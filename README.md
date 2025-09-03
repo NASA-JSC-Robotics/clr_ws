@@ -19,11 +19,12 @@ Alternatively, individual packages and submodules can be added or extracted from
 1) [Install Docker](https://docs.docker.com/engine/install/ubuntu/)
     - Don't worry about Docker Desktop
     - For Ubuntu recommend using the [utility script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)
-2) Fork or copy the contents of this repository as needed
+2) Fork or copy the contents of this repository as needed.
+NASA internal users should refer to confluence for how to setup authentication to GitHub.
 
     ```bash
     # Clone with submodules
-    git clone --recursive git@js-er-code.jsc.nasa.gov:imetro/robots/chonkur-l-rail-e/clr_ws.git
+    git clone --recursive https://github.com/NASA-JSC-Robotics/clr_ws.git
 
     # Or initialize them from the repo's root
     cd clr_ws
