@@ -34,3 +34,7 @@
 	path = src/external/merlin_mockup_description
 	url = https://github.com/NASA-JSC-Robotics/merlin_mockup_description.git
 	branch = humble-devel
+[submodule "src/external/mujoco_ros2_simulation"]
+	path = src/external/mujoco_ros2_simulation
+	url = https://github.com/NASA-JSC-Robotics/mujoco_ros2_simulation.git
+	branch = humble-devel
