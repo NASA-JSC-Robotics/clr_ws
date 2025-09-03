@@ -124,8 +124,7 @@ For more information refer to the [compose specification](docker-compose.yaml).
 
 - Defaults for `colcon build` are set for the user. To change or modify, refer to the [defaults file](config/colcon-defaults.yaml).
 
-- We use [MuJoCo](https://mujoco.readthedocs.io/en/stable/XMLreference.html) for many of our dynamic simulations, and install the packages in this workspace.
-For `aarch64` users, you will need to set the `CPU_ARCH=aarch64` variable in your environment to ensure the correct version is installed.
+- We use [MuJoCo](https://mujoco.readthedocs.io/en/stable/XMLreference.html) for many of our dynamic simulations, so we include installing in the [Dockerfile](./Dockerfile).
 
 ## Troubleshooting
 

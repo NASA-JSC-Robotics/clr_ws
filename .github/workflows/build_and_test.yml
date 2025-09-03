@@ -35,6 +35,7 @@ jobs:
         run: |
           echo "REPOSITORY_NAME: ${{ env.REPOSITORY_NAME }}"
           echo "TAG: ${{ env.TAG }}"
+      # NOTE: This will not work for non-public submodules. Use a token and config substitution instead.
       - name: Checkout code
         uses: actions/checkout@v4
       # TODO: We won't need this once all submodules are public
