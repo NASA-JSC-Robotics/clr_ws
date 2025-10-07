@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       target: er4-dev
       tags:
-        - er4-dev:latest
+        - er4-dev:${ROS2_DISTRO:-jazzy}
       args:
         - USERNAME=er4-user  # Changing username requires updating workspace mounts below
         - USER_UID=${USER_UID:-1000}
