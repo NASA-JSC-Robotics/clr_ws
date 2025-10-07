@@ -1,5 +1,5 @@
-# Set desired ROS distribution, this image currently only supports humble.
-ARG ROS_DISTRO=humble
+# Set desired ROS distribution
+ARG ROS_DISTRO=jazzy
 
 # This layer grabs package manifests from the src directory for preserving rosdep installs.
 # This can significantly speed up rebuilds for the base package when src contents have changed.
@@ -18,8 +18,7 @@ FROM ros:${ROS_DISTRO} AS er4-dev
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Overridable non root user information, this can be annoying for non humble ROS base images, which
-# may already have a non-root user created.
+# Overridable non root user information.
 ARG USER_UID=1000
 ARG USER_GID=1000
 ARG USERNAME=er4-user
@@ -53,7 +52,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     xterm \
     wget
 
-# Add a non-root user with provided user details
+# Add a non-root user with provided user details. Some images have a default `ubuntu` user, so we remove it before adding the
+# new one.
+RUN userdel -r ubuntu 2>/dev/null || true
 RUN groupadd -g ${USER_GID} ${USERNAME} \
     && useradd -l -u ${USER_UID} -g ${USER_GID} --create-home -m -s /bin/bash -G sudo,adm,dialout,dip,plugdev,video ${USERNAME} \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
@@ -104,15 +105,15 @@ RUN CPU_ARCH=$(uname -m); \
     tar -xzf "mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz" -C $(dirname "${MUJOCO_DIR}") && \
     rm "mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz"
 
-# Install MuJoCo specific pip dependencies
+# Install MuJoCo specific pip dependencies at the system level because it's an image
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install mujoco obj2mjcf
+    pip install --break-system-packages mujoco obj2mjcf
 
 # There's no build for arm64 on linux, so just ignore failures here if that's the case
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install bpy==4.0.0 --extra-index-url https://download.blender.org/pypi/ || true
+    pip install --break-system-packages bpy==4.0.0 --extra-index-url https://download.blender.org/pypi/ || true
 
 # Copy in the remainder of the src directory
 COPY src/ src/
