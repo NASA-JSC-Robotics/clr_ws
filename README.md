@@ -4,7 +4,8 @@ This empty workspace can be used a starting point for a Docker-enabled workspace
 The contents of the `src` directory should be treated similarly to a "normal" ROS workspace.
 That is, source code can be imported and added as needed to `src/`, then be built and run inside of an isolated, ROS enabled environment.
 
-This workflow will support either `humble` or `jazzy` ROS distros.
+This workflow has been tested against the `humble` and `jazzy` ROS distros.
+To change ROS versions, update the `ROS_DISTRO` variable in your environment.
 
 ## Quick Development Setup
 
