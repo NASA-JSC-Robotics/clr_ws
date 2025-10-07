@@ -106,14 +106,15 @@ RUN CPU_ARCH=$(uname -m); \
     rm "mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz"
 
 # Install MuJoCo specific pip dependencies at the system level because it's an image
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install --break-system-packages mujoco obj2mjcf
+    pip install mujoco obj2mjcf
 
 # There's no build for arm64 on linux, so just ignore failures here if that's the case
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install --break-system-packages bpy==4.0.0 --extra-index-url https://download.blender.org/pypi/ || true
+    pip install bpy==4.0.0 --extra-index-url https://download.blender.org/pypi/ || true
 
 # Copy in the remainder of the src directory
 COPY src/ src/
