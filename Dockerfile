@@ -89,7 +89,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get install -q -y \
     ros-${ROS_DISTRO}-ros2controlcli \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
-    ros-${ROS_DISTRO}-rmw-fastrtps-cpp
+    ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
+    ros-${ROS_DISTRO}-plotjuggler-ros
 
 # Configure and install MuJoCo using the defaults for the MuJoCo drivers.
 # We use MuJoCo in many systems so we just install the drivers in the base workspace.
