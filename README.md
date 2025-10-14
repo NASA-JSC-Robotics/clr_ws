@@ -18,6 +18,10 @@ This workflow has been tested against the `humble` and `jazzy` ROS distros, but 
 To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
 Note the `2`! As this is intended to be isolated from your system.
 
+This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
+Note the `2`! As this is intended to be isolated from your system.
+
 ## Quick Development Setup
 
 1) [Install Docker](https://docs.docker.com/engine/install/ubuntu/)
