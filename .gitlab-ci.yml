@@ -8,7 +8,7 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       when: always
     # Run for commits to protected/standard development branches
-    - if: '$CI_COMMIT_BRANCH == "humble" || $CI_COMMIT_BRANCH == "jazzy" || $CI_COMMIT_BRANCH =~ /.*-devel$/'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "humble" || $CI_COMMIT_BRANCH == "jazzy" || $CI_COMMIT_BRANCH =~ /.*-devel$/'
       when: always
     - when: never
 
@@ -34,7 +34,7 @@ pre-commit-check:
   rules:
     - if: $CI_MERGE_REQUEST_ID
       when: always
-    - if: '$CI_COMMIT_BRANCH == "humble" || $CI_COMMIT_BRANCH == "jazzy" || $CI_COMMIT_BRANCH =~ /.*-devel$/'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "humble" || $CI_COMMIT_BRANCH == "jazzy" || $CI_COMMIT_BRANCH =~ /.*-devel$/'
       when: always
     - when: never
 
@@ -65,7 +65,6 @@ build_dev_source:
     - DOCKER_BUILDKIT=1 docker build
             --pull
             --cache-from ${CI_REGISTRY_IMAGE}:${CONTAINER_TAG}
-            --cache-from ${CI_REGISTRY_IMAGE}:humble-devel
             -t ${CI_REGISTRY_IMAGE}:${CONTAINER_TAG}
             --load
             --target er4-dev-source
