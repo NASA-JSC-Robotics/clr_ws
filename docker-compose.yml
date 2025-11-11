@@ -6,12 +6,12 @@ services:
       dockerfile: Dockerfile
       target: er4-dev
       tags:
-        - er4-dev:latest
+        - er4-dev:${ROS2_DISTRO:-jazzy}
       args:
         - USERNAME=er4-user  # Changing username requires updating workspace mounts below
         - USER_UID=${USER_UID:-1000}
         - USER_GID=${USER_GID:-1000}
-        - ROS_DISTRO=${ROS2_DISTRO:-humble}
+        - ROS_DISTRO=${ROS2_DISTRO:-jazzy}
     # Ensures signals are actually passed and reaped in the container for shutdowns
     # https://docs.docker.com/compose/compose-file/compose-file-v3/#init
     init: true
@@ -36,6 +36,10 @@ services:
       # make the bash history folder link to our local .bash so that we can rtain info between container starts
       - HISTFILE=/home/er4-user/.bash/.bash_history
       - NVIDIA_DRIVER_CAPABILITIES=all
+      # TODO: Running a 24.04 container on a 22.04 host can cause issues with OpenGL context. If you see
+      # black screens in rviz or mujoco simulation, uncomment the line below to just always use software
+      # rendering for opengl.
+      # - LIBGL_ALWAYS_SOFTWARE=1
     # If using an nvidia driver uncomment these lines
     # runtime: nvidia
     # deploy:

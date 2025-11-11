@@ -21,6 +21,14 @@ This workspace bundles all required git submodules into a Docker containerized w
 While not required, we recommend using our Dockerfiles for consistent environment setup.
 Alternatively, individual packages and submodules can be added or extracted from the `src` directory as needed by the user.
 
+This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
+Note the `2`! As this is intended to be isolated from your system.
+
+This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
+Note the `2`! As this is intended to be isolated from your system.
+
 ## Quick Development Setup
 
 1) [Install Docker](https://docs.docker.com/engine/install/ubuntu/)
