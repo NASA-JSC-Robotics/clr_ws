@@ -22,9 +22,10 @@
 #include <map>
 #include <thread>
 
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit_visual_tools/moveit_visual_tools.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <moveit_msgs/msg/allowed_collision_matrix.hpp>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
@@ -701,10 +702,9 @@ private:
     RCLCPP_INFO(LOGGER, "End effector link: %s", move_group->getEndEffectorLink().c_str());
     RCLCPP_INFO(LOGGER, "Using planning group: %s", move_group->getName().c_str());
 
-    const double jump_threshold = 0.0;
     const double eef_step = 0.01;
 
-    double trajectory_percent = move_group->computeCartesianPath(poses, eef_step, jump_threshold, trajectory);
+    double trajectory_percent = move_group->computeCartesianPath(poses, eef_step, trajectory);
 
     if (trajectory_percent == 1.0)
     {
@@ -728,10 +728,10 @@ private:
     // The page below is referenced, which recommends manual velocity scaling:
     // https://groups.google.com/g/moveit-users/c/MOoFxy2exT4
 
-    trajectory_processing::IterativeParabolicTimeParameterization iptp;
+    trajectory_processing::TimeOptimalTrajectoryGeneration totg;
 
     bool success;
-    success = iptp.computeTimeStamps(rt, scaling, scaling);
+    success = totg.computeTimeStamps(rt, scaling, scaling);
     RCLCPP_INFO(LOGGER, "Computed time stamp %s", success ? "SUCCEEDED" : "FAILED");
 
     if (success)
@@ -760,38 +760,37 @@ private:
     {
       move_group->setJointValueTarget(move_group->getNamedTargetValues(waypoint.preset_name));
     }
-    if (waypoint.use_jconfig)
+    else if (waypoint.use_jconfig)
     {
       move_group->setJointValueTarget(waypoint.config);
-      move_group->setNumPlanningAttempts(10);
     }
     else
     {
-      geometry_msgs::msg::Pose start_pose = move_group->getCurrentPose().pose;
       geometry_msgs::msg::Pose end_pose = waypoint.pose;
       if (waypoint.is_relative)
       {
+        geometry_msgs::msg::Pose start_pose = move_group->getCurrentPose().pose;
         end_pose = this->relative_to_global(start_pose, end_pose);
       }
-      move_group->setJointValueTarget(end_pose);
-      move_group->setNumPlanningAttempts(10);
+      move_group->setPoseTarget(end_pose);
     }
 
+    move_group->setNumPlanningAttempts(5);
     move_group->setMaxVelocityScalingFactor(scaling);
     move_group->setMaxAccelerationScalingFactor(scaling);
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     moveit::core::MoveItErrorCode error_code = move_group->plan(plan);
 
-    if (error_code == moveit::core::MoveItErrorCode::SUCCESS)
+    if (error_code)
     {
       RCLCPP_INFO(LOGGER, "Successfully computed trajectory");
-      trajectory = plan.trajectory_;
+      trajectory = plan.trajectory;
       return true;
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Planning failed with error code %s", error_code_to_string(error_code).c_str());
+      RCLCPP_ERROR(LOGGER, "Planning failed: %s", error_code.message.c_str());
       return false;
     }
   }
@@ -801,7 +800,7 @@ private:
     moveit::core::MoveItErrorCode move_success = move_group->execute(trajectory);
     if (move_success != moveit::core::MoveItErrorCode::SUCCESS)
     {
-      error_code_to_string(move_success);
+      RCLCPP_ERROR(LOGGER, "Execution failed with error code %s", move_success.message.c_str());
       return false;
     }
     return true;
