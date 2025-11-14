@@ -22,10 +22,6 @@
 	path = src/external/vention_rail
 	url = https://github.com/NASA-JSC-Robotics/vention_rail.git
 	branch = humble-devel
-[submodule "src/trac_ik"]
-	path = src/external/trac_ik
-	url = https://bitbucket.org/traclabs/trac_ik.git
-	branch = 2.0.1
 [submodule "src/external/surface_robotics_mockups_description"]
 	path = src/external/surface_robotics_mockups_description
 	url = https://github.com/NASA-JSC-Robotics/surface_robotics_mockups_description.git
