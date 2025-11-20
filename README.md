@@ -1,12 +1,5 @@
 # CLR Demonstration Workspace
 
-> [!NOTE]
-> This is a fork of the base [CLR repo](https://github.com/NASA-JSC-Robotics/clr_ws).
-> In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
-> For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
->
-> Users wishing to expand on the base CLR capabilities can use this workspace as a guide on how to fork and build on the base project.
-
 This workspace includes open source resources for using the ChonkUR L Rail-E robot system,
 part of the [iMETRO Facility](https://ntrs.nasa.gov/citations/20240013956) at NASA's Johnson Space Center.
 
@@ -20,6 +13,9 @@ The mock-ups here can be used by anyone to develop or test robot applications fo
 This workspace bundles all required git submodules into a Docker containerized workflow that is identical to that which we run on hardware.
 While not required, we recommend using our Dockerfiles for consistent environment setup.
 Alternatively, individual packages and submodules can be added or extracted from the `src` directory as needed by the user.
+
+In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
+For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
 ## Quick Development Setup
 
