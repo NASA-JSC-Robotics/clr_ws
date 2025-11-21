@@ -38,3 +38,11 @@
 	path = src/external/mujoco_ros2_simulation
 	url = https://github.com/NASA-JSC-Robotics/mujoco_ros2_simulation.git
 	branch = humble-devel
+[submodule "src/clr_sim_demos"]
+	path = src/clr_sim_demos
+	url = https://github.com/NASA-JSC-Robotics/clr_sim_demos.git
+	branch = humble-devel
+[submodule "src/external/color_tools"]
+	path = src/external/color_tools
+	url = https://github.com/NASA-JSC-Robotics/color_tools.git
+	branch = humble-devel
