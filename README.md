@@ -27,10 +27,10 @@ NASA internal users should refer to confluence for how to setup authentication t
 
     ```bash
     # Clone with submodules
-    git clone --recursive https://github.com/NASA-JSC-Robotics/clr_demo_ws.git
+    git clone --recursive https://github.com/NASA-JSC-Robotics/clr_ws.git
 
     # Or initialize them from the repo's root
-    cd clr_demo_ws
+    cd clr_ws
     git submodule update --init
     ```
 
