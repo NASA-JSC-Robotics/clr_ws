@@ -40,17 +40,21 @@ def generate_launch_description():
     )
     sim = LaunchConfiguration("sim")
 
+    package_share_dir = get_package_share_directory("clr_pick_and_place_demo")
+
     description_package = "clr_imetro_environments"
     description_file = "clr_trainer_multi_hatch.urdf.xacro"
     moveit_config_file_path = "srdf/clr_and_sim_mockups.srdf.xacro"
+
     description_full_path = os.path.join(get_package_share_directory(description_package), "urdf", description_file)
-    rviz_config_file = os.path.join(get_package_share_directory("clr_pick_and_place_demo"), "rviz", "demo_config.rviz")
+    rviz_config_file = os.path.join(package_share_dir, "rviz", "demo_config.rviz")
+    kinematics_config_file = os.path.join(package_share_dir, "config", "demo_kinematics.yaml")
 
     moveit_config = (
         MoveItConfigsBuilder("clr", package_name="clr_moveit_config")
         .robot_description(file_path=description_full_path)
         .robot_description_semantic(file_path=moveit_config_file_path)
-        .robot_description_kinematics(file_path="config/kinematics.yaml")
+        .robot_description_kinematics(file_path=kinematics_config_file)
         .joint_limits(file_path="config/joint_limits.yaml")
         .trajectory_execution(file_path="config/clr_moveit_controllers.yaml")
         .planning_pipelines(default_planning_pipeline="ompl", pipelines=["ompl"])
@@ -69,15 +73,14 @@ def generate_launch_description():
                 {"use_sim_time": sim},
             ],
         ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory("clr_moveit_config"), "launch", "clr_moveit.launch.py"),
-            ),
-            launch_arguments={
-                "launch_rviz": "false",
-                "include_mockups_in_description": "true",
-                "use_sim_time": sim,
-            }.items(),
+        Node(
+            package="moveit_ros_move_group",
+            executable="move_group",
+            output="both",
+            parameters=[
+                moveit_config.to_dict(),
+                {"use_sim_time": sim},
+            ],
         ),
     ]
 
