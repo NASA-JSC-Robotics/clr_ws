@@ -3,23 +3,23 @@ waypoints:
     config:
     - 0.0
     - 0.0
-    - -3.71755
-    - -3.0020
-    - -0.9599
-    - -0.6982
-    - -1.5184
-    - -1.0297
+    - 2.5656  # 147 deg
+    - -3.0020 # -172 deg
+    - -0.9599 # -55 deg
+    - -0.6982 # -40 deg
+    - -1.5184 # -87 deg
+    - -1.0297 # -59 deg
     planning_group: "clr"
     cartesian: false
     planner: "RRTstarkConfigDefault"
   approach_bench_seat:
     config:
-    - -3.8235
-    - -2.683256954185755
-    - -1.5352487041273213
-    - -0.44915294760331065
-    - -1.5091231026904337
-    - -0.9393066919906827
+    - 2.46091 # 141 deg
+    - -2.6832 # -153.7 deg
+    - -1.5352 # -88 deg
+    - -0.4491 # -25.7 deg
+    - -1.5091 # -86.5 deg
+    - -0.9393 # -53.8 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
@@ -37,12 +37,12 @@ waypoints:
     relative: true
   stow:
     config:
-    - -2.11185
-    - -2.6529
-    - 2.44346
+    - -2.11185 # -121 deg
+    - -2.6529 # -152 deg
+    - 2.44346 # 140 deg
     - 0.0
-    - 1.0821
-    - 0.1222
+    - 1.0821 # 62 deg
+    - 0.1222 # 7 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
