@@ -1,4 +1,4 @@
-# ChonkUR L Rail-E Workspace
+# CLR Demonstration Workspace
 
 This workspace includes open source resources for using the ChonkUR L Rail-E robot system,
 part of the [iMETRO Facility](https://ntrs.nasa.gov/citations/20240013956) at NASA's Johnson Space Center.
@@ -18,9 +18,8 @@ This workflow has been tested against the `humble` and `jazzy` ROS distros, but 
 To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
 Note the `2`! As this is intended to be isolated from your system.
 
-This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
-To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
-Note the `2`! As this is intended to be isolated from your system.
+In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
+For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
 ## Quick Development Setup
 
