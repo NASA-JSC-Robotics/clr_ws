@@ -202,6 +202,11 @@ public:
     this->movegroup_visualtools_setup("ur_manipulator");
     moveit_viz->trigger();
     moveit_viz->prompt("Press next in RvizVisualToolsGUI to start the demo");
+    if (!this->demo_home())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to reach home pose. Exiting.");
+      return;
+    }
     if (!this->init())
     {
       RCLCPP_ERROR(LOGGER, "Failed to reach initial pose. Exiting.");
@@ -220,6 +225,11 @@ public:
     if (!this->back_out())
     {
       RCLCPP_ERROR(LOGGER, "Failed to back out from bench seat. Exiting.");
+      return;
+    }
+    if (!this->approach_stow())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to approach stow waypoint. Exiting.");
       return;
     }
     if (!this->stow())
@@ -285,6 +295,12 @@ public:
     RCLCPP_INFO(LOGGER, "Demo succeeded!");
   }
 
+  bool demo_home()
+  {
+    RCLCPP_INFO(LOGGER, "Moving to home position.");
+    return plan_and_execute(wp_map.at("demo_home"));
+  }
+
   bool init()
   {
     RCLCPP_INFO(LOGGER, "Moving to initial position.");
@@ -348,6 +364,12 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Backing out from bench seat.");
     return plan_and_execute(wp_map.at("back_out"));
+  }
+
+  bool approach_stow()
+  {
+    RCLCPP_INFO(LOGGER, "Moving rail to approach stow position.");
+    return plan_and_execute(wp_map.at("approach_stow"));
   }
 
   bool stow()

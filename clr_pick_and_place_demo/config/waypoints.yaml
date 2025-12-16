@@ -1,4 +1,15 @@
 waypoints:
+  demo_home:
+    config:
+    - 3.1927
+    - -2.3913
+    - -1.7760
+    - -0.4700
+    - -1.6177
+    - -1.6134
+    planning_group: "ur_manipulator"
+    cartesian: false
+    planner: "RRTstarkConfigDefault"
   init:
     config:
     - 0.0
@@ -35,9 +46,15 @@ waypoints:
     planning_group: "ur_manipulator"
     cartesian: true
     relative: true
+  approach_stow:
+    config:
+      - 0.500
+    planning_group: "rail"
+    cartesian: false
+
   stow:
     config:
-    - -2.11185 # -121 deg
+    - 4.17133 # 238 deg
     - -2.6529 # -152 deg
     - 2.44346 # 140 deg
     - 0.0
