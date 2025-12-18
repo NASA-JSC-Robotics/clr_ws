@@ -292,6 +292,11 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to stow manipulator. Exiting.");
       return;
     }
+    if (!this->demo_home())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to return to home position. Exiting.");
+      return;
+    }
     RCLCPP_INFO(LOGGER, "Demo succeeded!");
   }
 
@@ -434,7 +439,7 @@ public:
     geometry_msgs::msg::Pose offset = wp_map.at("ctb_offset").pose;
     global_pose = this->relative_to_global(global_pose, offset);
 
-    Waypoint blob_wp = Waypoint(global_pose, "chonkur_grasp", true);
+    Waypoint blob_wp = Waypoint(global_pose, "clr", true);
     return plan_and_execute(blob_wp);
   }
 

@@ -53,19 +53,26 @@ waypoints:
     cartesian: false
 
   stow:
+    # config:
+    # - 4.17133 # 238 deg
+    # - -2.6529 # -152 deg
+    # - 2.44346 # 140 deg
+    # - 0.0
+    # - 1.0821 # 62 deg
+    # - 0.1222 # 7 deg
     config:
-    - 4.17133 # 238 deg
-    - -2.6529 # -152 deg
-    - 2.44346 # 140 deg
-    - 0.0
-    - 1.0821 # 62 deg
-    - 0.1222 # 7 deg
+    - 1.5010 # 86 deg
+    - -0.3316 # -19 deg
+    - -2.2515 # -129 deg
+    - -3.6477 # -209 deg
+    - -1.5533 # -89 deg
+    - 1.5708 # 90 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
   traverse_right:
     config:
-    - 1.748
+    - 1.200
     planning_group: "rail"
     cartesian: false
   ctb_offset:
