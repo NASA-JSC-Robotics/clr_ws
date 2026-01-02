@@ -487,7 +487,6 @@ public:
     return plan_and_execute(wp_map.at("traverse_left_2"));
   }
 
-
   bool drop_ctb()
   {
     RCLCPP_INFO(LOGGER, "Dropping CTB.");
