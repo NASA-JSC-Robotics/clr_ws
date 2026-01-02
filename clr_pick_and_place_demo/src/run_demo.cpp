@@ -262,14 +262,19 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to lift CTB. Exiting.");
       return;
     }
-    if (!this->traverse_left())
+    if (!this->traverse_left_1())
     {
-      RCLCPP_ERROR(LOGGER, "Failed to traverse to CTB dropoff location. Exiting.");
+      RCLCPP_ERROR(LOGGER, "Failed to traverse left. Exiting.");
       return;
     }
     if (!this->pre_drop_ctb())
     {
       RCLCPP_ERROR(LOGGER, "Failed to approach CTB dropoff location. Exiting.");
+      return;
+    }
+    if (!this->traverse_left_2())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to traverse to CTB dropoff location. Exiting.");
       return;
     }
     if (!this->drop_ctb())
@@ -456,10 +461,10 @@ public:
            plan_and_execute(wp_map.at("stow_ctb"));
   }
 
-  bool traverse_left()
+  bool traverse_left_1()
   {
     RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
-    return plan_and_execute(wp_map.at("traverse_left"));
+    return plan_and_execute(wp_map.at("traverse_left_1"));
   }
 
   bool pre_drop_ctb()
@@ -472,8 +477,16 @@ public:
     }
     Waypoint approach_wp_1 = Waypoint(eef.transform.translation.x, eef.transform.translation.y,
                                       eef.transform.translation.z, 0.725, 0.688, 0.032, -0.004, "ur_manipulator", true);
-    return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
+    // return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
+    return plan_and_execute(approach_wp_1) && plan_and_execute(wp_map.at("pre_drop_ctb"));
   }
+
+  bool traverse_left_2()
+  {
+    RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
+    return plan_and_execute(wp_map.at("traverse_left_2"));
+  }
+
 
   bool drop_ctb()
   {

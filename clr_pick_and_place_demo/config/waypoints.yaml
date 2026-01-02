@@ -51,7 +51,6 @@ waypoints:
       - 0.500
     planning_group: "rail"
     cartesian: false
-
   stow:
     # config:
     # - 4.17133 # 238 deg
@@ -119,14 +118,14 @@ waypoints:
     planning_group: "ur_manipulator"
     cartesian: true
     relative: true
-  traverse_left:
+  traverse_left_1:
     config:
-    - 0.000
+    - 0.700
     planning_group: "rail"
     cartesian: false
   pre_drop_ctb:
     pose:
-      x: -1.708
+      x: -1.006
       y: 0.811
       z: 1.580
       qx: 0.725
@@ -134,7 +133,12 @@ waypoints:
       qz: 0.032
       qw: -0.004
     planning_group: "ur_manipulator"
-    cartesian: true
+    cartesian: false
+  traverse_left_2:
+    config:
+    - 0.000
+    planning_group: "rail"
+    cartesian: false
   drop_arm:
     pose:
       x: 0.0
