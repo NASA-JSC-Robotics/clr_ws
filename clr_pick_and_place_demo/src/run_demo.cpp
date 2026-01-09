@@ -202,6 +202,11 @@ public:
     this->movegroup_visualtools_setup("ur_manipulator");
     moveit_viz->trigger();
     moveit_viz->prompt("Press next in RvizVisualToolsGUI to start the demo");
+    if (!this->demo_home())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to reach home pose. Exiting.");
+      return;
+    }
     if (!this->init())
     {
       RCLCPP_ERROR(LOGGER, "Failed to reach initial pose. Exiting.");
@@ -220,6 +225,11 @@ public:
     if (!this->back_out())
     {
       RCLCPP_ERROR(LOGGER, "Failed to back out from bench seat. Exiting.");
+      return;
+    }
+    if (!this->approach_stow())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to approach stow waypoint. Exiting.");
       return;
     }
     if (!this->stow())
@@ -252,14 +262,19 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to lift CTB. Exiting.");
       return;
     }
-    if (!this->traverse_left())
+    if (!this->traverse_left_1())
     {
-      RCLCPP_ERROR(LOGGER, "Failed to traverse to CTB dropoff location. Exiting.");
+      RCLCPP_ERROR(LOGGER, "Failed to traverse left. Exiting.");
       return;
     }
     if (!this->pre_drop_ctb())
     {
       RCLCPP_ERROR(LOGGER, "Failed to approach CTB dropoff location. Exiting.");
+      return;
+    }
+    if (!this->traverse_left_2())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to traverse to CTB dropoff location. Exiting.");
       return;
     }
     if (!this->drop_ctb())
@@ -282,7 +297,18 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to stow manipulator. Exiting.");
       return;
     }
+    if (!this->demo_home())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to return to home position. Exiting.");
+      return;
+    }
     RCLCPP_INFO(LOGGER, "Demo succeeded!");
+  }
+
+  bool demo_home()
+  {
+    RCLCPP_INFO(LOGGER, "Moving to home position.");
+    return plan_and_execute(wp_map.at("demo_home"));
   }
 
   bool init()
@@ -350,6 +376,12 @@ public:
     return plan_and_execute(wp_map.at("back_out"));
   }
 
+  bool approach_stow()
+  {
+    RCLCPP_INFO(LOGGER, "Moving rail to approach stow position.");
+    return plan_and_execute(wp_map.at("approach_stow"));
+  }
+
   bool stow()
   {
     RCLCPP_INFO(LOGGER, "Stowing manipulator.");
@@ -364,7 +396,7 @@ public:
 
   bool approach_ctb_handle()
   {
-    RCLCPP_INFO(LOGGER, "Reaching for CTB handle.");
+    RCLCPP_INFO(LOGGER, "Detecting CTB handle.");
     // Find red blob in wrist camera image
     auto request = std::make_shared<color_tools_msgs::srv::BlobCentroid::Request>();
     request->color = "red";
@@ -412,6 +444,8 @@ public:
     geometry_msgs::msg::Pose offset = wp_map.at("ctb_offset").pose;
     global_pose = this->relative_to_global(global_pose, offset);
 
+    // TODO: Consider replacing with a two phase grasp, one to align to fixed z-offset, and one to grasp.
+    RCLCPP_INFO(LOGGER, "Reaching for CTB handle.");
     Waypoint blob_wp = Waypoint(global_pose, "chonkur_grasp", true);
     return plan_and_execute(blob_wp);
   }
@@ -429,10 +463,10 @@ public:
            plan_and_execute(wp_map.at("stow_ctb"));
   }
 
-  bool traverse_left()
+  bool traverse_left_1()
   {
     RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
-    return plan_and_execute(wp_map.at("traverse_left"));
+    return plan_and_execute(wp_map.at("traverse_left_1"));
   }
 
   bool pre_drop_ctb()
@@ -445,7 +479,14 @@ public:
     }
     Waypoint approach_wp_1 = Waypoint(eef.transform.translation.x, eef.transform.translation.y,
                                       eef.transform.translation.z, 0.725, 0.688, 0.032, -0.004, "ur_manipulator", true);
-    return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
+    // return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
+    return plan_and_execute(approach_wp_1) && plan_and_execute(wp_map.at("pre_drop_ctb"));
+  }
+
+  bool traverse_left_2()
+  {
+    RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
+    return plan_and_execute(wp_map.at("traverse_left_2"));
   }
 
   bool drop_ctb()

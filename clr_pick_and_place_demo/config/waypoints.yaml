@@ -1,25 +1,36 @@
 waypoints:
+  demo_home:
+    config:
+    - 3.1927
+    - -2.3913
+    - -1.7760
+    - -0.4700
+    - -1.6177
+    - -1.6134
+    planning_group: "ur_manipulator"
+    cartesian: false
+    planner: "RRTstarkConfigDefault"
   init:
     config:
     - 0.0
     - 0.0
-    - -3.71755
-    - -3.0020
-    - -0.9599
-    - -0.6982
-    - -1.5184
-    - -1.0297
+    - 2.5656  # 147 deg
+    - -3.0020 # -172 deg
+    - -0.9599 # -55 deg
+    - -0.6982 # -40 deg
+    - -1.5184 # -87 deg
+    - -1.0297 # -59 deg
     planning_group: "clr"
     cartesian: false
     planner: "RRTstarkConfigDefault"
   approach_bench_seat:
     config:
-    - -3.8235
-    - -2.683256954185755
-    - -1.5352487041273213
-    - -0.44915294760331065
-    - -1.5091231026904337
-    - -0.9393066919906827
+    - 2.46091 # 141 deg
+    - -2.6832 # -153.7 deg
+    - -1.5352 # -88 deg
+    - -0.4491 # -25.7 deg
+    - -1.5091 # -86.5 deg
+    - -0.9393 # -53.8 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
@@ -35,20 +46,32 @@ waypoints:
     planning_group: "ur_manipulator"
     cartesian: true
     relative: true
-  stow:
+  approach_stow:
     config:
-    - -2.11185
-    - -2.6529
-    - 2.44346
-    - 0.0
-    - 1.0821
-    - 0.1222
+      - 0.500
+    planning_group: "rail"
+    cartesian: false
+  stow:
+    # config:
+    # - 4.17133 # 238 deg
+    # - -2.6529 # -152 deg
+    # - 2.44346 # 140 deg
+    # - 0.0
+    # - 1.0821 # 62 deg
+    # - 0.1222 # 7 deg
+    config:
+    - 1.5010 # 86 deg
+    - -0.3316 # -19 deg
+    - -2.2515 # -129 deg
+    - -3.6477 # -209 deg
+    - -1.5533 # -89 deg
+    - 1.5708 # 90 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
   traverse_right:
     config:
-    - 1.748
+    - 1.200
     planning_group: "rail"
     cartesian: false
   ctb_offset:
@@ -95,14 +118,14 @@ waypoints:
     planning_group: "ur_manipulator"
     cartesian: true
     relative: true
-  traverse_left:
+  traverse_left_1:
     config:
-    - 0.000
+    - 0.700
     planning_group: "rail"
     cartesian: false
   pre_drop_ctb:
     pose:
-      x: -1.708
+      x: -1.006
       y: 0.811
       z: 1.580
       qx: 0.725
@@ -110,7 +133,12 @@ waypoints:
       qz: 0.032
       qw: -0.004
     planning_group: "ur_manipulator"
-    cartesian: true
+    cartesian: false
+  traverse_left_2:
+    config:
+    - 0.000
+    planning_group: "rail"
+    cartesian: false
   drop_arm:
     pose:
       x: 0.0
