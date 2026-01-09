@@ -396,7 +396,7 @@ public:
 
   bool approach_ctb_handle()
   {
-    RCLCPP_INFO(LOGGER, "Reaching for CTB handle.");
+    RCLCPP_INFO(LOGGER, "Detecting CTB handle.");
     // Find red blob in wrist camera image
     auto request = std::make_shared<color_tools_msgs::srv::BlobCentroid::Request>();
     request->color = "red";
@@ -444,7 +444,9 @@ public:
     geometry_msgs::msg::Pose offset = wp_map.at("ctb_offset").pose;
     global_pose = this->relative_to_global(global_pose, offset);
 
-    Waypoint blob_wp = Waypoint(global_pose, "clr", true);
+    // TODO: Consider replacing with a two phase grasp, one to align to fixed z-offset, and one to grasp.
+    RCLCPP_INFO(LOGGER, "Reaching for CTB handle.");
+    Waypoint blob_wp = Waypoint(global_pose, "chonkur_grasp", true);
     return plan_and_execute(blob_wp);
   }
 
