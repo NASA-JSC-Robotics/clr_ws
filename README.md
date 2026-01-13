@@ -150,7 +150,7 @@ Please refer to the [troubleshooting guide](./docs/TROUBLESHOOTING.md#slow-rende
 
 Common pitfalls and troubleshooting tips are documented in the [troubleshooting guide](./docs/TROUBLESHOOTING.md).
 
-### Citation
+## Citation
 
 This project falls under the purview of the iMETRO project. If you use this in your own work, please cite the following paper:
 
