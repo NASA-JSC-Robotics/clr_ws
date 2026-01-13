@@ -15,7 +15,7 @@ As of now there is a single example available for public consumption made with o
 
 ![alt text](./clr_mujoco_simulation.png "CLR MuJoCo simulation")
 
-### Citation
+## Citation
 
 This project falls under the purview of the iMETRO project. If you use this in your own work, please cite the following paper:
 
