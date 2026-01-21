@@ -277,6 +277,11 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to traverse to CTB dropoff location. Exiting.");
       return;
     }
+    if (!this->center_ctb())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to center CTB in bench. Exiting.");
+      return;
+    }
     if (!this->drop_ctb())
     {
       RCLCPP_ERROR(LOGGER, "Failed to lower CTB. Exiting.");
@@ -487,6 +492,12 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
     return plan_and_execute(wp_map.at("traverse_left_2"));
+  }
+
+  bool center_ctb()
+  {
+    RCLCPP_INFO(LOGGER, "Centering CTB in bench.");
+    return plan_and_execute(wp_map.at("center_ctb"));
   }
 
   bool drop_ctb()
