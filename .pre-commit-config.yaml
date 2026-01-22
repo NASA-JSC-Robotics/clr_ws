@@ -82,3 +82,4 @@ repos:
     hooks:
       - id: codespell
         exclude: \.(svg|stl|dae)$
+        args: ["--ignore-words-list", "Hart"]
