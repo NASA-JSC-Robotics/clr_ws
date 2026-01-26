@@ -17,6 +17,10 @@ Alternatively, individual packages and submodules can be added or extracted from
 In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
 For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
+This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
+Note the `2`! As this is intended to be isolated from your system.
+
 ## Quick Development Setup
 
 1) [Install Docker](https://docs.docker.com/engine/install/ubuntu/)

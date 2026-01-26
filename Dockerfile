@@ -1,5 +1,5 @@
-# Set desired ROS distribution, this image currently only supports humble.
-ARG ROS_DISTRO=humble
+# Set desired ROS distribution
+ARG ROS_DISTRO=jazzy
 
 # This layer grabs package manifests from the src directory for preserving rosdep installs.
 # This can significantly speed up rebuilds for the base package when src contents have changed.
@@ -18,8 +18,7 @@ FROM ros:${ROS_DISTRO} AS er4-dev
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Overridable non root user information, this can be annoying for non humble ROS base images, which
-# may already have a non-root user created.
+# Overridable non root user information.
 ARG USER_UID=1000
 ARG USER_GID=1000
 ARG USERNAME=er4-user
@@ -53,7 +52,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     xterm \
     wget
 
-# Add a non-root user with provided user details
+# Add a non-root user with provided user details. Some images have a default `ubuntu` user, so we remove it before adding the
+# new one.
+RUN userdel -r ubuntu 2>/dev/null || true
 RUN groupadd -g ${USER_GID} ${USERNAME} \
     && useradd -l -u ${USER_UID} -g ${USER_GID} --create-home -m -s /bin/bash -G sudo,adm,dialout,dip,plugdev,video ${USERNAME} \
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
@@ -62,12 +63,35 @@ RUN groupadd -g ${USER_GID} ${USERNAME} \
         /home/${USERNAME}/.colcon \
         /home/${USERNAME}/.ros \
         /home/${USERNAME}/.bash \
-        ${ER4_WS}
+        ${ER4_WS}/src \
+        ${ER4_WS}/build \
+        ${ER4_WS}/install \
+        ${ER4_WS}/log && \
+    chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+
+# Configure and install MuJoCo using the defaults for the MuJoCo drivers.
+# We use MuJoCo in many systems so we just install the drivers in the base workspace.
+# The install is CPU dependent, this works with `x86_64` and `arm64` chips, TBD on others.
+ARG MUJOCO_VERSION=3.4.0
+ENV MUJOCO_VERSION=${MUJOCO_VERSION}
+ENV MUJOCO_DIR="/opt/mujoco/mujoco-${MUJOCO_VERSION}"
+RUN mkdir -p ${MUJOCO_DIR} && \
+    chown -R ${USERNAME}:${USERNAME} ${MUJOCO_DIR} && \
+    CPU_ARCH=$(uname -m); \
+    wget https://github.com/google-deepmind/mujoco/releases/download/${MUJOCO_VERSION}/mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz && \
+    tar -xzf "mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz" -C $(dirname "${MUJOCO_DIR}") && \
+    rm "mujoco-${MUJOCO_VERSION}-linux-${CPU_ARCH}.tar.gz"
+
+# Install MuJoCo specific pip dependencies at the system level because it's an image
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    pip3 install mujoco obj2mjcf trimesh
 
 # Setup the install directory and copy the workspace to it.
 # We could alternatively copy package manifests to preserve the layer cache if the build duration becomes too onerous.
+USER ${USERNAME}
 WORKDIR  ${ER4_WS}
-RUN mkdir src build install log
 
 # Copy package manifests for installing rosdeps
 COPY --chown=${USERNAME}:${USERNAME} --from=package-manifests /src/ ./src
@@ -77,16 +101,16 @@ COPY --chown=${USERNAME}:${USERNAME} --from=package-manifests /src/ ./src
 # RUN sudo rosdep init && rosdep update --rosdistro ${ROS_DISTRO}
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    source /opt/ros/${ROS_DISTRO}/setup.bash && \
-    apt-get update && \
+    sudo apt update && \
+    . /opt/ros/${ROS_DISTRO}/setup.bash && \
     rosdep update && \
     rosdep install -iy --from-paths src
 
 # Install extra ROS deps
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && \
-    apt-get install -q -y \
+    sudo apt-get update && \
+    sudo apt-get install -q -y \
     ros-${ROS_DISTRO}-ros2controlcli \
     ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
     ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
@@ -110,10 +134,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     pip install mujoco obj2mjcf trimesh
 
 # Copy in the remainder of the src directory
-COPY src/ src/
-RUN chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
-
-USER ${USERNAME}
+COPY --chown=${USERNAME}:${USERNAME} src/ src/
 
 # Setup colcon default mixins and add default settings
 RUN colcon mixin add default \
@@ -127,16 +148,6 @@ RUN colcon metadata add default  \
 # To address this, we have adjusted the $LD_LIBRARY_PATH in the entrypoint to ensure
 # the required path is available to the python module to load the library.
 RUN pip3 install pyassimp==4.1.3
-
-# Install useful tooling
-RUN pip3 install ipython
-
-# Fix rosdep permissions and ensure sudo while we're at it
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    sudo apt update && \
-    . /opt/ros/${ROS_DISTRO}/setup.bash && \
-    rosdep update --rosdistro ${ROS_DISTRO}
 
 # copy in configs for different features
 COPY --chown=${USERNAME}:${USERNAME} config/colcon-defaults.yaml /home/${USERNAME}/.colcon/defaults.yaml
