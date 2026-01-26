@@ -95,7 +95,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Configure and install MuJoCo using the defaults for the MuJoCo drivers.
 # We use MuJoCo in many systems so we just install the drivers in the base workspace.
 # The install is CPU dependent, this works with `x86_64` and `arm64` chips, TBD on others.
-ARG MUJOCO_VERSION=3.3.4
+ARG MUJOCO_VERSION=3.4.0
 ENV MUJOCO_VERSION=${MUJOCO_VERSION}
 ENV MUJOCO_DIR="/opt/mujoco/mujoco-${MUJOCO_VERSION}"
 RUN mkdir -p ${MUJOCO_DIR} && sudo chown -R ${USERNAME}:${USERNAME} ${MUJOCO_DIR}
@@ -107,12 +107,7 @@ RUN CPU_ARCH=$(uname -m); \
 # Install MuJoCo specific pip dependencies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install mujoco obj2mjcf
-
-# There's no build for arm64 on linux, so just ignore failures here if that's the case
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install bpy==4.0.0 --extra-index-url https://download.blender.org/pypi/ || true
+    pip install mujoco obj2mjcf trimesh
 
 # Copy in the remainder of the src directory
 COPY src/ src/
