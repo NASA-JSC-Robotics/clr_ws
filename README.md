@@ -152,7 +152,7 @@ Common pitfalls and troubleshooting tips are documented in the [troubleshooting 
 
 ## Citation
 
-This project falls under the purview of the iMETRO project. 
+This project falls under the purview of the iMETRO project.
 If you use this in your own work, please cite the following paper:
 
 ```bibtex
