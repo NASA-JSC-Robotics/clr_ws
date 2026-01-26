@@ -120,7 +120,7 @@ waypoints:
     relative: true
   traverse_left_1:
     config:
-    - 0.700
+    - 0.300
     planning_group: "rail"
     cartesian: false
   pre_drop_ctb:
@@ -139,6 +139,18 @@ waypoints:
     - 0.000
     planning_group: "rail"
     cartesian: false
+  center_ctb:
+    pose:
+      x: 0.0
+      y: -0.25
+      z: 0.0
+      qx: 0.0
+      qy: 0.0
+      qz: 0.0
+      qw: 1.0
+    planning_group: "ur_manipulator"
+    cartesian: true
+    relative: true
   drop_arm:
     pose:
       x: 0.0
