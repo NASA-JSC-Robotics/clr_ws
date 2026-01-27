@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       target: er4-dev
       tags:
-        - er4-dev:latest
+        - er4-dev:${ROS2_DISTRO:-humble}
       args:
         - USERNAME=er4-user  # Changing username requires updating workspace mounts below
         - USER_UID=${USER_UID:-1000}
@@ -35,6 +35,8 @@ services:
       - FASTRTPS_DEFAULT_PROFILES_FILE=/fastdds.xml
       # make the bash history folder link to our local .bash so that we can rtain info between container starts
       - HISTFILE=/home/er4-user/.bash/.bash_history
+      # default to colorized output of ros logs
+      - RCUTILS_COLORIZED_OUTPUT=1
       - NVIDIA_DRIVER_CAPABILITIES=all
     # If using an nvidia driver uncomment these lines
     # runtime: nvidia
