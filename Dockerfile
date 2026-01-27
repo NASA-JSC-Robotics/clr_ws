@@ -131,7 +131,7 @@ RUN CPU_ARCH=$(uname -m); \
 # Install MuJoCo specific pip dependencies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip install mujoco obj2mjcf trimesh
+    pip install mujoco obj2mjcf trimesh pycollada
 
 # Copy in the remainder of the src directory
 COPY --chown=${USERNAME}:${USERNAME} src/ src/
