@@ -82,4 +82,4 @@ repos:
     hooks:
       - id: codespell
         exclude: \.(svg|stl|dae)$
-        args: ["--ignore-words-list", "hande", "--uri-ignore-words-list", "*"]
+        args: ["--ignore-words-list", "hande, Hart", "--uri-ignore-words-list", "*"]
