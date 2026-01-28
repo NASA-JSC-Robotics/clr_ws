@@ -45,3 +45,6 @@
 [submodule "src/external/drt_ur_gui"]
 	path = src/external/drt_ur_gui
 	url = https://github.com/NASA-JSC-Robotics/drt_ur_gui.git
+[submodule "src/external/mujoco_ros2_control"]
+	path = src/external/mujoco_ros2_control
+	url = https://github.com/ros-controls/mujoco_ros2_control.git
