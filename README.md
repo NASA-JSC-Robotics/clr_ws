@@ -17,6 +17,10 @@ Alternatively, individual packages and submodules can be added or extracted from
 In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
 For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
+This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
+Note the `2`! As this is intended to be isolated from your system.
+
 ## Quick Development Setup
 
 1) [Install Docker](https://docs.docker.com/engine/install/ubuntu/)
@@ -149,3 +153,21 @@ Please refer to the [troubleshooting guide](./docs/TROUBLESHOOTING.md#slow-rende
 ## Troubleshooting
 
 Common pitfalls and troubleshooting tips are documented in the [troubleshooting guide](./docs/TROUBLESHOOTING.md).
+
+## Citation
+
+This project falls under the purview of the iMETRO project.
+If you use this in your own work, please cite the following paper:
+
+```bibtex
+@INPROCEEDINGS{imetro-facility-2025,
+  author={Dunkelberger, Nathan and Sheetz, Emily and Rainen, Connor and Graf, Jodi and Hart, Nikki and Zemler, Emma and Azimi, Shaun},
+  booktitle={2025 22nd International Conference on Ubiquitous Robots (UR)},
+  title={Design of the iMETRO Facility: A Platform for Intravehicular Space Robotics Research},
+  year={2025},
+  volume={},
+  number={},
+  pages={390-397},
+  keywords={NASA;Moon;Seals;Maintenance engineering;Maintenance;Robots;Standards;Open source software;Testing;Logistics},
+  doi={10.1109/UR65550.2025.11077983}}
+```
