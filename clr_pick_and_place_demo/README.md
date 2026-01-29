@@ -36,7 +36,7 @@ To run this demo on hardware, run the following in a dynamic sim container on th
 ```bash
 ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
 
-ros2 launch chonkur_deploy ur_tools.launch.py
+ros2 launch chonkur_deploy chonkur_comm.launch.py
 ```
 
 Then run the following in the dynamic sim container on the console PC:
