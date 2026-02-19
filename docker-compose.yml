@@ -4,9 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: er4-dev
+      target: er4-vla-dev
       tags:
-        - er4-dev:${ROS2_DISTRO:-humble}
+        - er4-vla-dev:${ROS2_DISTRO:-humble}
       args:
         - USERNAME=er4-user  # Changing username requires updating workspace mounts below
         - USER_UID=${USER_UID:-1000}
@@ -76,3 +76,12 @@ services:
       - /dev:/dev
     command: sleep infinity
     profiles: [ hw ]
+
+  vla_dev:
+    extends: dev
+    volumes:
+      # The controller machine requires access to some devices for hardware comms.
+      # Including, but not necessarily limited to the Hand-E gripper and Lift.
+      # TODO: Mount specific devices by name conventions, rather than all of /dev
+      - /dev:/dev
+    command: sleep infinity

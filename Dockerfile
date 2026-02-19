@@ -167,3 +167,32 @@ FROM er4-dev AS er4-dev-source
 
 RUN . /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build
+
+
+FROM er4-dev AS er4-vla-dev
+
+RUN echo "Building docker for VLAs"
+
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sudo apt-get update && \
+    sudo apt-get install -q -y \
+    git-lfs
+
+WORKDIR  ${ER4_WS}/src/vla/Lerobot-MujoCo
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    pip install -r requirements.txt
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb \
+    && sudo dpkg -i cuda-keyring_1.1-1_all.deb \
+    && sudo apt-get update \
+    && sudo apt-get -y install cuda-toolkit-12-8
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    pip install flash-attn==2.7.3 --no-build-isolation
