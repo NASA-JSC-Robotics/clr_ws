@@ -126,7 +126,7 @@ When running ChonkUR or all of CLR, launching the hardware is a two step process
 
 ```bash
 # Start the dashboard client and other UR tools prior to launching the ROS 2 HW drivers
-ros2 launch chonkur_deploy ur_tools.launch.py
+ros2 launch chonkur_deploy chonkur_comm.launch.py
 
 # Then start the relevant hardware interface
 ros2 launch clr_deploy clr_hw.launch.py
