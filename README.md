@@ -29,6 +29,14 @@ Note the `2`! As this is intended to be isolated from your system.
 2) Fork or copy the contents of this repository as needed.
 NASA internal users should refer to confluence for how to setup authentication to GitHub.
 
+    **_NOTE:_**  This repository uses LFS for mesh file storage, be sure it is installed with:
+
+    ```bash
+    sudo apt-get install git-lfs
+    ```
+
+    Then,
+
     ```bash
     # Clone with submodules
     git clone --recursive https://github.com/NASA-JSC-Robotics/clr_ws.git
