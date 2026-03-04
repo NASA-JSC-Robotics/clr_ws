@@ -29,6 +29,14 @@ Note the `2`! As this is intended to be isolated from your system.
 2) Fork or copy the contents of this repository as needed.
 NASA internal users should refer to confluence for how to setup authentication to GitHub.
 
+    **_NOTE:_**  This repository uses LFS for mesh file storage, be sure it is installed with:
+
+    ```bash
+    sudo apt-get install git-lfs
+    ```
+
+    Then,
+
     ```bash
     # Clone with submodules
     git clone --recursive https://github.com/NASA-JSC-Robotics/clr_ws.git
@@ -126,7 +134,7 @@ When running ChonkUR or all of CLR, launching the hardware is a two step process
 
 ```bash
 # Start the dashboard client and other UR tools prior to launching the ROS 2 HW drivers
-ros2 launch chonkur_deploy ur_tools.launch.py
+ros2 launch chonkur_deploy chonkur_comm.launch.py
 
 # Then start the relevant hardware interface
 ros2 launch clr_deploy clr_hw.launch.py
