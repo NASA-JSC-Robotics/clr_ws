@@ -4,7 +4,7 @@ This empty workspace can be used a starting point for a Docker-enabled workspace
 The contents of the `src` directory should be treated similarly to a "normal" ROS workspace.
 That is, source code can be imported and added as needed to `src/`, then be built and run inside of an isolated, ROS enabled environment.
 
-This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+This workflow has been tested against the `jazzy` ROS distro.
 To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
 Note the `2`! As this is intended to be isolated from your system.
 
@@ -48,6 +48,28 @@ docker compose exec dev bash
 
 Once you're attached to the container, you can use it as a regular colcon workspace.
 The contents of the `src/` directory will be mounted into `/home/er4-user/ws/src`.
+
+## The Pixi Workflow
+
+We also provide a [pixi/robostack](https://prefix.dev) build for compiling on baremetal in consistent, isolated environments.
+Be sure to install the latest (after 0.65.0) release of the tool.
+The build relies on the [pixi-build-ros](https://prefix-dev.github.io/pixi-build-backends/backends/pixi-build-ros/) backend for compatibility with our ROS projects.
+
+To install and run with pixi:
+
+```bash
+# Install the frozen environment and configure colcon
+pixi install --frozen
+pixi run setup-colcon
+
+# Build and test
+pixi run build
+pixi run test
+
+# Or launch an interactive shell and do things "normally"
+pixi shell
+colcon build
+```
 
 ## Other Things to Note
 
