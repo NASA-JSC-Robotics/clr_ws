@@ -24,18 +24,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  REPOSITORY_NAME: ${{ github.event.repository.name }}
-  TAG: ${{ github.head_ref || github.ref_name }}
-
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     steps:
-      - name: Print info
-        run: |
-          echo "REPOSITORY_NAME: ${{ env.REPOSITORY_NAME }}"
-          echo "TAG: ${{ env.TAG }}"
       # NOTE: This will not work for non-public submodules. Use a token and config substitution instead.
       - name: Checkout code
         uses: actions/checkout@v6
@@ -43,20 +35,75 @@ jobs:
           submodules: recursive
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.event.repository.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
       # TODO: Use GHCR or Dockerhub to push images once these are public
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           file: Dockerfile
-          tags: ${{ env.REPOSITORY_NAME }}:${{ env.TAG }}
+          tags: ${{ steps.meta.outputs.tags }}
           target: er4-dev-source
           push: false
           load: true
+          cache-from: type=gha,scope=ros-${{ github.event.repository.name }}
+          cache-to: type=gha,mode=max,scope=ros-${{ github.event.repository.name }}
       - name: Run tests
         run: |
           docker run --rm \
-            ${{ env.REPOSITORY_NAME }}:${{ env.TAG }} \
+            ${{ steps.meta.outputs.tags }} \
             bash -c "
               colcon test &&
               colcon test-result --verbose
+            "
+
+  pixi_jazzy_build_and_test:
+    env:
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.pixi
+          push: false
+          load: true
+          tags: ${{ github.event.repository.name }}_pixi:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Cache sccache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.SCCACHE_DIR }}
+          key: ${{ runner.os }}-sccache-${{ github.head_ref || github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-main
+            ${{ runner.os }}-sccache-
+      # Run pixi jobs, and ensure the cache is world readable.
+      - name: Build and test in container
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -v ${{ github.workspace }}/.sccache:/workspace/.sccache \
+            -w /workspace \
+            -e SCCACHE_DIR=/workspace/.sccache \
+            ${{ github.event.repository.name }}_pixi:ci \
+            bash -c "
+              pixi run setup-colcon && \
+              pixi run build && \
+              pixi run test && \
+              pixi run test-result && \
+              chmod -R a+rwX /workspace/.sccache
             "
