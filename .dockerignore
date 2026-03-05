@@ -1,0 +1,17 @@
+.git/
+.github
+.gitignore
+
+build/*
+install/*
+log/*
+.ccache/*
+
+docs/*
+README.md
+Dockerfile
+docker-compose.yml
+.gitlab-ci.yml
+
+.pixi/*
+!.pixi/config.toml
