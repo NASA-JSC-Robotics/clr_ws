@@ -1,5 +1,5 @@
 # Set desired ROS distribution
-ARG ROS_DISTRO=humble
+ARG ROS_DISTRO=jazzy
 
 # This layer grabs package manifests from the src directory for preserving rosdep installs.
 # This can significantly speed up rebuilds for the base package when src contents have changed.
