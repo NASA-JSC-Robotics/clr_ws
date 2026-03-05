@@ -115,7 +115,7 @@ def generate_launch_description():
         ),
         Node(
             package="color_blob_centroid",
-            executable="ColorBlobCentroid",
+            executable="color_blob_node",
             output="both",
             parameters=[
                 {
