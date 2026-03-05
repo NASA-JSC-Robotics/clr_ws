@@ -17,7 +17,7 @@ Alternatively, individual packages and submodules can be added or extracted from
 In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
 For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
-This workflow has been tested against the `humble` and `jazzy` ROS distros, but defaults to jazzy.
+This workflow has been tested against the `jazzy` ROS distro.
 To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
 Note the `2`! As this is intended to be isolated from your system.
 
@@ -80,6 +80,7 @@ docker compose exec dev bash
 Once you're attached to the container, you can use it as a regular colcon workspace.
 The contents of the `src/` directory will be mounted into `/home/er4-user/ws/src`.
 
+<<<<<<< HEAD
 For example:
 
 ```bash
@@ -138,6 +139,28 @@ ros2 launch chonkur_deploy chonkur_comm.launch.py
 
 # Then start the relevant hardware interface
 ros2 launch clr_deploy clr_hw.launch.py
+```
+
+## The Pixi Workflow
+
+We also provide a [pixi/robostack](https://prefix.dev) build for compiling on baremetal in consistent, isolated environments.
+Be sure to install the latest (after 0.65.0) release of the tool.
+The build relies on the [pixi-build-ros](https://prefix-dev.github.io/pixi-build-backends/backends/pixi-build-ros/) backend for compatibility with our ROS projects.
+
+To install and run with pixi:
+
+```bash
+# Install the frozen environment and configure colcon
+pixi install --frozen
+pixi run setup-colcon
+
+# Build and test
+pixi run build
+pixi run test
+
+# Or launch an interactive shell and do things "normally"
+pixi shell
+colcon build
 ```
 
 ## Important Notes
