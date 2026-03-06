@@ -13,6 +13,13 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://pixi.sh/install.sh | bash
 ENV PATH="/root/.pixi/bin:${PATH}"
 
+# TODO: Remove this when dependencies are available in the upstream
+WORKDIR /root
+RUN git clone -b clr-updates https://github.com/eholum/ros-jazzy/
+RUN cd ros-jazzy && \
+    pixi install --frozen && \
+    pixi run build
+
 WORKDIR /workspace
 
 CMD ["/bin/bash"]

@@ -65,8 +65,6 @@ jobs:
             "
 
   pixi_jazzy_build_and_test:
-    # TODO: Re-enable if/when pixi builds are fully functional without local changes
-    if: false
     env:
       SCCACHE_DIR: ${{ github.workspace }}/.sccache
     runs-on: ubuntu-latest
