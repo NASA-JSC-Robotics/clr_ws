@@ -19,7 +19,7 @@ channels = [
 # If building robostack packages locally be sure to only target the build you care about.
 # For CI we are only looking at linux-64
 # platforms = ["linux-aarch64", "linux-64"]
-platforms = ["linux-aarch64"]
+platforms = ["linux-64"]
 version = "0.1.0"
 preview = ["pixi-build"]
 
