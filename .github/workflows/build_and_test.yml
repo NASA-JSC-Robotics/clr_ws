@@ -108,7 +108,5 @@ jobs:
             bash -c "
               pixi run setup-colcon && \
               pixi run build && \
-              # pixi run test && \
-              # pixi run test-result && \
               chmod -R a+rwX /workspace/.sccache
             "
