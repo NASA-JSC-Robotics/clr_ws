@@ -1,14 +1,27 @@
 [workspace]
 # Update the workspace name accordingly
-name = "ros_docker_ws"
+name = "clr_ws"
 authors = ["Erik Holum <erik.holum@nasa.gov>"]
 channels = [
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/robostack-jazzy",
+  # TODO: This will fail until the following are avilable in robostack. For now building locally
+  # and pointing to the output works to resolve local issues.
+  #
+  # https://github.com/RoboStack/ros-jazzy/pull/176
+  # https://github.com/RoboStack/ros-jazzy/pull/177
+  #
+  # Just be sure to clone and build the correct version of https://github.com/eholum/ros-jazzy/
+  "file:///home/eholum/robostack/ros-jazzy/output",
 ]
+# If building robostack packages locally be sure to only target the build you care about
 platforms = ["linux-aarch64", "linux-64"]
 version = "0.1.0"
 preview = ["pixi-build"]
+
+[system-requirements]
+# Needed for realsense
+libc = { family = "glibc", version = "2.35" }
 
 [activation.env]
 CMAKE_INSTALL_MODE          = "SYMLINK"
@@ -30,9 +43,6 @@ clean = "rm -rf build install log .pixi"
 test = "colcon test"
 test-result = "colcon test-result --verbose"
 
-[dev]
-# Add path dependencies to any sources in the workspace
-
 [dependencies]
 python = ">=3.11,<3.13"
 cmake = ">=4.1.2,<5"
@@ -42,6 +52,60 @@ mold = ">=2.40.2,<3"
 colcon-common-extensions = ">=0.3.0,<0.4"
 colcon-mixin = ">=0.2.3,<0.3"
 pip = "*"
+nanobind = ">=2.8.0,<3"
 
 # Not necessary for building, but for tests/running in isolated environments
 ros-jazzy-ros-base = "*"
+
+[dev]
+# Add path dependencies to any sources in the workspace
+ros-jazzy-chonkur-deploy = { path = "./src/chonkur_l_raile/chonkur/chonkur_deploy/package.xml" }
+ros-jazzy-chonkur-description = { path = "./src/chonkur_l_raile/chonkur/chonkur_description/package.xml" }
+ros-jazzy-chonkur-moveit-config = { path = "./src/chonkur_l_raile/chonkur/chonkur_moveit_config/package.xml" }
+ros-jazzy-clr-deploy = { path = "./src/chonkur_l_raile/clr_deploy/package.xml" }
+ros-jazzy-clr-description = { path = "./src/chonkur_l_raile/clr_description/package.xml" }
+ros-jazzy-clr-imetro-environments = { path = "./src/chonkur_l_raile/clr_imetro_environments/package.xml" }
+ros-jazzy-clr-moveit-config = { path = "./src/chonkur_l_raile/clr_moveit_config/package.xml" }
+ros-jazzy-clr-mujoco-config = { path = "./src/chonkur_l_raile/clr_mujoco_config/package.xml" }
+ros-jazzy-clr-pick-and-place-demo = { path = "./src/clr_sim_demos/clr_pick_and_place_demo/package.xml" }
+ros-jazzy-clr-safety = { path = "./src/chonkur_l_raile/clr_safety/package.xml" }
+ros-jazzy-color-blob-centroid = { path = "./src/external/color_tools/color_blob_centroid/package.xml" }
+ros-jazzy-color-names = { path = "./src/external/color_tools/color_names/package.xml" }
+ros-jazzy-color-tools-msgs = { path = "./src/external/color_tools/color_tools_msgs/package.xml" }
+ros-jazzy-ctb = { path = "./src/external/surface_robotics_mockups_description/ctb/package.xml" }
+ros-jazzy-dextivr-hande-deploy = { path = "./src/external/dextivr_hande/dextivr_hande_deploy/package.xml" }
+ros-jazzy-dextivr-hande-description = { path = "./src/external/dextivr_hande/dextivr_hande_description/package.xml" }
+ros-jazzy-drt-ur-gui = { path = "./src/external/drt_ur_gui/package.xml" }
+ros-jazzy-ewellix-liftkit-deploy = { path = "./src/external/ewellix_lift_kit/ewellix_liftkit_deploy/package.xml" }
+ros-jazzy-ewellix-liftkit-description = { path = "./src/external/ewellix_lift_kit/ewellix_liftkit_description/package.xml" }
+ros-jazzy-ewellix-liftkit-moveit-config = { path = "./src/external/ewellix_lift_kit/ewellix_liftkit_moveit_config/package.xml" }
+ros-jazzy-express-rack = { path = "./src/external/surface_robotics_mockups_description/express_rack/package.xml" }
+ros-jazzy-hatch-4040 = { path = "./src/external/surface_robotics_mockups_description/hatch_4040/package.xml" }
+ros-jazzy-hatch-4060 = { path = "./src/external/surface_robotics_mockups_description/hatch_4060/package.xml" }
+ros-jazzy-hatch-accessories = { path = "./src/external/surface_robotics_mockups_description/hatch_accessories/package.xml" }
+ros-jazzy-liftkit-hardware-interface = { path = "./src/external/ewellix_lift_kit/ewellix_liftkit_hardware_interface/package.xml" }
+ros-jazzy-long-bench = { path = "./src/external/surface_robotics_mockups_description/long_bench/package.xml" }
+ros-jazzy-merlin-mockup-description = { path = "./src/external/merlin_mockup_description/package.xml" }
+ros-jazzy-mockups-launch-common = { path = "./src/external/surface_robotics_mockups_description/mockups_launch_common/package.xml" }
+ros-jazzy-mockups-offsets = { path = "./src/external/surface_robotics_mockups_description/mockups_offsets/package.xml" }
+ros-jazzy-mujoco-ros2-control-demos = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control_demos/package.xml" }
+ros-jazzy-mujoco-ros2-control-msgs = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control_msgs/package.xml" }
+ros-jazzy-mujoco-ros2-control = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control/package.xml" }
+ros-jazzy-mujoco-ros2-control-plugins = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control_plugins/package.xml" }
+ros-jazzy-mujoco-ros2-control-tests = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control_tests/package.xml" }
+ros-jazzy-robotiq-controllers = { path = "./src/external/ros2_robotiq_gripper/robotiq_controllers/package.xml" }
+ros-jazzy-robotiq-description = { path = "./src/external/ros2_robotiq_gripper/robotiq_description/package.xml" }
+ros-jazzy-robotiq-driver = { path = "./src/external/ros2_robotiq_gripper/robotiq_driver/package.xml" }
+ros-jazzy-robotiq-hande-description = { path = "./src/external/ros2_robotiq_gripper/robotiq_hande_description/package.xml" }
+ros-jazzy-robotiq-hardware-tests = { path = "./src/external/ros2_robotiq_gripper/robotiq_hardware_tests/package.xml" }
+ros-jazzy-serial = { path = "./src/external/serial/package.xml" }
+# ros-jazzy-trac-ik-examples = { path = "./src/external/trac_ik/trac_ik_examples/package.xml" }
+ros-jazzy-trac-ik-kinematics-plugin = { path = "./src/external/trac_ik/trac_ik_kinematics_plugin/package.xml" }
+ros-jazzy-trac-ik-lib = { path = "./src/external/trac_ik/trac_ik_lib/package.xml" }
+ros-jazzy-trac-ik = { path = "./src/external/trac_ik/trac_ik/package.xml" }
+# ros-jazzy-trac-ik-python = { path = "./src/external/trac_ik/trac_ik_python/package.xml" }
+ros-jazzy-trainer = { path = "./src/external/surface_robotics_mockups_description/trainer/package.xml" }
+ros-jazzy-vention-rail-controllers = { path = "./src/external/vention_rail/vention_rail_controllers/package.xml" }
+ros-jazzy-vention-rail-deploy = { path = "./src/external/vention_rail/vention_rail_deploy/package.xml" }
+ros-jazzy-vention-rail-description = { path = "./src/external/vention_rail/vention_rail_description/package.xml" }
+ros-jazzy-vention-rail-hardware-interface = { path = "./src/external/vention_rail/vention_rail_hardware_interface/package.xml" }
