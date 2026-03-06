@@ -5,7 +5,7 @@ authors = ["Erik Holum <erik.holum@nasa.gov>"]
 channels = [
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/robostack-jazzy",
-  # TODO: This will fail until the following are avilable in robostack. For now building locally
+  # TODO: This will fail until the following are available in robostack. For now building locally
   # and pointing to the output works to resolve local issues.
   #
   # https://github.com/RoboStack/ros-jazzy/pull/176
