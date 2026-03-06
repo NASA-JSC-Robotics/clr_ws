@@ -30,9 +30,6 @@ clean = "rm -rf build install log .pixi"
 test = "colcon test"
 test-result = "colcon test-result --verbose"
 
-[dev]
-# Add path dependencies to any sources in the workspace
-
 [dependencies]
 python = ">=3.11,<3.13"
 cmake = ">=4.1.2,<5"
@@ -45,3 +42,6 @@ pip = "*"
 
 # Not necessary for building, but for tests/running in isolated environments
 ros-jazzy-ros-base = "*"
+
+[dev]
+# Add path dependencies to any sources in the workspace
