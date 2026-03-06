@@ -71,6 +71,19 @@ pixi shell
 colcon build
 ```
 
+Note that any package we are building from source must be included in [pixi.toml](./pixi.toml).
+This is a bit annoying, but it can be updated using a script to find all `package.xmls` and name them accordingly:
+
+```bash
+# Be sure to ignore env files or otherwise. We only want package.xmls from
+# packages compiled in the workspace.
+find src/ -name package.xml | grep -v '\.pixi/' | while read f; do
+  pkg=$(grep -oP '(?<=<name>)[^<]+' "$f")
+  pkg_key="ros-jazzy-$(echo "$pkg" | tr '_' '-')"
+  echo "$pkg_key = { path = \"./$f\" }"
+done | sort
+```
+
 ## Other Things to Note
 
 - Build logs, compiled artifaces, and the `.ccache` are also mounted in the workspace/user home.
