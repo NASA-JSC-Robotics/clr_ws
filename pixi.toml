@@ -5,21 +5,10 @@ authors = ["Erik Holum <erik.holum@nasa.gov>"]
 channels = [
   "https://prefix.dev/conda-forge",
   "https://prefix.dev/robostack-jazzy",
-  # TODO: This will fail until the following are available in robostack. For now building locally
-  # and pointing to the output works to resolve local issues.
-  #
-  # https://github.com/RoboStack/ros-jazzy/pull/176
-  # https://github.com/RoboStack/ros-jazzy/pull/177
-  #
-  # To build this now we can add those deps by cloning the "clr-updates" of: https://github.com/eholum/ros-jazzy/.
-  # The following is a temp override for CI to build and test the pixi workflow.
-  # Update this to your local clone if need be.
-  "file:///root/ros-jazzy/output",
 ]
 # If building robostack packages locally be sure to only target the build you care about.
 # For CI we are only looking at linux-64
-# platforms = ["linux-aarch64", "linux-64"]
-platforms = ["linux-64"]
+platforms = ["linux-aarch64", "linux-64"]
 version = "0.1.0"
 preview = ["pixi-build"]
 
