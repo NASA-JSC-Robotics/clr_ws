@@ -156,10 +156,18 @@ pixi run setup-colcon
 # Build and test
 pixi run build
 pixi run test
+```
 
-# Or launch an interactive shell and do things "normally"
+Alternatively, launch an interactive shell and do things "normally":
+
+```bash
+# Launch the shell and compile the workspace
 pixi shell
 colcon build
+
+# Source the workspace and launch an application
+source install/setup.bash
+ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ```
 
 ## Important Notes
