@@ -25,12 +25,12 @@ waypoints:
     planner: "RRTstarkConfigDefault"
   approach_bench_seat:
     config:
-    - 2.46091 # 141 deg
-    - -2.6832 # -153.7 deg
-    - -1.5352 # -88 deg
-    - -0.4491 # -25.7 deg
-    - -1.5091 # -86.5 deg
-    - -0.9393 # -53.8 deg
+    - 2.443 # 141 deg
+    - -2.670 # -153.7 deg
+    - -1.571 # -88 deg
+    - -0.419 # -25.7 deg
+    - -1.500 # -86.5 deg
+    - -0.925 # -53.8 deg
     planning_group: "ur_manipulator"
     cartesian: false
     planner: "RRTstarkConfigDefault"
@@ -153,7 +153,7 @@ waypoints:
     relative: true
   drop_arm:
     pose:
-      x: 0.0
+      x: -0.05
       y: 0.0
       z: 0.1
       qx: 0.0

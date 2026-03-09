@@ -262,6 +262,11 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to lift CTB. Exiting.");
       return;
     }
+    if (!this->reorient_ctb())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to approach CTB dropoff location. Exiting.");
+      return;
+    }
     if (!this->traverse_left_1())
     {
       RCLCPP_ERROR(LOGGER, "Failed to traverse left. Exiting.");
@@ -295,11 +300,6 @@ public:
     if (!this->back_off())
     {
       RCLCPP_ERROR(LOGGER, "Failed to back off from CTB. Exiting.");
-      return;
-    }
-    if (!this->stow())
-    {
-      RCLCPP_ERROR(LOGGER, "Failed to stow manipulator. Exiting.");
       return;
     }
     if (!this->demo_home())
@@ -468,13 +468,7 @@ public:
            plan_and_execute(wp_map.at("stow_ctb"));
   }
 
-  bool traverse_left_1()
-  {
-    RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
-    return plan_and_execute(wp_map.at("traverse_left_1"));
-  }
-
-  bool pre_drop_ctb()
+  bool reorient_ctb()
   {
     RCLCPP_INFO(LOGGER, "Approaching CTB dropoff location.");
     geometry_msgs::msg::TransformStamped eef;
@@ -484,8 +478,19 @@ public:
     }
     Waypoint approach_wp_1 = Waypoint(eef.transform.translation.x, eef.transform.translation.y,
                                       eef.transform.translation.z, 0.725, 0.688, 0.032, -0.004, "ur_manipulator", true);
-    // return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
-    return plan_and_execute(approach_wp_1) && plan_and_execute(wp_map.at("pre_drop_ctb"));
+    return plan_and_execute(approach_wp_1);
+  }
+
+  bool traverse_left_1()
+  {
+    RCLCPP_INFO(LOGGER, "Traversing to bench seat location.");
+    return plan_and_execute(wp_map.at("traverse_left_1"));
+  }
+
+  bool pre_drop_ctb()
+  {
+    RCLCPP_INFO(LOGGER, "Preparing CTB for drop");
+    return plan_and_execute(wp_map.at("pre_drop_ctb"));
   }
 
   bool traverse_left_2()
@@ -503,10 +508,10 @@ public:
   bool drop_ctb()
   {
     RCLCPP_INFO(LOGGER, "Dropping CTB.");
-    if (!plan_and_execute(wp_map.at("drop_arm")))
-    {
-      return false;
-    }
+    // if (!plan_and_execute(wp_map.at("drop_arm")))
+    // {
+    //   return false;
+    // }
     return plan_and_execute(wp_map.at("drop_lift"));
   }
 
