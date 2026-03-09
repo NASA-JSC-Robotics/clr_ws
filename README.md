@@ -110,7 +110,7 @@ ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ros2 launch clr_moveit_config clr_moveit.launch.py include_mockups_in_description:=true use_sim_time:=true
 ```
 
-More information about the dynamic simulation is available in the [project](https://github.com/NASA-JSC-Robotics/chonkur_l_raile) and [drivers](https://github.com/NASA-JSC-Robotics/mujoco_ros2_simulation) packages.
+More information about the dynamic simulation is available in the [project](https://github.com/NASA-JSC-Robotics/chonkur_l_raile) and [drivers](https://github.com/ros-controls/mujoco_ros2_control) packages.
 
 ## Using the Hardware Image
 
