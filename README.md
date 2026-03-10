@@ -144,7 +144,7 @@ ros2 launch clr_deploy clr_hw.launch.py
 ## The Pixi Workflow
 
 We also provide a [pixi/robostack](https://prefix.dev) build for compiling on baremetal in consistent, isolated environments.
-Be sure to install the latest (after 0.65.0) release of the tool.
+Be sure to install the latest (after 0.65.0) release of the tool following the instructions [here](https://pixi.prefix.dev/latest/installation/).
 The build relies on the [pixi-build-ros](https://prefix-dev.github.io/pixi-build-backends/backends/pixi-build-ros/) backend for compatibility with our ROS projects.
 
 To install and run with pixi:
