@@ -16,6 +16,9 @@ preview = ["pixi-build"]
 # Needed for realsense
 libc = { family = "glibc", version = "2.35" }
 
+[activation]
+scripts = ["scripts/entrypoint_pixi.sh"]
+
 [activation.env]
 CMAKE_INSTALL_MODE          = "SYMLINK"
 COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
