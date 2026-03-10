@@ -106,3 +106,11 @@ ros-jazzy-vention-rail-controllers = { path = "./src/external/vention_rail/venti
 ros-jazzy-vention-rail-deploy = { path = "./src/external/vention_rail/vention_rail_deploy/package.xml" }
 ros-jazzy-vention-rail-description = { path = "./src/external/vention_rail/vention_rail_description/package.xml" }
 ros-jazzy-vention-rail-hardware-interface = { path = "./src/external/vention_rail/vention_rail_hardware_interface/package.xml" }
+
+[pypi-dependencies]
+xacro = ">=2.1.1, <3"
+obj2mjcf = ">=0.0.25"
+trimesh = "*"
+scipy = ">=1.17.0, <2"
+pycollada = "*"
+numpy= "<2.5, >=1.23.5"
