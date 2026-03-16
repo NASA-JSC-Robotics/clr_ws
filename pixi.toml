@@ -11,7 +11,7 @@ version = "0.1.0"
 preview = ["pixi-build"]
 
 [activation.env]
-CMAKE_INSTALL_MODE          = "SYMLINK"
+CMAKE_INSTALL_MODE = "SYMLINK"
 COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
 LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LIBRARY_PATH}"
 LD_LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
