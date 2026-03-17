@@ -46,7 +46,9 @@ ros2 launch drt_ur_gui one_arm.launch.py
 Once the UR status is "READY" use the drop down to select the "load_program" service call and press "Send"
 
 Now that the UR is configured and ready to run, start the CLR drivers.
-Use caution. Don't run the robot into anything. Know where all the E-stops are before operating any hardware.
+Use caution!
+Do NOT run the robot into anything. 
+Know where all the E-stops are before operating any hardware.
 When indicated, press the safety homing button.
 ```bash
 ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
