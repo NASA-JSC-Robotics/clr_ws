@@ -11,6 +11,7 @@ version = "0.1.0"
 preview = ["pixi-build"]
 
 [activation]
+# Sources the workspace install, if present
 scripts = ["scripts/entrypoint_pixi.sh"]
 
 [activation.env]
