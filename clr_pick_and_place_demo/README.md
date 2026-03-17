@@ -48,12 +48,10 @@ Once the UR status is "READY" use the drop down to select the "load_program" ser
 Now that the UR is configured and ready to run, start the CLR drivers.
 Use caution!
 Do NOT run the robot into anything. 
-Know where all the E-stops are before operating any hardware.
 When indicated, press the safety homing button.
+
 ```bash
 ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
-```
-
 Then run the following in the dynamic sim container on the console PC:
 
 ```bash
