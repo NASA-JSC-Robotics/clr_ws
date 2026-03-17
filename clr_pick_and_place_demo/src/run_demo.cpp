@@ -464,8 +464,9 @@ public:
   bool lift_ctb()
   {
     RCLCPP_INFO(LOGGER, "Lifting CTB.");
-    return plan_and_execute(wp_map.at("lift_relative")) && plan_and_execute(wp_map.at("lift_lift")) &&
-           plan_and_execute(wp_map.at("stow_ctb"));
+    return plan_and_execute(wp_map.at("lift_relative")) && 
+           plan_and_execute(wp_map.at("stow_ctb")) &&
+           plan_and_execute(wp_map.at("lift_lift"));
   }
 
   bool reorient_ctb()
@@ -508,10 +509,10 @@ public:
   bool drop_ctb()
   {
     RCLCPP_INFO(LOGGER, "Dropping CTB.");
-    // if (!plan_and_execute(wp_map.at("drop_arm")))
-    // {
-    //   return false;
-    // }
+    if (!plan_and_execute(wp_map.at("drop_arm")))
+    {
+      return false;
+    }
     return plan_and_execute(wp_map.at("drop_lift"));
   }
 
