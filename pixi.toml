@@ -12,16 +12,21 @@ platforms = ["linux-aarch64", "linux-64"]
 version = "0.1.0"
 preview = ["pixi-build"]
 
+[activation]
+# Sources the workspace install, if present
+scripts = ["scripts/entrypoint_pixi.sh"]
+
 [system-requirements]
 # Needed for realsense
 libc = { family = "glibc", version = "2.35" }
 
 [activation.env]
-CMAKE_INSTALL_MODE          = "SYMLINK"
+CMAKE_INSTALL_MODE = "SYMLINK"
 COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
 LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LIBRARY_PATH}"
 LD_LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
 LDFLAGS = "-L${CONDA_PREFIX}/lib -Wl,-rpath,${CONDA_PREFIX}/lib -fuse-ld=mold"
+RCUTILS_COLORIZED_OUTPUT = "1"
 
 [tasks]
 # Setup tasks
