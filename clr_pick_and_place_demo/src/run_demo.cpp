@@ -446,19 +446,17 @@ public:
     }
     tf2::doTransform(local_pose, global_pose, transform);
 
-    // Add offset to place grasp frame ABOVE the CTB handle (hover offset now)
+    // Offset to place grasp frame ABOVE the CTB handle (hover offset now)
     geometry_msgs::msg::Pose offset = wp_map.at("ctb_offset").pose;
     global_pose = this->relative_to_global(global_pose, offset);
 
-    // TODO: Consider replacing with a two phase grasp, one to align to fixed z-offset, and one to grasp.
     RCLCPP_INFO(LOGGER, "Reaching for CTB handle. Stopping at 5 cm above handle.");
     Waypoint blob_wp = Waypoint(global_pose, "chonkur_grasp", true);
     plan_and_execute(blob_wp);
 
     RCLCPP_INFO(LOGGER, "Descending to CTB handle. Getting ready to grasp.");
-    plan_and_execute(wp_map.at("descend_to_ctb_handle"));
 
-    return true;
+    return plan_and_execute(wp_map.at("descend_to_ctb_handle"));
   }
 
   bool close_grasp()
