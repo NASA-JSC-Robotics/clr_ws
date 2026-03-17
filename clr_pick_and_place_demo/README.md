@@ -40,10 +40,9 @@ ros2 launch chonkur_deploy ur_tools.launch.py
 ```
 
 Once the UR communication nodes start, go back over to the console machine and the UR GUI:
+
 ```bash
 ros2 launch drt_ur_gui one_arm.launch.py
-```
-Make sure all E-stops are released, then press "release brakes"
 Once the UR status is "READY" use the drop down to select the "load_program" service call and press "Send"
 
 Now that the UR is configured and ready to run, start the CLR drivers.
