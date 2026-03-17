@@ -48,4 +48,5 @@ pip = "*"
 ros-jazzy-ros-base = "*"
 
 [dev]
-# Add path dependencies to any sources in the workspace
+# Add path dependencies to any sources in the workspace, for example:
+# ros-jazzy-clr-deploy = { path = "./src/chonkur_l_raile/clr_deploy/package.xml" }
