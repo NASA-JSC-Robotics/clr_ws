@@ -62,4 +62,4 @@ ros2 launch clr_pick_and_place_demo demo.launch.py sim:=false
 
 Finally, before hitting next, go back to the UR GUI and hit Play.
 
-Then hit next to start and perform the demo.docker
+Then hit next to start the demo.
