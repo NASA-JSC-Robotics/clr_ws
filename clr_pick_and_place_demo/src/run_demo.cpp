@@ -464,8 +464,7 @@ public:
   bool lift_ctb()
   {
     RCLCPP_INFO(LOGGER, "Lifting CTB.");
-    return plan_and_execute(wp_map.at("lift_relative")) && 
-           plan_and_execute(wp_map.at("stow_ctb")) &&
+    return plan_and_execute(wp_map.at("lift_relative")) && plan_and_execute(wp_map.at("stow_ctb")) &&
            plan_and_execute(wp_map.at("lift_lift"));
   }
 

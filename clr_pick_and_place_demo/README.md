@@ -47,7 +47,7 @@ Once the UR status is "READY" use the drop down to select the "load_program" ser
 
 Now that the UR is configured and ready to run, start the CLR drivers.
 Use caution!
-Do NOT run the robot into anything. 
+Do NOT run the robot into anything.
 When indicated, press the safety homing button.
 
 ```bash
