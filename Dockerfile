@@ -103,6 +103,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     ros-${ROS_DISTRO}-rmw-fastrtps-cpp \
     ros-${ROS_DISTRO}-plotjuggler-ros
 
+# Install additional MuJoCo dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    pip3 install mujoco obj2mjcf trimesh
+
 # Copy in the remainder of the src directory
 COPY --chown=${USERNAME}:${USERNAME} src/ src/
 
