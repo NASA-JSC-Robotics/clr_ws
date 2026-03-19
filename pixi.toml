@@ -31,9 +31,9 @@ colcon mixin update default
 
 # Build tasks
 build = "colcon build"
-clean = "rm -rf build install log .pixi"
 test = "colcon test"
 test-result = "colcon test-result --verbose"
+clean = "rm -rf build/* install/* log/*"
 
 [dependencies]
 python = ">=3.11,<3.13"
