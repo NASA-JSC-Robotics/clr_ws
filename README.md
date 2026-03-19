@@ -55,6 +55,9 @@ We also provide a [pixi/robostack](https://prefix.dev) build for compiling on ba
 Be sure to install the latest (after 0.65.0) release of the tool.
 The build relies on the [pixi-build-ros](https://prefix-dev.github.io/pixi-build-backends/backends/pixi-build-ros/) backend for compatibility with our ROS projects.
 
+This is an experimental workflow that is not as tested as the Docker build methods.
+For more information on pixi refer to the [instructions](./docs/USING_PIXI.md).
+
 To install and run with pixi:
 
 ```bash
@@ -72,17 +75,6 @@ colcon build
 ```
 
 Note that any package we are building from source must be included in [pixi.toml](./pixi.toml).
-This is a bit annoying, but it can be updated using a script to find all `package.xmls` and name them accordingly:
-
-```bash
-# Be sure to ignore env files or otherwise. We only want package.xmls from
-# packages compiled in the workspace.
-find src/ -name package.xml | grep -v '\.pixi/' | while read f; do
-  pkg=$(grep -oP '(?<=<name>)[^<]+' "$f")
-  pkg_key="ros-jazzy-$(echo "$pkg" | tr '_' '-')"
-  echo "$pkg_key = { path = \"./$f\" }"
-done | sort
-```
 
 ## Other Things to Note
 
