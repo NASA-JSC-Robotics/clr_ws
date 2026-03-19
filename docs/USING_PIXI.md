@@ -86,7 +86,7 @@ We provide a brief overview of the relevant sections, for more information refer
   Any ROS package built from source in the workspace must be listed here as a path dependency pointing to its `package.xml`.
   This tells pixi-build-ros to resolve that package's ROS dependencies from the conda channels and make them available at build time.
 
-  This can be annoying if the workspace has many packages installed.
+  This can be annoying if the workspace has many packages installed, as many workspace do.
   More information is provided in the next section.
 
 ## Adding Source Dependencies
@@ -134,7 +134,8 @@ How you install determines whether that snapshot is maintained or re-resolved:
 Note that the `pixi.lock` file _SHOULD_ be committed to version control.
 Some developers can be put off by the large set of changes, but this is what ensures consistency across machines.
 When making changes, if `git` reports a difference in the lockfile, then the changes represent modified dependencies and committing them should be an _intentional choice_.
-This is good!
+
+This is a good thing!
 
 ## Troubleshooting
 
