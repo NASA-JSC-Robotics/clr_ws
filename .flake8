@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 120
+# Only catch extraneous imports and formatting not handled by black
+select = F,E711,E712,E721,E902,W605

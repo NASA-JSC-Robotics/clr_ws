@@ -66,7 +66,7 @@ jobs:
 
   pixi_jazzy_build_and_test:
     env:
-      SCCACHE_DIR: ${{ github.workspace }}/.sccache
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -85,15 +85,15 @@ jobs:
           tags: ${{ github.event.repository.name }}_pixi:ci
           cache-from: type=gha,scope=pixi-${{ github.event.repository.name }}
           cache-to: type=gha,mode=max,scope=pixi-${{ github.event.repository.name }}
-      - name: Cache sccache
+      - name: Cache ccache
         uses: actions/cache@v5
         with:
           path: |
-            ${{ env.SCCACHE_DIR }}
-          key: ${{ runner.os }}-sccache-${{ github.head_ref || github.ref_name }}
+            ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ github.head_ref || github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-sccache-main
-            ${{ runner.os }}-sccache-
+            ${{ runner.os }}-ccache-main
+            ${{ runner.os }}-ccache-
       # Run pixi jobs, and ensure the cache is world readable.
       # TODO: There is an issue with the colorblob with the newer opencv from conda.
       #       Need to resolve that before we re-enable tests.
@@ -101,12 +101,12 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            -v ${{ github.workspace }}/.sccache:/workspace/.sccache \
+            -v ${{ github.workspace }}/.ccache:/workspace/.ccache \
             -w /workspace \
-            -e SCCACHE_DIR=/workspace/.sccache \
+            -e CCACHE_DIR=/workspace/.ccache \
             ${{ github.event.repository.name }}_pixi:ci \
             bash -c "
               pixi run setup-colcon && \
               pixi run build && \
-              chmod -R a+rwX /workspace/.sccache
+              chmod -R a+rwX /workspace/.ccache
             "

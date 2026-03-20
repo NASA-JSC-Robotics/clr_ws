@@ -35,6 +35,28 @@ sudo nvidia-ctk runtime configure --runtime=containerd
 sudo systemctl restart containerd
 ```
 
+## X Permissions Errors
+
+X authentication objects and files are bind mounted into the container in the [compose file](../docker-compose.yml).
+If RViz or other graphical applications give errors such as:
+
+```bash
+[rviz2-2] Authorization required, but no authorization protocol specified
+[rviz2-2]
+[rviz2-2] qt.qpa.xcb: could not connect to display :0
+[rviz2-2] qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though it was found.
+[rviz2-2] This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+[rviz2-2]
+[rviz2-2] Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, wayland-egl, wayland, wayland-xcomposite-egl, wayland-xcomposite-glx, xcb.
+```
+
+Firstly, double check that user information (`UID` and `GID`) on the host match what's in the container.
+Run the `id` both inside and outside the container and make sure that the `UID` and `GID` of both users match.
+If not, refer to the [README](./../README.md) setup section for setting those host variables.
+
+If the user information matches, try running `xhost +local:docker` and restarting the container.
+This will give docker broader X permissions, but would have to be run once per login, if required.
+
 ## Build Changes Not Visible
 
 Changing the workflow or workspace then running `docker compose build` will recreate the image.

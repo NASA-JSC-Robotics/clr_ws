@@ -80,7 +80,6 @@ docker compose exec dev bash
 Once you're attached to the container, you can use it as a regular colcon workspace.
 The contents of the `src/` directory will be mounted into `/home/er4-user/ws/src`.
 
-<<<<<<< HEAD
 For example:
 
 ```bash
@@ -111,7 +110,7 @@ ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ros2 launch clr_moveit_config clr_moveit.launch.py include_mockups_in_description:=true use_sim_time:=true
 ```
 
-More information about the dynamic simulation is available in the [project](https://github.com/NASA-JSC-Robotics/chonkur_l_raile) and [drivers](https://github.com/NASA-JSC-Robotics/mujoco_ros2_simulation) packages.
+More information about the dynamic simulation is available in the [project](https://github.com/NASA-JSC-Robotics/chonkur_l_raile) and [drivers](https://github.com/ros-controls/mujoco_ros2_control) packages.
 
 ## Using the Hardware Image
 
@@ -147,6 +146,9 @@ We also provide a [pixi/robostack](https://prefix.dev) build for compiling on ba
 Be sure to install the latest (after 0.65.0) release of the tool.
 The build relies on the [pixi-build-ros](https://prefix-dev.github.io/pixi-build-backends/backends/pixi-build-ros/) backend for compatibility with our ROS projects.
 
+This is an experimental workflow that is not as tested as the Docker build methods.
+For more information on pixi refer to the [instructions](./docs/USING_PIXI.md).
+
 To install and run with pixi:
 
 ```bash
@@ -157,11 +159,21 @@ pixi run setup-colcon
 # Build and test
 pixi run build
 pixi run test
+```
 
-# Or launch an interactive shell and do things "normally"
+Alternatively, launch an interactive shell and do things "normally":
+
+```bash
+# Launch the shell and compile the workspace
 pixi shell
 colcon build
+
+# Source the workspace and launch an application
+source install/setup.bash
+ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ```
+
+Note that any package we are building from source must be included in [pixi.toml](./pixi.toml).
 
 ## Important Notes
 
