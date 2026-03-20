@@ -21,11 +21,11 @@ scripts = ["scripts/entrypoint_pixi.sh"]
 libc = { family = "glibc", version = "2.35" }
 
 [activation.env]
-CMAKE_INSTALL_MODE = "SYMLINK"
-COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
 LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LIBRARY_PATH}"
 LD_LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
 LDFLAGS = "-L${CONDA_PREFIX}/lib -Wl,-rpath,${CONDA_PREFIX}/lib -fuse-ld=mold"
+COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
+COLCON_DEFAULTS_FILE = "${PIXI_PROJECT_ROOT}/config/colcon-defaults.yaml"
 RCUTILS_COLORIZED_OUTPUT = "1"
 
 [tasks]
@@ -37,16 +37,16 @@ colcon mixin update default
 
 # Build tasks
 build = "colcon build"
-clean = "rm -rf build install log .pixi"
 test = "colcon test"
 test-result = "colcon test-result --verbose"
+clean = "rm -rf build/* install/* log/*"
 
 [dependencies]
 python = ">=3.11,<3.13"
 cmake = ">=4.1.2,<5"
+ccache = ">=4.13.1,<5"
 ninja = ">=1.13.1,<2"
-sccache = ">=0.11.0,<0.12"
-mold = ">=2.40.2,<3"
+mold = ">=2.40.4,<3"
 colcon-common-extensions = ">=0.3.0,<0.4"
 colcon-mixin = ">=0.2.3,<0.3"
 pip = "*"
