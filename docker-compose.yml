@@ -8,7 +8,9 @@ services:
       tags:
         - er4-dev:${ROS2_DISTRO:-jazzy}
       args:
-        - USERNAME=er4-user  # Changing username requires updating workspace mounts below
+        # WARNING: Changing username requires updating workspace mounts below.
+        # Do not mess with these unless you know what you are doing!
+        - USERNAME=er4-user
         - USER_UID=${USER_UID:-1000}
         - USER_GID=${USER_GID:-1000}
         - ROS_DISTRO=${ROS2_DISTRO:-jazzy}
@@ -17,6 +19,8 @@ services:
     init: true
     stdin_open: true
     tty: true
+    # WARNING: We set these by default but they may be trimmed down or removed depending on the exact nature
+    # of the application.
     privileged: true
     network_mode: host
     # Ensures the UR drivers have access to RT priority
@@ -33,7 +37,7 @@ services:
       - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}
       - CYCLONEDDS_URI=/cyclonedds.xml
       - FASTRTPS_DEFAULT_PROFILES_FILE=/fastdds.xml
-      # make the bash history folder link to our local .bash so that we can rtain info between container starts
+      # make the bash history folder link to our local .bash so that we can retain info between container starts
       - HISTFILE=/home/er4-user/.bash/.bash_history
       # default to colorized output of ros logs
       - RCUTILS_COLORIZED_OUTPUT=1
@@ -60,10 +64,12 @@ services:
       - ./log:/home/er4-user/ws/log/:rw
       - ./.ccache:/home/er4-user/.ccache
       - ./.bash:/home/er4-user/.bash
-      # For rendering graphical commands inside the container
-      - x11_sock:/tmp/.X11-unix
+      # For rendering graphical commands inside the container. The container requires `connect`
+      # access to the socket so `ro` access should be sufficient. However, mismatched user information
+      # or other socket permissions errors can cause other issues. Refer to the troubleshooting
+      # documentation or ask if you are running into odd X issues.
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
-      - $HOME/.Xauthority:/home/${HOST_USERNAME:-er4-user}/.Xauthority:rw
+      - $HOME/.Xauthority:/home/er4-user/.Xauthority:ro
       # Uncomment to allow access to host hardware
       # NOTE: This is quite dangerous so be careful with these containers
       # - /dev:/dev
