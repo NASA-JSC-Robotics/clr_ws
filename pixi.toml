@@ -89,7 +89,7 @@ ros-jazzy-hatch-4060 = { path = "./src/external/surface_robotics_mockups_descrip
 ros-jazzy-hatch-accessories = { path = "./src/external/surface_robotics_mockups_description/hatch_accessories/package.xml" }
 ros-jazzy-liftkit-hardware-interface = { path = "./src/external/ewellix_lift_kit/ewellix_liftkit_hardware_interface/package.xml" }
 ros-jazzy-long-bench = { path = "./src/external/surface_robotics_mockups_description/long_bench/package.xml" }
-ros-jazzy-merlin-mockup-description = { path = "./src/external/merlin_mockup_description/package.xml" }
+ros-jazzy-merlin-mockup-description = { path = "./src/external/surface_robotics_mockups_description/merlin_mockup_description/package.xml" }
 ros-jazzy-mockups-launch-common = { path = "./src/external/surface_robotics_mockups_description/mockups_launch_common/package.xml" }
 ros-jazzy-mockups-offsets = { path = "./src/external/surface_robotics_mockups_description/mockups_offsets/package.xml" }
 ros-jazzy-mujoco-ros2-control-demos = { path = "./src/external/mujoco_ros2_control/mujoco_ros2_control_demos/package.xml" }
