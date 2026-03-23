@@ -78,11 +78,23 @@ waypoints:
     pose:
       x: 0.0
       y: 0.0
-      z: 0.03
+      z: -0.05
       qx: 0.0
       qy: 0.0
       qz: 1.0
       qw: 0.0
+    planning_group: "ur_manipulator"
+    cartesian: true
+    relative: true
+  descend_to_ctb_handle:
+    pose:
+      x: 0.0
+      y: 0.0
+      z: 0.08
+      qx: 0.0
+      qy: 0.0
+      qz: 0.0
+      qw: 1.0
     planning_group: "ur_manipulator"
     cartesian: true
     relative: true

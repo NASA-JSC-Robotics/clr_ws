@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>Application demonstration of the CLR robot operating in its dynamic simulation</description>
   <maintainer email="nikki.j.hart@nasa.gov">njhart</maintainer>
-  <license>Apache License, Version 2.0</license>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
