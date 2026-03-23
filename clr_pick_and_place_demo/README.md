@@ -43,15 +43,20 @@ Once the UR communication nodes start, go back over to the console machine and t
 
 ```bash
 ros2 launch drt_ur_gui one_arm.launch.py
-Once the UR status is "READY" use the drop down to select the "load_program" service call and press "Send"
+```
+
+Once the UR status is "READY" use the drop down to select the "load_program" service call and press "Send".
 
 Now that the UR is configured and ready to run, start the CLR drivers.
 Use caution!
 Do NOT run the robot into anything.
+
 When indicated, press the safety homing button.
 
 ```bash
 ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
+```
+
 Then run the following in the dynamic sim container on the console PC:
 
 ```bash
