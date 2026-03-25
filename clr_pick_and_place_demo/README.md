@@ -51,6 +51,10 @@ Now that the UR is configured and ready to run, start the CLR drivers.
 Use caution!
 Do NOT run the robot into anything.
 
+> [!NOTE]
+> Having multiple MoveIt instances running simultaneously breaks trajectory execution.
+> Be sure to not have an existing `/move_group` node before starting the demo on hardware.
+
 When indicated, press the safety homing button.
 
 ```bash
