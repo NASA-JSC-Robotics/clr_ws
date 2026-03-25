@@ -23,9 +23,6 @@ services:
     # of the application.
     privileged: true
     network_mode: host
-    # Ensures the UR drivers have access to RT priority
-    ulimits:
-      rtprio: 99
     environment:
       # Pass the ROS_DOMAIN_ID from the host, if available, otherwise we default to 1 to avoid spamming networks
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}
@@ -78,6 +75,12 @@ services:
   # The hardware service includes any additional specifications for running on CLR hardware.
   hw:
     extends: dev
+    # Ensures the UR drivers have access to RT priority
+    ulimits:
+      rtprio: 99
+      memlock:
+        soft: -1
+        hard: -1
     volumes:
       # The controller machine requires access to some devices for hardware comms.
       # Including, but not necessarily limited to the Hand-E gripper and Lift.
