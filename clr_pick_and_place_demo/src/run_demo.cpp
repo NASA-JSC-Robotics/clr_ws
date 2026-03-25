@@ -263,6 +263,11 @@ public:
       RCLCPP_ERROR(LOGGER, "Failed to lift CTB. Exiting.");
       return;
     }
+    if (!this->reorient_ctb())
+    {
+      RCLCPP_ERROR(LOGGER, "Failed to approach CTB dropoff location. Exiting.");
+      return;
+    }
     if (!this->traverse_left_1())
     {
       RCLCPP_ERROR(LOGGER, "Failed to traverse left. Exiting.");
@@ -296,11 +301,6 @@ public:
     if (!this->back_off())
     {
       RCLCPP_ERROR(LOGGER, "Failed to back off from CTB. Exiting.");
-      return;
-    }
-    if (!this->stow())
-    {
-      RCLCPP_ERROR(LOGGER, "Failed to stow manipulator. Exiting.");
       return;
     }
     if (!this->demo_home())
@@ -468,8 +468,21 @@ public:
   bool lift_ctb()
   {
     RCLCPP_INFO(LOGGER, "Lifting CTB.");
-    return plan_and_execute(wp_map.at("lift_relative")) && plan_and_execute(wp_map.at("lift_lift")) &&
-           plan_and_execute(wp_map.at("stow_ctb"));
+    return plan_and_execute(wp_map.at("lift_relative")) && plan_and_execute(wp_map.at("stow_ctb")) &&
+           plan_and_execute(wp_map.at("lift_lift"));
+  }
+
+  bool reorient_ctb()
+  {
+    RCLCPP_INFO(LOGGER, "Approaching CTB dropoff location.");
+    geometry_msgs::msg::TransformStamped eef;
+    if (!this->get_global_transform("tool0", eef))
+    {
+      return false;
+    }
+    Waypoint approach_wp_1 = Waypoint(eef.transform.translation.x, eef.transform.translation.y,
+                                      eef.transform.translation.z, 0.725, 0.688, 0.032, -0.004, "ur_manipulator", true);
+    return plan_and_execute(approach_wp_1);
   }
 
   bool traverse_left_1()
@@ -480,16 +493,8 @@ public:
 
   bool pre_drop_ctb()
   {
-    RCLCPP_INFO(LOGGER, "Approaching CTB dropoff location.");
-    geometry_msgs::msg::TransformStamped eef;
-    if (!this->get_global_transform("tool0", eef))
-    {
-      return false;
-    }
-    Waypoint approach_wp_1 = Waypoint(eef.transform.translation.x, eef.transform.translation.y,
-                                      eef.transform.translation.z, 0.725, 0.688, 0.032, -0.004, "ur_manipulator", true);
-    // return plan_and_execute({ approach_wp_1, wp_map.at("pre_drop_ctb") });
-    return plan_and_execute(approach_wp_1) && plan_and_execute(wp_map.at("pre_drop_ctb"));
+    RCLCPP_INFO(LOGGER, "Preparing CTB for drop");
+    return plan_and_execute(wp_map.at("pre_drop_ctb"));
   }
 
   bool traverse_left_2()

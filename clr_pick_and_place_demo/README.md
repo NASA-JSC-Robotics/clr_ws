@@ -34,17 +34,41 @@ ros2 launch clr_pick_and_place_demo demo.launch.py wait_for_prompt:=false
 To run this demo on hardware, run the following in a dynamic sim container on the controls PC:
 
 ```bash
-ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
+ros2 run ur_robot_driver tool_communication.py --ros-args -p robot_ip:="192.168.1.102"
 
-ros2 launch chonkur_deploy chonkur_comm.launch.py
+ros2 launch chonkur_deploy ur_tools.launch.py
+```
+
+Once the UR communication nodes start, go back over to the console machine and the UR GUI:
+
+```bash
+ros2 launch drt_ur_gui one_arm.launch.py
+```
+
+Once the UR status is "READY" use the drop down to select the "load_program" service call and press "Send".
+
+Now that the UR is configured and ready to run, start the CLR drivers.
+Use caution!
+Do NOT run the robot into anything.
+
+> [!NOTE]
+> Having multiple MoveIt instances running simultaneously breaks trajectory execution.
+> Be sure to not have an existing `/move_group` node before starting the demo on hardware.
+
+When indicated, press the safety homing button.
+
+```bash
+ros2 launch clr_deploy clr_hw.launch.py include_mockups_in_description:=true
 ```
 
 Then run the following in the dynamic sim container on the console PC:
 
 ```bash
-ros2 launch clr_moveit_config clr_moveit.launch.py launch_rviz:=false include_mockups_in_description:=true
-
-ros2 launch clr_pick_and_place_demo demo_planning_viz.launch.py sim:=false
+ros2 launch clr_pick_and_place_demo demo_planning_viz.launch.py sim:=false include_mockups_in_description:=true
 
 ros2 launch clr_pick_and_place_demo demo.launch.py sim:=false
 ```
+
+Finally, before hitting next, go back to the UR GUI and hit Play.
+
+Then hit next to start the demo.
