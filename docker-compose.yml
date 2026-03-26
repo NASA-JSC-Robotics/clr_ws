@@ -23,9 +23,6 @@ services:
     # of the application.
     privileged: true
     network_mode: host
-    # Ensures the UR drivers have access to RT priority
-    ulimits:
-      rtprio: 99
     environment:
       # Pass the ROS_DOMAIN_ID from the host, if available, otherwise we default to 1 to avoid spamming networks
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}
@@ -74,3 +71,18 @@ services:
       # NOTE: This is quite dangerous so be careful with these containers
       # - /dev:/dev
     command: sleep infinity
+
+  # The hardware service includes any additional specifications for running on hardware vs dev environments.
+  hw:
+    extends: dev
+    # HW generally uses R/T kernels. This ensures the control node has access to priority and memory.
+    ulimits:
+      rtprio: 99
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      # TODO: Mount specific devices by name conventions, rather than all of /dev
+      - /dev:/dev
+    command: sleep infinity
+    profiles: [ hw ]
