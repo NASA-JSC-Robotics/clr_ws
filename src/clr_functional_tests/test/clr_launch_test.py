@@ -81,8 +81,24 @@ class TestFixture(unittest.TestCase):
                 return True
         return False
 
-    def test_node_start(self):
+    def test_basic_sim_launch(self):
         self.assertTrue(
             self.spin_until(lambda: self._latest_js is not None, timeout=10.0),
             "No joint states received",
+        )
+        expected_joints = {
+            "vention_rail_base_to_carriage",
+            "ewellix_lift_lower_to_higher",
+            "shoulder_pan_joint",
+            "shoulder_lift_joint",
+            "elbow_joint",
+            "wrist_1_joint",
+            "wrist_2_joint",
+            "wrist_3_joint",
+            "finger_1_joint",
+        }
+        self.assertEqual(
+            set(self._latest_js.name),
+            expected_joints,
+            f"Unexpected joints: {self._latest_js.name}",
         )
