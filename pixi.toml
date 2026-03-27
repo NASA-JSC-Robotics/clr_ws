@@ -68,6 +68,7 @@ ros-jazzy-chonkur-description = { path = "./src/chonkur_l_raile/chonkur/chonkur_
 ros-jazzy-chonkur-moveit-config = { path = "./src/chonkur_l_raile/chonkur/chonkur_moveit_config/package.xml" }
 ros-jazzy-clr-deploy = { path = "./src/chonkur_l_raile/clr_deploy/package.xml" }
 ros-jazzy-clr-description = { path = "./src/chonkur_l_raile/clr_description/package.xml" }
+ros-jazzy-clr-functional-tests = { path = "./src/clr_functional_tests/package.xml" }
 ros-jazzy-clr-imetro-environments = { path = "./src/chonkur_l_raile/clr_imetro_environments/package.xml" }
 ros-jazzy-clr-moveit-config = { path = "./src/chonkur_l_raile/clr_moveit_config/package.xml" }
 ros-jazzy-clr-mujoco-config = { path = "./src/chonkur_l_raile/clr_mujoco_config/package.xml" }
