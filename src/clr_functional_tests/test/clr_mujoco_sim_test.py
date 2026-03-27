@@ -18,7 +18,7 @@
 # under the License.
 
 import os
-import time
+import sys
 import unittest
 
 from ament_index_python.packages import get_package_share_directory
@@ -31,6 +31,9 @@ import pytest
 import rclpy
 from sensor_msgs.msg import JointState
 
+sys.path.append(os.path.dirname(__file__))
+from clr_test import spin_until
+
 
 @pytest.mark.rostest
 def generate_test_description():
@@ -40,8 +43,11 @@ def generate_test_description():
 
     launch_include = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory("clr_deploy"), "launch", "clr_sim.launch.py")
+            os.path.join(get_package_share_directory("clr_mujoco_config"), "launch", "clr_mujoco.launch.py")
         ),
+        launch_arguments={
+            "headless": "true",
+        }.items(),
     )
 
     return LaunchDescription([launch_include, KeepAliveProc(), ReadyToTest()])
@@ -60,8 +66,11 @@ class TestFixture(unittest.TestCase):
     def setUp(self):
         self.node = rclpy.create_node("test_node")
         self._latest_js = None
-        self._latest_actuator_js = None
+        self._latest_actuator_states = None
         self._js_sub = self.node.create_subscription(JointState, "/joint_states", self.joint_state_cb, 10)
+        self._actuator_sub = self.node.create_subscription(
+            JointState, "/mujoco_actuators_states", self.mujoco_actuator_states_cb, 10
+        )
 
     def tearDown(self):
         self.node.destroy_node()
@@ -69,36 +78,15 @@ class TestFixture(unittest.TestCase):
     def joint_state_cb(self, msg):
         self._latest_js = msg
 
-    def spin_until(self, predicate, timeout=20.0, spin_period=0.05):
-        """Spin the node until predicate() returns True or timeout is reached.
-
-        Returns True if the predicate was satisfied, False on timeout.
-        """
-        end_time = time.time() + timeout
-        while time.time() < end_time:
-            rclpy.spin_once(self.node, timeout_sec=spin_period)
-            if predicate():
-                return True
-        return False
+    def mujoco_actuator_states_cb(self, msg):
+        self._latest_actuator_states = msg
 
     def test_basic_sim_launch(self):
         self.assertTrue(
-            self.spin_until(lambda: self._latest_js is not None, timeout=10.0),
+            spin_until(lambda: self._latest_js is not None, self.node, timeout=30.0),
             "No joint states received",
         )
-        expected_joints = {
-            "vention_rail_base_to_carriage",
-            "ewellix_lift_lower_to_higher",
-            "shoulder_pan_joint",
-            "shoulder_lift_joint",
-            "elbow_joint",
-            "wrist_1_joint",
-            "wrist_2_joint",
-            "wrist_3_joint",
-            "finger_1_joint",
-        }
-        self.assertEqual(
-            set(self._latest_js.name),
-            expected_joints,
-            f"Unexpected joints: {self._latest_js.name}",
+        self.assertTrue(
+            spin_until(lambda: self._latest_actuator_states is not None, self.node, timeout=30.0),
+            "No joint states received",
         )

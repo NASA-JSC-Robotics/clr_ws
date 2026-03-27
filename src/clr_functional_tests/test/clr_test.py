@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 #
 # Copyright (c) 2025, United States Government, as represented by the
@@ -17,18 +18,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from launch import LaunchDescription
-from chonkur_deploy.launch_helpers import include_launch_file
+import time
+import rclpy
 
 
-def generate_launch_description():
+def spin_until(predicate, node, timeout=20.0, spin_period=0.05):
+    """Spin the node until predicate() returns True or timeout is reached.
 
-    clr_launch = include_launch_file(
-        package_name="clr_deploy",
-        launch_file="control.launch.py",
-        launch_arguments={
-            "use_fake_hardware": "true",
-        }.items(),
-    )
-
-    return LaunchDescription([clr_launch])
+    Returns True if the predicate was satisfied, False on timeout.
+    """
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        rclpy.spin_once(node, timeout_sec=spin_period)
+        if predicate():
+            return True
+    return False
