@@ -11,6 +11,10 @@ on:
       - '*'
   # Run and push on request
   workflow_dispatch:
+  # TODO: Remove before merging
+  pull_request:
+    branches:
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-functional
@@ -36,6 +40,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
+            type=ref,event=pr
       # TODO: Pull these once they are available
       - name: Build test image
         uses: docker/build-push-action@v6

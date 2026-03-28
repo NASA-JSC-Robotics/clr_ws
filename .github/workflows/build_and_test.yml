@@ -43,6 +43,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
+            type=ref,event=pr
       # TODO: Use GHCR or Dockerhub to push images once these are public
       - name: Build and push
         uses: docker/build-push-action@v6
