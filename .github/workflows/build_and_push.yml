@@ -33,6 +33,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
       # TODO: Pull these once they are available
       - name: Build test image
         uses: docker/build-push-action@v6

@@ -40,6 +40,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
       # TODO: Use GHCR or Dockerhub to push images once these are public
       - name: Build and push
         uses: docker/build-push-action@v6
