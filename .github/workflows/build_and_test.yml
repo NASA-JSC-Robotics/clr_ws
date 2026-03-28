@@ -102,8 +102,6 @@ jobs:
             ${{ runner.os }}-ccache-main
             ${{ runner.os }}-ccache-
       # Run pixi jobs, and ensure the cache is world readable.
-      # TODO: There is an issue with the colorblob with the newer opencv from conda.
-      #       Need to resolve that before we re-enable tests.
       - name: Build and test in container
         run: |
           docker run --rm \
