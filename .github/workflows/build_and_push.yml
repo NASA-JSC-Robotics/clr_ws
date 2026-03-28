@@ -1,6 +1,6 @@
 # This workflow requires LFS objects, and so should be run less frequently
 # to reduce bandwidth requirements.
-name: functional_tests
+name: build_and_push_images
 on:
   # Run weekly on Monday morning
   schedule:
