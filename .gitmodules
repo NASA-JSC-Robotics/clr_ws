@@ -30,10 +30,6 @@
 	path = src/external/surface_robotics_mockups_description
 	url = https://github.com/NASA-JSC-Robotics/surface_robotics_mockups_description.git
 	branch = humble-devel
-[submodule "src/external/merlin_mockup_description"]
-	path = src/external/merlin_mockup_description
-	url = https://github.com/NASA-JSC-Robotics/merlin_mockup_description.git
-	branch = humble-devel
 [submodule "src/clr_sim_demos"]
 	path = src/clr_sim_demos
 	url = https://github.com/NASA-JSC-Robotics/clr_sim_demos.git

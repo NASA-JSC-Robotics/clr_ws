@@ -1,0 +1,50 @@
+# Workflow for weekly runs of functional tests on the default branch
+name: functional_tests
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-functional
+  cancel-in-progress: true
+
+jobs:
+  functional_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Clone lfs objects required for full functional tests
+        run: git submodule foreach --recursive 'git lfs pull'
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.event.repository.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+      # TODO: Pull these once they are available
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          target: er4-dev-source
+          push: false
+          load: true
+          cache-from: type=gha,scope=ros-${{ github.event.repository.name }}
+      - name: Run functional tests
+        run: |
+          docker run --rm \
+            ${{ steps.meta.outputs.tags }} \
+            bash -c "
+              colcon test --packages-select clr_functional_tests &&
+              colcon test-result --verbose
+            "
