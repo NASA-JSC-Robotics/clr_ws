@@ -55,12 +55,20 @@ jobs:
           load: true
           cache-from: type=gha,scope=ros-${{ github.event.repository.name }}
           cache-to: type=gha,mode=max,scope=ros-${{ github.event.repository.name }}
+      # Skip packages we don't really care about.
+      # Additionally, functional tests require LFS cloning, so are only run at scheduled times
+      # to save on bandwidth consumption.
       - name: Run tests
         run: |
           docker run --rm \
             ${{ steps.meta.outputs.tags }} \
             bash -c "
-              colcon test &&
+              colcon test --packages-skip \
+                mujoco_ros2_control \
+                mujoco_ros2_control_tests \
+                robotiq_driver \
+                serial \
+                clr_functional_tests &&
               colcon test-result --verbose
             "
 
