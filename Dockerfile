@@ -159,6 +159,8 @@ ARG USER_GID
 # Include release colcon defaults
 COPY config/colcon-defaults.yaml /home/${USERNAME}/.colcon/defaults.yaml
 
+USER root
+
 RUN OLD_UID=$(id -u ${USERNAME}) && \
     OLD_GID=$(id -g ${USERNAME}) && \
     if [ "${OLD_UID}" != "${USER_UID}" ] || [ "${OLD_GID}" != "${USER_GID}" ]; then \
@@ -169,6 +171,6 @@ RUN OLD_UID=$(id -u ${USERNAME}) && \
             -print0 | xargs -0 -P $(nproc) -n 1000 chown ${USER_UID}:${USER_GID}; \
     fi
 
-USER root
+USER ${USERNAME}
 
 CMD ["/usr/bin/bash"]
