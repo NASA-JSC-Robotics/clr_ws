@@ -1,8 +1,15 @@
-# Workflow for weekly runs of functional tests on the default branch
-name: functional_tests
+# This workflow requires LFS objects, and so should be run less frequently
+# to reduce bandwidth requirements.
+name: build_and_push_images
 on:
+  # Run weekly on Monday morning
   schedule:
     - cron: '0 8 * * 1'
+  # Always push tagged version
+  push:
+    tags:
+      - '*'
+  # Run and push on request
   workflow_dispatch:
 
 concurrency:
@@ -10,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  functional_tests:
+  test_and_push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -25,10 +32,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ github.event.repository.name }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
       # TODO: Pull these once they are available
       - name: Build test image
         uses: docker/build-push-action@v6
@@ -48,3 +54,18 @@ jobs:
               colcon test --packages-select clr_functional_tests &&
               colcon test-result --verbose
             "
+      # Only push if the tests pass
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          target: er4-dev-source
+          push: true
+          cache-from: type=gha,scope=ros-${{ github.event.repository.name }}

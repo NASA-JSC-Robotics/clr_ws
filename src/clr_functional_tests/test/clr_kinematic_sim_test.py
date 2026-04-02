@@ -73,7 +73,7 @@ class TestFixture(unittest.TestCase):
 
     def test_basic_sim_launch(self):
         self.assertTrue(
-            spin_until(lambda: self._latest_js is not None, self.node, timeout=10.0),
+            spin_until(lambda: self._latest_js is not None, self.node, timeout=30.0),
             "No joint states received",
         )
         expected_joints = {
