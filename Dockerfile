@@ -156,9 +156,6 @@ ARG USERNAME
 ARG USER_UID
 ARG USER_GID
 
-# Include release colcon defaults
-COPY config/colcon-defaults.yaml /home/${USERNAME}/.colcon/defaults.yaml
-
 USER root
 
 RUN OLD_UID=$(id -u ${USERNAME}) && \
