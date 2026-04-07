@@ -10,11 +10,11 @@ services:
       args:
         # WARNING: Changing username requires updating workspace mounts below.
         # Do not mess with these unless you know what you are doing!
-        - CLR_WS_BASE_IMAGE_TAG=${CLR_WS_BASE_IMAGE_TAG:-jazzy-devel}
         - USERNAME=er4-user
         - USER_UID=${USER_UID:-1000}
         - USER_GID=${USER_GID:-1000}
         - ROS_DISTRO=${ROS2_DISTRO:-jazzy}
+        - CLR_WS_BASE_IMAGE_TAG=${CLR_WS_BASE_IMAGE_TAG:-jazzy-devel}
     init: true
     stdin_open: true
     tty: true
@@ -54,6 +54,15 @@ services:
       # If you build this locally with the correct user information then this shouldn't be an issue
       # mounting without bindfs
       - ./src:/home/er4-user/ws/src/:rw
+      # Bind mount folders into the container for preserving build artifacts
+      - ./install:/home/er4-user/ws/install/:rw
+      - ./build:/home/er4-user/ws/build/:rw
+      - ./log:/home/er4-user/ws/log/:rw
+      - ./.ccache:/home/er4-user/.ccache
+      - ./.bash:/home/er4-user/.bash
+      # Uncomment to allow access to host hardware
+      # NOTE: This is quite dangerous so be careful with these containers
+      # - /dev:/dev
       # For rendering graphical commands inside the container. The container requires `connect`
       # access to the socket so `ro` access should be sufficient. However, mismatched user information
       # or other socket permissions errors can cause other issues. Refer to the troubleshooting
@@ -65,23 +74,13 @@ services:
   demo:
     extends: base
 
-
   dev:
+    extends: base
     image: clr_ws_dev
     build:
       target: er4-dev
       tags:
         - er4-dev:${ROS2_DISTRO:-jazzy}
-    volumes:
-      # Bind mount folders into the container for preserving build artifacts
-      - ./build:/home/er4-user/ws/build/:rw
-      - ./install:/home/er4-user/ws/install/:rw
-      - ./log:/home/er4-user/ws/log/:rw
-      - ./.ccache:/home/er4-user/.ccache
-      - ./.bash:/home/er4-user/.bash
-      # Uncomment to allow access to host hardware
-      # NOTE: This is quite dangerous so be careful with these containers
-      # - /dev:/dev
     command: sleep infinity
     profiles: [dev]
 
