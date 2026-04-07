@@ -169,5 +169,3 @@ RUN OLD_UID=$(id -u ${USERNAME}) && \
     fi
 
 USER ${USERNAME}
-
-CMD ["/usr/bin/bash"]
