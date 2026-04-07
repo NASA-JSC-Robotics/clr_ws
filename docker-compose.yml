@@ -13,7 +13,6 @@ services:
         - USERNAME=er4-user
         - USER_UID=${USER_UID:-1000}
         - USER_GID=${USER_GID:-1000}
-        - ROS_DISTRO=${ROS2_DISTRO:-jazzy}
         - CLR_WS_BASE_IMAGE_TAG=${CLR_WS_BASE_IMAGE_TAG:-jazzy-devel}
     init: true
     stdin_open: true
@@ -64,7 +63,10 @@ services:
       - $HOME/.Xauthority:/home/er4-user/.Xauthority:ro
     command: sleep infinity
 
-  _dev_base:
+  demo:
+    extends: _base
+
+  dev:
     extends: _base
     image: clr_ws_dev
     build:
@@ -80,12 +82,6 @@ services:
       - ./build:/home/er4-user/ws/build/:rw
       - ./log:/home/er4-user/ws/log/:rw
       - ./.ccache:/home/er4-user/.ccache
-
-  demo:
-    extends: _base
-
-  dev:
-    extends: _dev_base
     profiles: [dev]
 
   # The hardware services include any additional specifications for running on CLR hardware.
@@ -102,7 +98,7 @@ services:
     profiles: [ hw-demo ]
 
   hw-dev:
-    extends: _dev_base
+    extends: dev
     # Ensures the UR drivers have access to RT priority
     ulimits:
       rtprio: 99
