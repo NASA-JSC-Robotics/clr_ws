@@ -86,7 +86,7 @@ docker compose exec demo bash
 
 Once inside the demo container you will be able to run applications our of the clr_ws.
 
-We have provided some baseline example simulations to test installation and get familiar with the CLR robot system and iMETRO environment mockups.
+Launch files for our supported simulation environments are included:
 
 - CLR kinematic sim
     ```bash
