@@ -128,7 +128,7 @@ docker compose up dev -d
 docker compose exec dev bash
 ```
 
-Once you're attached to the container, you can use it as a regular colcon workspace.
+Once attached to the container, is is usable as a regular colcon workspace.
 The contents of the `src/` directory will be mounted into `/home/er4-user/ws/src`.
 
 For example:
