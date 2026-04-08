@@ -18,7 +18,6 @@ In addition to the base packages, it adds multiple submodules for running demons
 For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
 This workflow has been tested against the `jazzy` ROS distro.
-To change ROS versions, update the `ROS2_DISTRO` variable in your environment and/or local `.env` file.
 Note the `2`! As this is intended to be isolated from your system.
 
 ## Quick Development Setup
