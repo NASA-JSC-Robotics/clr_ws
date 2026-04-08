@@ -89,6 +89,7 @@ Once inside the demo container you will be able to run applications our of the c
 Launch files for our supported simulation environments are included:
 
 - CLR kinematic sim
+
     ```bash
     # In one terminal launch the kinematic simulation environment
     ros2 launch clr_deploy clr_sim.launch.py
