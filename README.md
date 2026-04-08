@@ -61,7 +61,7 @@ NASA internal users should refer to confluence for how to setup authentication t
 
        ```bash
       cp .env.default .env
-      ```   
+      ```
 
 Then follow the instructions below to build and run the application.
 
