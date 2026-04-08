@@ -67,7 +67,7 @@ Then follow the instructions below to build and run the application.
 
 ## Using the Demo Image
 
-The demo image is based of pre-built images that are pushed to our [Docker Hub](https://hub.docker.com/r/nasajscrobotics/clr_ws) (you'll need a Docker Hub login to see).
+The demo image is based of pre-built images that are pushed to our [Docker Hub](https://hub.docker.com/r/nasajscrobotics/clr_ws).
 
 These images are tested in CI and intended to be easy for new users to get started running applications quickly.
 
