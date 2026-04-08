@@ -109,7 +109,7 @@ Launch files for our supported simulation environments are included:
 
 ## Using the Development Image
 
-The development image is built locally starting from a baseline `ros:${ROS2-DISTRO}` image.
+The development image is built locally starting from a baseline `ros:jazzy` image.
 
 This image is not setup to run once built.
 
