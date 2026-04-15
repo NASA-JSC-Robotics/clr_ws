@@ -61,10 +61,10 @@ services:
       # documentation or ask if you are running into odd X issues.
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - $HOME/.Xauthority:/home/er4-user/.Xauthority:ro
-    command: sleep infinity
 
   demo:
     extends: _base
+    command: sleep infinity
 
   dev:
     extends: _base
@@ -82,6 +82,7 @@ services:
       - ./build:/home/er4-user/ws/build/:rw
       - ./log:/home/er4-user/ws/log/:rw
       - ./.ccache:/home/er4-user/.ccache
+    command: sleep infinity
     profiles: [dev]
 
   # The hardware services include any additional specifications for running on CLR hardware.
@@ -95,6 +96,7 @@ services:
         hard: -1
     volumes:
       - /dev:/dev
+    command: sleep infinity
     profiles: [ hw-demo ]
 
   hw-dev:
@@ -107,4 +109,5 @@ services:
         hard: -1
     volumes:
       - /dev:/dev
+    command: sleep infinity
     profiles: [ hw-dev ]
