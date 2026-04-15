@@ -80,11 +80,11 @@ docker compose build
 # Start the demo service in the background
 docker compose up -d demo
 
-# Run the bash shell on the demo service container
+# Launch a bash session in the container
 docker compose exec demo bash
 ```
 
-Once inside the demo container you will be able to run applications our of the clr_ws.
+The demo container will source the installed environment, and can be used to launch pre-compiled applications,
 
 Launch files for our supported simulation environments are included:
 
@@ -94,7 +94,7 @@ Launch files for our supported simulation environments are included:
     # In one terminal launch the kinematic simulation environment
     ros2 launch clr_deploy clr_sim.launch.py
 
-    # then open another instance of bash inside the demo container and run MoveIt
+    # Then open another session and launch MoveIt,
     ros2 launch clr_moveit_config clr_moveit.launch.py
     ```
 
@@ -103,7 +103,7 @@ Launch files for our supported simulation environments are included:
     # In one terminal launch the MuJoCo dynamic simulation environment and CLR controllers
     ros2 launch clr_mujoco_config clr_mujoco.launch.py
 
-    # next open another instance of bash inside the demo container and run MoveIt
+    # In another session launch MoveIt, including the environment and sim time
     ros2 launch clr_moveit_config clr_moveit.launch.py include_mockups_in_description:=true use_sim_time:=true
     ```
 
@@ -113,7 +113,7 @@ The development image is built locally starting from a baseline `ros:jazzy` imag
 
 This image is not setup to run once built.
 
-Instead, the user's local workspace is mounted to the container and must be built at runtime.
+Instead, the user's local workspace is mounted into the container and must be compiled manually.
 
 To build and launch the development image, from the workspace root run:
 
@@ -122,7 +122,7 @@ To build and launch the development image, from the workspace root run:
 docker compose build dev
 
 # Start it
-docker compose up dev -d
+docker compose up -d dev
 
 # Connect to the console shell
 docker compose exec dev bash
