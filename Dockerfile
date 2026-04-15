@@ -152,8 +152,6 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.bash && \
 
 FROM ${CLR_WS_BASE_IMAGE} AS er4-demo
 
-# TODO: Determine if we can usermod locally without exploding the image size to
-# support non-default UID/GIDs
 ARG USERNAME
 ARG USER_UID
 ARG USER_GID
