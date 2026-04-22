@@ -53,7 +53,7 @@ NASA internal users should refer to confluence for how to setup authentication t
       export USER_GID=$(id -g $USER)
       ```
 
-    - Alternatively, copy `.env.default` file in the root of this repo to a new file named just `.env` and update each line with your information
+    - Copy `.env.default` in the root of this repo to a new file named just `.env` and update each line with your information
         - `USER_UID` and `USER_GID` (found using `id -u` and `id -g` respectively)
 
         ```bash
