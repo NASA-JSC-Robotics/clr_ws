@@ -71,8 +71,6 @@ services:
     image: clr_ws_dev
     build:
       target: er4-dev
-      tags:
-        - er4-dev:${ROS2_DISTRO:-jazzy}
     volumes:
       # If you build this locally with the correct user information then this shouldn't be an issue
       # mounting without bindfs
