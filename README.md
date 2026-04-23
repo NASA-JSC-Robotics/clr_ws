@@ -45,20 +45,22 @@ NASA internal users should refer to confluence for how to setup authentication t
     git submodule update --init
     ```
 
-3) Set your user information for the project build
+3) Copy `.env.default` in the root of this repo to a new file named just `.env`
+
+    ```bash
+    cp .env.default .env
+    ```
+
+4) Set your user information for the project build
     - We recommend just putting this in your `~/.bashrc`:
+    - `USER_UID` and `USER_GID` (found using `id -u` and `id -g` respectively)
 
       ```bash
       export USER_UID=$(id -u $USER)
       export USER_GID=$(id -g $USER)
       ```
 
-    - Copy `.env.default` in the root of this repo to a new file named just `.env` and update each line with your information
-        - `USER_UID` and `USER_GID` (found using `id -u` and `id -g` respectively)
-
-        ```bash
-        cp .env.default .env
-        ```
+    Alternatively, edit the contents of the newly created `.env`.
 
 Then follow the instructions below to build and run the application.
 
@@ -97,7 +99,7 @@ Launch files for our supported simulation environments are included:
 
 - MuJoCo CLR dynamic sim
 
-    
+    ```
     # In one terminal launch the MuJoCo dynamic simulation environment and CLR controllers
     ros2 launch clr_mujoco_config clr_mujoco.launch.py
 
