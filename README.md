@@ -96,7 +96,8 @@ Launch files for our supported simulation environments are included:
     ```
 
 - MuJoCo CLR dynamic sim
-    ```bash
+
+    
     # In one terminal launch the MuJoCo dynamic simulation environment and CLR controllers
     ros2 launch clr_mujoco_config clr_mujoco.launch.py
 
@@ -136,13 +137,13 @@ colcon build
 source install/setup.bash
 ```
 
-Once the workspace is built and sourced within the container, ROS 2 executables and launch files can be ran.
+Once the workspace is built and sourced within the container, ROS 2 executables and launch files can be run.
 
 ## Using the Hardware
 
 Running the system on hardware is more involved than running simulations.
 
-Please see [HARDWARE.md](HARDWARE.md) for details.
+Refer to internal documentation for more details.
 
 ## The Pixi Workflow
 
