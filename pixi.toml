@@ -104,11 +104,6 @@ ros-jazzy-robotiq-driver = { path = "./src/external/ros2_robotiq_gripper/robotiq
 ros-jazzy-robotiq-hande-description = { path = "./src/external/ros2_robotiq_gripper/robotiq_hande_description/package.xml" }
 ros-jazzy-robotiq-hardware-tests = { path = "./src/external/ros2_robotiq_gripper/robotiq_hardware_tests/package.xml" }
 ros-jazzy-serial = { path = "./src/external/serial/package.xml" }
-# ros-jazzy-trac-ik-examples = { path = "./src/external/trac_ik/trac_ik_examples/package.xml" }
-ros-jazzy-trac-ik-kinematics-plugin = { path = "./src/external/trac_ik/trac_ik_kinematics_plugin/package.xml" }
-ros-jazzy-trac-ik-lib = { path = "./src/external/trac_ik/trac_ik_lib/package.xml" }
-ros-jazzy-trac-ik = { path = "./src/external/trac_ik/trac_ik/package.xml" }
-# ros-jazzy-trac-ik-python = { path = "./src/external/trac_ik/trac_ik_python/package.xml" }
 ros-jazzy-trainer = { path = "./src/external/surface_robotics_mockups_description/trainer/package.xml" }
 ros-jazzy-vention-rail-controllers = { path = "./src/external/vention_rail/vention_rail_controllers/package.xml" }
 ros-jazzy-vention-rail-deploy = { path = "./src/external/vention_rail/vention_rail_deploy/package.xml" }

@@ -1,6 +1,12 @@
 # Set desired ROS distribution
 ARG ROS_DISTRO=jazzy
 
+# The base image for the overlay deployment
+ARG CLR_WS_BASE_IMAGE_TAG="jazzy-devel"
+ARG CLR_WS_BASE_IMAGE="nasajscrobotics/clr_ws"
+ARG CLR_WS_BASE_IMAGE_REPO="clr_ws"
+ARG CLR_WS_BASE_IMAGE="${CLR_WS_BASE_IMAGE}:${CLR_WS_BASE_IMAGE_TAG}"
+
 # This layer grabs package manifests from the src directory for preserving rosdep installs.
 # This can significantly speed up rebuilds for the base package when src contents have changed.
 FROM alpine:latest AS package-manifests
@@ -143,3 +149,23 @@ FROM er4-dev AS er4-dev-source
 
 RUN . /opt/ros/${ROS_DISTRO}/setup.bash && \
     colcon build
+
+FROM ${CLR_WS_BASE_IMAGE} AS er4-demo
+
+ARG USERNAME
+ARG USER_UID
+ARG USER_GID
+
+USER root
+
+RUN OLD_UID=$(id -u ${USERNAME}) && \
+    OLD_GID=$(id -g ${USERNAME}) && \
+    if [ "${OLD_UID}" != "${USER_UID}" ] || [ "${OLD_GID}" != "${USER_GID}" ]; then \
+        sed -i "s/^\(${USERNAME}:[^:]*:\)[^:]*:[^:]*:/\1${USER_UID}:${USER_GID}:/" /etc/passwd && \
+        sed -i "s/^\(${USERNAME}:[^:]*:\)[^:]*:/\1${USER_GID}:/" /etc/group && \
+        find /home/${USERNAME} \
+            \( -user ${OLD_UID} -o -group ${OLD_GID} \) \
+            -print0 | xargs -0 -P $(nproc) -n 1000 chown ${USER_UID}:${USER_GID}; \
+    fi
+
+USER ${USERNAME}

@@ -4,7 +4,7 @@ This workspace includes open source resources for using the ChonkUR L Rail-E rob
 part of the [iMETRO Facility](https://ntrs.nasa.gov/citations/20240013956) at NASA's Johnson Space Center.
 
 The system consists of a UR10e robot mounted on top of an Ewellix column lift and Vention rail.
-Peripherals include a Robotiq Hand-E gripper with custom printed fingers and a wrist mounted Realsense D435 camera.
+Peripherals include a Robotiq Hand-E gripper with custom printed fingers and a wrist mounted Realsense camera.
 Descriptions of commonly used environmental components are also included, such as hatches, storage benches, or Merlin Freezes.
 The mock-ups here can be used by anyone to develop or test robot applications for space logistics in our hardware environment.
 
@@ -18,7 +18,6 @@ In addition to the base packages, it adds multiple submodules for running demons
 For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
 
 This workflow has been tested against the `jazzy` ROS distro.
-To change ROS versions, update the `ROS2_DISTRO` variable in your environment.
 Note the `2`! As this is intended to be isolated from your system.
 
 ## Quick Development Setup
@@ -46,38 +45,90 @@ NASA internal users should refer to confluence for how to setup authentication t
     git submodule update --init
     ```
 
-3) Set your user information for the project build
+3) Copy `.env.default` in the root of this repo to a new file named just `.env`
+
+    ```bash
+    cp .env.default .env
+    ```
+
+4) Set your user information for the project build
     - We recommend just putting this in your `~/.bashrc`:
+    - `USER_UID` and `USER_GID` (found using `id -u` and `id -g` respectively)
 
       ```bash
       export USER_UID=$(id -u $USER)
       export USER_GID=$(id -g $USER)
       ```
 
-    - Alternatively, open the `.env` file in the root of this repo and update each line with your information
-        - `USER_UID` and `USER_GID`
-            - found using `id -u` and `id -g` respectively
+    Alternatively, edit the contents of the newly created `.env`.
 
 Then follow the instructions below to build and run the application.
 
+## Using the Demo Image
+
+The demo image is based of pre-built images that are pushed to our [Docker Hub](https://hub.docker.com/r/nasajscrobotics/clr_ws).
+
+These images contain the fully compiled workspace and can be run out of the box.
+
+To build and launch the demo image, from the workspace root run:
+
+```bash
+# Compile (pull) the image
+docker compose build
+
+# Start the demo service in the background
+docker compose up -d demo
+
+# Launch a bash session in the container
+docker compose exec demo bash
+```
+
+The demo container will source the installed environment, and can be used to launch pre-compiled applications,
+
+Launch files for our supported simulation environments are included:
+
+- CLR kinematic sim
+
+    ```bash
+    # In one terminal launch the kinematic simulation environment
+    ros2 launch clr_deploy clr_sim.launch.py
+
+    # Then open another session and launch MoveIt,
+    ros2 launch clr_moveit_config clr_moveit.launch.py
+    ```
+
+- MuJoCo CLR dynamic sim
+
+    ```
+    # In one terminal launch the MuJoCo dynamic simulation environment and CLR controllers
+    ros2 launch clr_mujoco_config clr_mujoco.launch.py
+
+    # In another session launch MoveIt, including the environment and sim time
+    ros2 launch clr_moveit_config clr_moveit.launch.py include_mockups_in_description:=true use_sim_time:=true
+    ```
+
 ## Using the Development Image
 
-Build the base images using the compose specification.
+The development image is built locally starting from a baseline `ros:jazzy` image.
 
-To build the development image from the repo root, and then launch it
+This image is not setup to run once built.
+
+Instead, the user's local workspace is mounted into the container and must be compiled manually.
+
+To build and launch the development image, from the workspace root run:
 
 ```bash
 # Compile the image
 docker compose build dev
 
 # Start it
-docker compose up dev -d
+docker compose up -d dev
 
 # Connect to the console shell
 docker compose exec dev bash
 ```
 
-Once you're attached to the container, you can use it as a regular colcon workspace.
+Once attached to the container, is is usable as a regular colcon workspace.
 The contents of the `src/` directory will be mounted into `/home/er4-user/ws/src`.
 
 For example:
@@ -88,57 +139,13 @@ colcon build
 source install/setup.bash
 ```
 
-A basic kinematic simulation with the description files, as well as a MoveIt configuration is included.
-To start those applications from inside the container,
+Once the workspace is built and sourced within the container, ROS 2 executables and launch files can be run.
 
-```bash
-# In one terminal launch the simulated environment
-ros2 launch clr_deploy clr_sim.launch.py
+## Using the Hardware
 
-# In another shell launch the moveit interface and move group nodes
-ros2 launch clr_moveit_config clr_moveit.launch.py
-```
+Running the system on hardware is more involved than running simulations.
 
-Additionally, a dynamic simulation of the CLR and mockups environment built with MuJoCo is available.
-To run,
-
-```bash
-# Start the mujoco ros2 control-based simulation
-ros2 launch clr_mujoco_config clr_mujoco.launch.py
-
-# In another shell launch the moveit interface with sim parameters set
-ros2 launch clr_moveit_config clr_moveit.launch.py include_mockups_in_description:=true use_sim_time:=true
-```
-
-More information about the dynamic simulation is available in the [project](https://github.com/NASA-JSC-Robotics/chonkur_l_raile) and [drivers](https://github.com/ros-controls/mujoco_ros2_control) packages.
-
-## Using the Hardware Image
-
-The [compose file](docker-compose.yml) includes one additional runtime target, `hw`, for running on the physical robot.
-This service extends the `dev` service by adding necessary configuration for interacting with ChonkUR's hardware.
-It is built and run identically to the `dev` target,
-
-```bash
-# Compile the image
-docker compose build hw
-
-# Start it
-docker compose up hw -d
-
-# Connect to the console shell
-docker compose exec hw bash
-```
-
-Then use it in the same way as the development image, with the added hardware connections.
-When running ChonkUR or all of CLR, launching the hardware is a two step process to ensure that the UR pendant is running fully remotely:
-
-```bash
-# Start the dashboard client and other UR tools prior to launching the ROS 2 HW drivers
-ros2 launch chonkur_deploy chonkur_comm.launch.py
-
-# Then start the relevant hardware interface
-ros2 launch clr_deploy clr_hw.launch.py
-```
+Refer to internal documentation for more details.
 
 ## The Pixi Workflow
 

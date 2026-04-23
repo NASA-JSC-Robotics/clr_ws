@@ -35,6 +35,13 @@ jobs:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
           flavor: |
             latest=false
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+      - name: Print metadata
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref name: ${{ github.ref_name }}"
+          echo "Tag: ${{ steps.meta.outputs.tags }}"
       # TODO: Pull these once they are available
       - name: Build test image
         uses: docker/build-push-action@v6
