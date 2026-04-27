@@ -1,0 +1,67 @@
+name: build_and_push_images
+on:
+  # Run weekly on Monday morning
+  schedule:
+    - cron: '0 8 * * 1'
+  # Always push tagged version
+  push:
+    tags:
+      - '*'
+  # Run and push on request
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-functional
+  cancel-in-progress: true
+
+jobs:
+  test_and_push:
+    # NOTE: To enable this workflow in a forked workspace remove this line.
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+      - name: Print metadata
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref name: ${{ github.ref_name }}"
+          echo "Tag: ${{ steps.meta.outputs.tags }}"
+      # TODO: Pull these once they are available
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          target: er4-dev-source
+          push: false
+          load: true
+          cache-from: type=gha,scope=ros-${{ github.event.repository.name }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          target: er4-dev-source
+          push: true
+          cache-from: type=gha,scope=ros-${{ github.event.repository.name }}
