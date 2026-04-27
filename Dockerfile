@@ -4,7 +4,6 @@ ARG ROS_DISTRO=jazzy
 # The base image for the overlay deployment
 ARG CLR_WS_BASE_IMAGE_TAG="jazzy-devel"
 ARG CLR_WS_BASE_IMAGE="nasajscrobotics/clr_ws"
-ARG CLR_WS_BASE_IMAGE_REPO="clr_ws"
 ARG CLR_WS_BASE_IMAGE="${CLR_WS_BASE_IMAGE}:${CLR_WS_BASE_IMAGE_TAG}"
 
 # This layer grabs package manifests from the src directory for preserving rosdep installs.

@@ -66,7 +66,7 @@ Then follow the instructions below to build and run the application.
 
 ## Using the Demo Image
 
-The demo image is based of pre-built images that are pushed to our [Docker Hub](https://hub.docker.com/r/nasajscrobotics/clr_ws).
+The demo image is based of pre-built images that are pushed to [DockerHub](https://hub.docker.com/r/nasajscrobotics/clr_ws).
 
 These images contain the fully compiled workspace and can be run out of the box.
 
@@ -99,7 +99,7 @@ Launch files for our supported simulation environments are included:
 
 - MuJoCo CLR dynamic sim
 
-    ```
+    ```bash
     # In one terminal launch the MuJoCo dynamic simulation environment and CLR controllers
     ros2 launch clr_mujoco_config clr_mujoco.launch.py
 
