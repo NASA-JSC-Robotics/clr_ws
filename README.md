@@ -15,7 +15,7 @@ While not required, we recommend using our Dockerfiles for consistent environmen
 Alternatively, individual packages and submodules can be added or extracted from the `src` directory as needed by the user.
 
 In addition to the base packages, it adds multiple submodules for running demonstrations with the CLR system, both on hardware an with the dynamic MuJoCo simulation.
-For more information, refer to the documentation in [clr_sim_demos](https://github.com/NASA-JSC-Robotics/clr_sim_demos).
+For more information, refer to the documentation in [clr_sim_demos](./src/clr_sim_demos/README.md).
 
 This workflow has been tested against the `jazzy` ROS distro.
 Note the `2`! As this is intended to be isolated from your system.

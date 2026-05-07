@@ -63,17 +63,17 @@ pycollada = ">=0.9.3, <0.10"
 
 [dev]
 # Add path dependencies to any sources in the workspace
-ros-jazzy-chonkur-deploy = { path = "./src/chonkur_l_raile/chonkur/chonkur_deploy/package.xml" }
-ros-jazzy-chonkur-description = { path = "./src/chonkur_l_raile/chonkur/chonkur_description/package.xml" }
-ros-jazzy-chonkur-moveit-config = { path = "./src/chonkur_l_raile/chonkur/chonkur_moveit_config/package.xml" }
-ros-jazzy-clr-deploy = { path = "./src/chonkur_l_raile/clr_deploy/package.xml" }
-ros-jazzy-clr-description = { path = "./src/chonkur_l_raile/clr_description/package.xml" }
+ros-jazzy-chonkur-deploy = { path = "./src/external/chonkur_l_raile/chonkur/chonkur_deploy/package.xml" }
+ros-jazzy-chonkur-description = { path = "./src/external/chonkur_l_raile/chonkur/chonkur_description/package.xml" }
+ros-jazzy-chonkur-moveit-config = { path = "./src/external/chonkur_l_raile/chonkur/chonkur_moveit_config/package.xml" }
+ros-jazzy-clr-deploy = { path = "./src/external/chonkur_l_raile/clr_deploy/package.xml" }
+ros-jazzy-clr-description = { path = "./src/external/chonkur_l_raile/clr_description/package.xml" }
 ros-jazzy-clr-functional-tests = { path = "./src/clr_functional_tests/package.xml" }
-ros-jazzy-clr-imetro-environments = { path = "./src/chonkur_l_raile/clr_imetro_environments/package.xml" }
-ros-jazzy-clr-moveit-config = { path = "./src/chonkur_l_raile/clr_moveit_config/package.xml" }
-ros-jazzy-clr-mujoco-config = { path = "./src/chonkur_l_raile/clr_mujoco_config/package.xml" }
+ros-jazzy-clr-imetro-environments = { path = "./src/external/chonkur_l_raile/clr_imetro_environments/package.xml" }
+ros-jazzy-clr-moveit-config = { path = "./src/external/chonkur_l_raile/clr_moveit_config/package.xml" }
+ros-jazzy-clr-mujoco-config = { path = "./src/external/chonkur_l_raile/clr_mujoco_config/package.xml" }
 ros-jazzy-clr-pick-and-place-demo = { path = "./src/clr_sim_demos/clr_pick_and_place_demo/package.xml" }
-ros-jazzy-clr-safety = { path = "./src/chonkur_l_raile/clr_safety/package.xml" }
+ros-jazzy-clr-safety = { path = "./src/external/chonkur_l_raile/clr_safety/package.xml" }
 ros-jazzy-color-blob-centroid = { path = "./src/external/color_tools/color_blob_centroid/package.xml" }
 ros-jazzy-color-names = { path = "./src/external/color_tools/color_names/package.xml" }
 ros-jazzy-color-tools-msgs = { path = "./src/external/color_tools/color_tools_msgs/package.xml" }

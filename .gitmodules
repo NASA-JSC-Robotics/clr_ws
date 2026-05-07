@@ -1,5 +1,5 @@
 [submodule "src/chonkur_l_raile"]
-	path = src/chonkur_l_raile
+	path = src/external/chonkur_l_raile
 	url = https://github.com/NASA-JSC-Robotics/chonkur_l_raile.git
 	branch = humble-devel
 [submodule "src/dextivr_hande"]
