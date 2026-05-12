@@ -1,0 +1,91 @@
+<root BTCPP_format="4"
+    main_tree_to_execute="BagPickUp">
+
+    <BehaviorTree ID="BagPickUp">
+        <Sequence>
+            <!-- Make sure that the gripper is open -->
+            <SubTree ID="OpenGripper"/>
+
+            <!-- Get the color blob frame -->
+            <ColorBlobFind
+                name="color_blob_find_test"
+                service_name="/color_blob_find"
+                centroid_pose="{goal_pose_stamped}"/>
+
+            <!-- Look up the frame that the color blob actually publishes -->
+            <AsyncTfLookup name="Look up color blob"
+                    base_frame="world"
+                    target_frame="colorblob_xd"
+                    tf="{goal_transform_stamped}"
+                />
+            <!-- Align the frame to the z-axis pointing directly down -->
+            <AlignTransform name="Align the transform"
+                transform_stamped="{goal_transform_stamped}"
+                aligned_transform="{goal_transform_stamped}"
+            />
+
+            <!-- Make the transform easier for the planner -->
+            <ApplyTransform name="Rotate the transform"
+                input_transform="{goal_transform_stamped}"
+                applied_transform="0.0;0.0;-0.1;0.0;0.0;1.0;0.0"
+                resulting_transform="{goal_transform_stamped}"
+            />
+
+            <!-- Get right above the target approach -->
+            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+
+            <!-- Get right above the target approach -->
+            <ApplyTransform name="Rotate the transform"
+                input_transform="{goal_transform_stamped}"
+                applied_transform="0.0;0.0;0.125;0.0;0.0;0.0;1.0"
+                resulting_transform="{goal_transform_stamped}"
+            />
+
+            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+
+            <!-- Close the gripper -->
+            <SubTree ID="CloseGripper"/>
+
+            <!-- Lift the bag over the bench -->
+            <ApplyTransform name="Rotate the transform"
+                input_transform="{goal_transform_stamped}"
+                applied_transform="0.0;0.0;-0.25;0.0;0.0;0.0;1.0"
+                resulting_transform="{goal_transform_stamped}"
+            />
+
+            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+
+            <!-- Move the bag to the goal -->
+            <SubTree ID="RandomGoalTransform"/>
+
+            <!-- Open the gripper, drop the ctb -->
+            <SubTree ID="OpenGripper"/>
+
+        </Sequence>
+    </BehaviorTree>
+
+
+    <BehaviorTree ID="RandomStartTransform">
+        <Sequence>
+          <CreateRandomTransform
+            name="Create random start transform"
+            transform_name="approximate_bag_pose"
+            center="0.45;0.75;1.29"
+            box_side="0.5;0.35;0.10"
+            transform="{transform}"/>
+
+          <ApplyTransform name="Rotate the transform"
+              input_transform="{transform}"
+              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              resulting_transform="{transform}"
+          />
+          <PublishTransform
+            name="publish transform"
+            input_transform="{transform}" />
+
+          <SubTree ID="rrt_to_transform" transform="{transform}"/>
+        </Sequence>
+
+    </BehaviorTree>
+
+</root>

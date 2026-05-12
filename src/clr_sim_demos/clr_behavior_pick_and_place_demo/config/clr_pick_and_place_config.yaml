@@ -1,0 +1,16 @@
+bt_action_server:
+  ros__parameters:
+    action_name: "bt_execution" # Optional (defaults to `bt_action_server`)
+    tick_frequency: 20 # Optional (defaults to 100 Hz)
+    groot2_port: 1667 # Optional (defaults to 1667)
+    ros_plugins_timeout: 10000  # Optional (defaults 1000 ms)
+
+    plugins:
+      - btcpp_ros2_samples/bt_plugins
+      - moveit_behavior/bt_plugins
+      - geometry_behavior/bt_plugins
+      - color_tools_behavior/bt_plugins
+
+    behavior_trees:
+      - drt_behavior/behavior_trees_xml
+      - moveit_behavior/behavior_trees_xml
