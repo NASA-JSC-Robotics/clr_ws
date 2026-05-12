@@ -65,7 +65,7 @@ def launch_setup(context, *args, **kwargs):
             os.path.join(
                 get_package_share_directory("drt_behavior"),
                 "launch",
-                "drt_behavior_executor.py",
+                "drt_behavior_executor.launch.py",
             ),
         )
     )
