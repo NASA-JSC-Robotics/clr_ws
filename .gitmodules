@@ -36,3 +36,11 @@
 [submodule "src/external/mujoco_ros2_control"]
 	path = src/external/mujoco_ros2_control
 	url = https://github.com/ros-controls/mujoco_ros2_control.git
+[submodule "src/external/drt_behavior"]
+	path = src/external/drt_behavior
+	url = git@js-er-code.jsc.nasa.gov:imetro/imetro-utilities/drt_behavior.git
+	branch = jazzy-devel
+[submodule "src/external/drt_rviz2_panel"]
+	path = src/external/drt_rviz2_panel
+	url = git@js-er-code.jsc.nasa.gov:imetro/imetro-utilities/drt_rviz2_panels.git
+	branch = jazzy-devel
