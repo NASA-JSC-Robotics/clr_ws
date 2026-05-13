@@ -14,3 +14,4 @@ bt_action_server:
     behavior_trees:
       - drt_behavior/behavior_trees_xml
       - moveit_behavior/behavior_trees_xml
+      - clr_behavior_pick_and_place_demo/behavior_trees_xml

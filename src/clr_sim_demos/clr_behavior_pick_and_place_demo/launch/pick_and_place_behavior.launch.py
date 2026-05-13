@@ -67,9 +67,15 @@ def launch_setup(context, *args, **kwargs):
                 "launch",
                 "drt_behavior_executor.launch.py",
             ),
-        )
+        ),
+        launch_arguments={
+            "package_name": "clr_behavior_pick_and_place_demo",
+            "file_name": "clr_pick_and_place_config.yaml",
+            "use_sim_time": use_sim_time,
+        }.items(),
     )
 
+    return [drt_behavior_nodes]
     return [move_group_nodes, color_blob_node, drt_behavior_nodes]
 
 
