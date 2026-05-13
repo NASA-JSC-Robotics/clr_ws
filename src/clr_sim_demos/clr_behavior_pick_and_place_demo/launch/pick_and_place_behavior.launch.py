@@ -75,7 +75,6 @@ def launch_setup(context, *args, **kwargs):
         }.items(),
     )
 
-    return [drt_behavior_nodes]
     return [move_group_nodes, color_blob_node, drt_behavior_nodes]
 
 
