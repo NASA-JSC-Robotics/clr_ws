@@ -9,18 +9,18 @@ For an introduction to behavior tree and their utilization, as well as the core 
 ## Instructions
 
 ### Setting up
-1. Start up the mujoco simulation, the default flag will include the mockup envrionment with the robot.
+1. Start up the mujoco simulation, the default flag will include the mockup environment with the robot.
 ```bash
 ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ```
-2. `pick_and_place_behavior` launch file setups up the MoveIt's `move_group`, color blob detection node, and behavior tree executor. 
+2. `pick_and_place_behavior` launch file setups up the MoveIt's `move_group`, color blob detection node, and behavior tree executor.
 ```bash
 ros2 launch clr_behavior_pick_and_place_demo pick_and_place_behavior.launch.py
 ```
 
 ### Running the demo
 To successfully pick up the bag you have to position the wrist camera above the cargo transfer bag where it can see the red handle.
-You can do that by calling 
+You can do that by calling
 ```bash
 ros2 action send_goal /bt_execution btcpp_ros2_interfaces/action/ExecuteTree "{target_tree: 'RandomStartTransform'}"
 ```
@@ -33,7 +33,7 @@ ros2 action send_goal /bt_execution btcpp_ros2_interfaces/action/ExecuteTree "{t
 ### Additional Notes
 The setup process spins up a behavior tree executor node responsible for running the demo properly.
 
-The behavior tree executor provides ROS service to list all of the available trees, and a ROS action to execute the registered trees. 
+The behavior tree executor provides ROS service to list all of the available trees, and a ROS action to execute the registered trees.
 
 To get the list of all available tree:
 ```bash

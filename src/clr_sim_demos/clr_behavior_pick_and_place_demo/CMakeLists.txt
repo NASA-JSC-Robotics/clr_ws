@@ -18,7 +18,7 @@ foreach(pkg IN LISTS dependencies_pkgs)
     find_package(${pkg} REQUIRED)
 endforeach()
 
-install(DIRECTORY 
+install(DIRECTORY
     config
     launch
     behavior_trees_xml

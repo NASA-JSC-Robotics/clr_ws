@@ -25,6 +25,7 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
+
 def launch_setup(context, *args, **kwargs):
     include_mockups_in_description = LaunchConfiguration("include_mockups_in_description")
     launch_rviz = LaunchConfiguration("launch_rviz")
@@ -106,6 +107,4 @@ def generate_launch_description():
         )
     )
 
-    return LaunchDescription(
-        declared_arguments + [OpaqueFunction(function=launch_setup)]
-    )
+    return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
