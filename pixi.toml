@@ -109,3 +109,5 @@ ros-jazzy-vention-rail-controllers = { path = "./src/external/vention_rail/venti
 ros-jazzy-vention-rail-deploy = { path = "./src/external/vention_rail/vention_rail_deploy/package.xml" }
 ros-jazzy-vention-rail-description = { path = "./src/external/vention_rail/vention_rail_description/package.xml" }
 ros-jazzy-vention-rail-hardware-interface = { path = "./src/external/vention_rail/vention_rail_hardware_interface/package.xml" }
+ros-jazzy-clr-behavior-pick-and-place-demo = { path = "./src/clr_sim_demos/clr_behavior_pick_and_place_demo/package.xml"}
+ros-jazzy-drt-behavior = { path = "src/external/drt_behavior/drt_behavior/package.xml"}
