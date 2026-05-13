@@ -37,7 +37,8 @@
             <!-- Make the transform easier for the planner -->
             <ApplyTransform name="Rotate the transform"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;-0.1;0.0;0.0;1.0;0.0"
+                applied_transform_translation="0.0;0.0;-0.1"
+                applied_transform_rotation="0.0;0.0;1.0;0.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
@@ -47,7 +48,8 @@
             <!-- Get right above the target approach -->
             <ApplyTransform name="Rotate the transform"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;0.125;0.0;0.0;0.0;1.0"
+                applied_transform_translation="0.0;0.0;0.125"
+                applied_transform_rotation="0.0;0.0;0.0;1.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
@@ -59,7 +61,8 @@
             <!-- Lift the bag over the bench -->
             <ApplyTransform name="Rotate the transform"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;-0.6;0.0;0.0;0.0;1.0"
+                applied_transform_translation="0.0;0.0;-0.6"
+                applied_transform_rotation="0.0;0.0;0.0;1.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
@@ -86,7 +89,8 @@
 
           <ApplyTransform name="Rotate the transform"
               input_transform="{transform}"
-              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              applied_transform_translation="0.0;0.0;0.0"
+              applied_transform_rotation="0.0;1.0;0.0;0.0"
               resulting_transform="{transform}"
           />
           <PublishTransform
@@ -109,7 +113,8 @@
 
           <ApplyTransform name="Rotate the transform"
               input_transform="{transform}"
-              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              applied_transform_translation="0.0;0.0;0.0"
+              applied_transform_rotation="0.0;1.0;0.0;0.0"
               resulting_transform="{transform}"
           />
           <PublishTransform
