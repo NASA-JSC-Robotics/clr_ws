@@ -1,6 +1,6 @@
 # CLR BehaviorTree Pick and Place Demo
 
-Similar to the `clr_pick_and_place_demo` package, this package contains an example of the CLR robot picking up and placing a cargo transfer bag from it's spawned location to the top of the bench.
+This package contains an example of the CLR robot picking up and placing a cargo transfer bag from its spawned location to the top of the bench.
 
 The purpose of this package is demonstration capability using behavior trees and the `drt_behaviors` package.
 
