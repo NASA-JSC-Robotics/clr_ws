@@ -35,7 +35,7 @@ The setup process spins up a behavior tree executor node responsible for running
 
 The behavior tree executor provides ROS service to list all of the available trees, and a ROS action to execute the registered trees.
 
-To get the list of all available tree:
+To get the list of all available trees:
 ```bash
 ros2 service call /get_loaded_trees btcpp_ros2_interfaces/srv/GetTrees "{}"
 ```
