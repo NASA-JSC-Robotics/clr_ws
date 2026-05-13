@@ -39,4 +39,4 @@
 [submodule "src/external/drt_behavior"]
 	path = src/external/drt_behavior
 	url = https://github.com/NASA-JSC-Robotics/drt_behavior.git
-	branch = parameterize-launch-file
+	branch = jazzy-devel
