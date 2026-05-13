@@ -28,7 +28,7 @@ To successfully pick up the bag you have to position the wrist camera above the 
 You can do that by calling:
 
 ```bash
-ros2 action send_goal /bt_execution btcpp_ros2_interfaces/action/ExecuteTree "{target_tree: 'RandomStartTransform'}"
+ros2 action send_goal /bt_execution btcpp_ros2_interfaces/action/ExecuteTree "{target_tree: 'MoveToPerceptionPose'}"
 ```
 
 When ready you can execute the `BagPickUp` behavior tree.

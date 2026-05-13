@@ -65,7 +65,7 @@
     </BehaviorTree>
 
 
-    <BehaviorTree ID="RandomStartTransform">
+    <BehaviorTree ID="MoveToPerceptionPose">
         <Sequence>
           <CreateRandomTransform
             name="Create random start transform"
