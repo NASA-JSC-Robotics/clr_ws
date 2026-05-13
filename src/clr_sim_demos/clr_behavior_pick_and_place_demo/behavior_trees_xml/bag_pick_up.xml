@@ -150,4 +150,29 @@
         </Sequence>
     </BehaviorTree>
 
+    <BehaviorTree ID="GetColorBlobPose">
+        <Sequence>
+            <GetSyncedImagePointCloudDepth
+                name="Get Synced Image Point Cloud Depth"
+                point_cloud_topic_name="/wrist_mounted_camera/depth/color/points"
+                depth_image_topic_name="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
+                rgb_camera_info="{rgb_camera_info}"
+                rgb_camera_info_topic_name="/wrist_mounted_camera/color/camera_info"
+                rgb_image_topic_name="/wrist_mounted_camera/color/image_raw"
+            />
+
+             <DetectColorBlobs
+                name="DetectColorBlobs"
+                blob_color="red"
+                blob_pose="{blob_pose}"
+                camera_info="{rgb_camera_info}"
+                depth_image="{depth_image}"
+                mask_image="{masked_blob_image}"
+                min_blob_size="5.0"
+                rgb_image="{rgb_image}"
+            />
+
+        </Sequence>
+    </BehaviorTree>
+
 </root>
