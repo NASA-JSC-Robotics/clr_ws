@@ -56,7 +56,7 @@
             <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
 
             <!-- Move the bag to the goal -->
-            <SubTree ID="RandomGoalTransform"/>
+            <SubTree ID="MoveToDropPose"/>
 
             <!-- Open the gripper, drop the ctb -->
             <SubTree ID="OpenGripper"/>
@@ -86,6 +86,68 @@
           <SubTree ID="rrt_to_transform" transform="{transform}"/>
         </Sequence>
 
+    </BehaviorTree>
+
+    <BehaviorTree ID="MoveToDropPose">
+        <Sequence>
+          <CreateRandomTransform
+            name="create random goal transform"
+            transform_name="bag_dropoff"
+            center="-1.5675;0.753;1.3"
+            box_side="0.2;0.15;0.125"
+            transform="{transform}"/>
+
+          <ApplyTransform name="Rotate the transform"
+              input_transform="{transform}"
+              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              resulting_transform="{transform}"
+          />
+          <PublishTransform
+            name="publish transform"
+            input_transform="{transform}" />
+
+          <SubTree ID="rrt_to_transform" transform="{transform}"/>
+
+        </Sequence>
+    </BehaviorTree>
+
+
+    <BehaviorTree ID="OpenGripper">
+        <Sequence>
+            <!-- Make sure that the gripper is open -->
+            <PlanToJointState
+                name="Plan to open the gripper"
+                service_name="/plan_kinematic_path"
+                group_name="hand"
+                joint_names="finger_1_joint;finger_2_joint"
+                joint_positions="0.024;0.024"
+                tolerance="0.0001"
+                trajectory="{gripper_traj}"/>
+
+            <ExecuteTrajectory
+                name="Open the gripper "
+                trajectory="{gripper_traj}"
+                action_name="/execute_trajectory"/>
+        </Sequence>
+    </BehaviorTree>
+
+
+    <BehaviorTree ID="CloseGripper">
+        <Sequence>
+            <PlanToJointState
+                name="Plan to close the gripper"
+                service_name="/plan_kinematic_path"
+                group_name="hand"
+                joint_names="finger_1_joint;finger_2_joint"
+                joint_positions="0.001;0.001"
+                tolerance="0.0001"
+                trajectory="{gripper_traj}"/>
+
+            <ExecuteTrajectory
+                name="Close the gripper "
+                trajectory="{gripper_traj}"
+                action_name="/execute_trajectory"/>
+        </Sequence>
     </BehaviorTree>
 
 </root>
