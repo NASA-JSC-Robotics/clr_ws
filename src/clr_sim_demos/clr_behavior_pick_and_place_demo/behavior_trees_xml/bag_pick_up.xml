@@ -10,7 +10,7 @@
             <SubTree ID="GetColorBlobPose" blob_pose="{blob_pose}" />
 
             <!-- GetColoBlobPose returns PoseStamped and we need TransformStamped -->
-            <PoseToTransform name="Blob pose to transform" 
+            <PoseToTransform name="Blob pose to transform"
                 pose_stamped="{blob_pose}"
                 transform_stamped="{goal_transform_stamped}"
             />
@@ -19,7 +19,7 @@
             <PublishTransform
                 name="publish transform"
                 new_transform_name="found_blob_pose"
-                input_transform="{goal_transform_stamped}" 
+                input_transform="{goal_transform_stamped}"
             />
 
             <!-- Look up the frame that the color blob actually publishes -->
