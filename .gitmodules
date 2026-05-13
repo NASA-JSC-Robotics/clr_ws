@@ -36,3 +36,7 @@
 [submodule "src/external/mujoco_ros2_control"]
 	path = src/external/mujoco_ros2_control
 	url = https://github.com/ros-controls/mujoco_ros2_control.git
+[submodule "src/external/drt_behavior"]
+	path = src/external/drt_behavior
+	url = https://github.com/NASA-JSC-Robotics/drt_behavior.git
+	branch = jazzy-devel

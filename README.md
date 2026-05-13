@@ -42,7 +42,7 @@ NASA internal users should refer to confluence for how to setup authentication t
 
     # Or initialize them from the repo's root
     cd clr_ws
-    git submodule update --init
+    git submodule update --init --recursive
     ```
 
 3) Copy `.env.default` in the root of this repo to a new file named just `.env`
