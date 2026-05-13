@@ -9,11 +9,13 @@
             <!-- Get the color blob frame -->
             <SubTree ID="GetColorBlobPose" blob_pose="{blob_pose}" />
 
+            <!-- GetColoBlobPose returns PoseStamped and we need TransformStamped -->
             <PoseToTransform name="Blob pose to transform" 
                 pose_stamped="{blob_pose}"
                 transform_stamped="{goal_transform_stamped}"
             />
 
+            <!-- MoveIt planning works **A LOT** better with world transform, this is a bit of a cheat -->
             <PublishTransform
                 name="publish transform"
                 new_transform_name="found_blob_pose"
