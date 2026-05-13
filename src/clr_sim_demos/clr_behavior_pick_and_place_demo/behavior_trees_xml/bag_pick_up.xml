@@ -7,15 +7,23 @@
             <SubTree ID="OpenGripper"/>
 
             <!-- Get the color blob frame -->
-            <ColorBlobFind
-                name="color_blob_find_test"
-                service_name="/color_blob_find"
-                centroid_pose="{goal_pose_stamped}"/>
+            <SubTree ID="GetColorBlobPose" blob_pose="{blob_pose}" />
+
+            <PoseToTransform name="Blob pose to transform" 
+                pose_stamped="{blob_pose}"
+                transform_stamped="{goal_transform_stamped}"
+            />
+
+            <PublishTransform
+                name="publish transform"
+                new_transform_name="found_blob_pose"
+                input_transform="{goal_transform_stamped}" 
+            />
 
             <!-- Look up the frame that the color blob actually publishes -->
             <AsyncTfLookup name="Look up color blob"
                     base_frame="world"
-                    target_frame="colorblob_xd"
+                    target_frame="found_blob_pose"
                     tf="{goal_transform_stamped}"
                 />
             <!-- Align the frame to the z-axis pointing directly down -->
