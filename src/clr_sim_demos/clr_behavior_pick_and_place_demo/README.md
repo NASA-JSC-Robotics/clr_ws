@@ -13,7 +13,7 @@ For an introduction to behavior tree and their utilization, as well as the core 
 ```bash
 ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ```
-2. `pick_and_place_behavior` launch file setups up the MoveIt's `move_group`, color blob detection node, and behavior tree executor.
+2. Launches nodes for MoveIt's `move_group`, color blob detection, and behavior tree executor.
 ```bash
 ros2 launch clr_behavior_pick_and_place_demo pick_and_place_behavior.launch.py
 ```
