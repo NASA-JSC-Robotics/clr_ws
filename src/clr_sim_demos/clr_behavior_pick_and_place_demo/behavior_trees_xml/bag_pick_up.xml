@@ -37,33 +37,54 @@
             <!-- Make the transform easier for the planner -->
             <ApplyTransform name="Rotate the transform"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;-0.1;0.0;0.0;1.0;0.0"
+                applied_transform_translation="0.0;0.0;-0.1"
+                applied_transform_rotation="0.0;0.0;1.0;0.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
             <!-- Get right above the target approach -->
-            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+            <SubTree ID="rrt_to_transform"
+                transform="{goal_transform_stamped}"
+                group_name="clr"
+                end_effector_name="grasp_frame"
+                velocity_scaling="1.0"
+                acceleration_scaling="1.0"
+            />
 
             <!-- Get right above the target approach -->
             <ApplyTransform name="Rotate the transform"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;0.125;0.0;0.0;0.0;1.0"
+                applied_transform_translation="0.0;0.0;0.125"
+                applied_transform_rotation="0.0;0.0;0.0;1.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
-            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+            <SubTree ID="rrt_to_transform"
+                transform="{goal_transform_stamped}"
+                group_name="clr"
+                end_effector_name="grasp_frame"
+                velocity_scaling="1.0"
+                acceleration_scaling="1.0"
+            />
 
             <!-- Close the gripper -->
             <SubTree ID="CloseGripper"/>
 
             <!-- Lift the bag over the bench -->
-            <ApplyTransform name="Rotate the transform"
+            <ApplyTransform name="Lift the bag"
                 input_transform="{goal_transform_stamped}"
-                applied_transform="0.0;0.0;-0.6;0.0;0.0;0.0;1.0"
+                applied_transform_translation="0.0;0.0;-0.6"
+                applied_transform_rotation="0.0;0.0;0.0;1.0"
                 resulting_transform="{goal_transform_stamped}"
             />
 
-            <SubTree ID="rrt_to_transform" transform="{goal_transform_stamped}"/>
+            <SubTree ID="rrt_to_transform"
+                transform="{goal_transform_stamped}"
+                group_name="clr"
+                end_effector_name="grasp_frame"
+                velocity_scaling="1.0"
+                acceleration_scaling="1.0"
+            />
 
             <!-- Move the bag to the goal -->
             <SubTree ID="MoveToDropPose"/>
@@ -86,14 +107,21 @@
 
           <ApplyTransform name="Rotate the transform"
               input_transform="{transform}"
-              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              applied_transform_translation="0.0;0.0;0.0"
+              applied_transform_rotation="0.0;1.0;0.0;0.0"
               resulting_transform="{transform}"
           />
           <PublishTransform
             name="publish transform"
             input_transform="{transform}" />
 
-          <SubTree ID="rrt_to_transform" transform="{transform}"/>
+          <SubTree ID="rrt_to_transform"
+            transform="{transform}"
+            group_name="clr"
+            end_effector_name="grasp_frame"
+            velocity_scaling="1.0"
+            acceleration_scaling="1.0"
+          />
         </Sequence>
 
     </BehaviorTree>
@@ -109,14 +137,21 @@
 
           <ApplyTransform name="Rotate the transform"
               input_transform="{transform}"
-              applied_transform="0.0;0.0;0.0;0.0;1.0;0.0;0.0"
+              applied_transform_translation="0.0;0.0;0.0"
+              applied_transform_rotation="0.0;1.0;0.0;0.0"
               resulting_transform="{transform}"
           />
           <PublishTransform
             name="publish transform"
             input_transform="{transform}" />
 
-          <SubTree ID="rrt_to_transform" transform="{transform}"/>
+          <SubTree ID="rrt_to_transform"
+            transform="{transform}"
+            group_name="clr"
+            end_effector_name="grasp_frame"
+            velocity_scaling="1.0"
+            acceleration_scaling="1.0"
+          />
 
         </Sequence>
     </BehaviorTree>
@@ -129,8 +164,8 @@
                 name="Plan to open the gripper"
                 service_name="/plan_kinematic_path"
                 group_name="hand"
-                joint_names="finger_1_joint;finger_2_joint"
-                joint_positions="0.024;0.024"
+                joint_names="finger_1_joint"
+                joint_positions="0.023"
                 tolerance="0.0001"
                 trajectory="{gripper_traj}"/>
 
@@ -148,8 +183,8 @@
                 name="Plan to close the gripper"
                 service_name="/plan_kinematic_path"
                 group_name="hand"
-                joint_names="finger_1_joint;finger_2_joint"
-                joint_positions="0.001;0.001"
+                joint_names="finger_1_joint"
+                joint_positions="0.001"
                 tolerance="0.0001"
                 trajectory="{gripper_traj}"/>
 
