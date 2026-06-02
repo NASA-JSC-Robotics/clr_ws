@@ -1,0 +1,14 @@
+launch:
+
+  # Include a custom RViz config
+  - node:
+        pkg: rviz2
+        exec: rviz2
+        name: rviz2
+        args: "-d $(find-pkg-share clr_roboplan_demos)/config/clr_roboplan_config.rviz"
+
+  # IK planning and execution node
+  - node:
+      pkg: clr_roboplan_demos
+      exec: plan_and_execute_node.py
+      output: screen

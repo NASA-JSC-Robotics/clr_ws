@@ -10,7 +10,7 @@ services:
       args:
         # WARNING: Changing username requires updating workspace mounts below.
         # Do not mess with these unless you know what you are doing!
-        - USERNAME=er4-user
+        - USERNAME=sebastian
         - USER_UID=${USER_UID:-1000}
         - USER_GID=${USER_GID:-1000}
         - CLR_WS_BASE_IMAGE_TAG=${CLR_WS_BASE_IMAGE_TAG:-jazzy-devel}
