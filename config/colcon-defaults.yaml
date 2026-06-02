@@ -5,6 +5,8 @@ build:
     - build-testing-on
     - ccache
     - compile-commands
+  packages-ignore:
+    - roboplan_oink  # Temporary due to OSQP version mismatch
 test:
   event-handlers:
     - console_direct+

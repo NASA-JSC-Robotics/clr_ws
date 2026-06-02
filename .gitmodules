@@ -40,3 +40,6 @@
 	path = src/external/drt_behavior
 	url = https://github.com/NASA-JSC-Robotics/drt_behavior.git
 	branch = jazzy-devel
+[submodule "external/roboplan-ros"]
+	path = src/external/roboplan-ros
+	url = https://github.com/open-planning/roboplan-ros.git
