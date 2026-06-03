@@ -16,6 +16,7 @@ install(DIRECTORY config launch
 
 install(PROGRAMS
         scripts/plan_and_execute_node.py
+        scripts/viser_ik.py
         DESTINATION lib/${PROJECT_NAME}
 )
 

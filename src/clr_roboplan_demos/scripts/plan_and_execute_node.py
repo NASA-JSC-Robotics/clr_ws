@@ -266,7 +266,9 @@ class PlanAndExecuteNode(Node):
         )
 
         # Setup an action client for trajectory execution
-        self._execute_client = ActionClient(self, FollowJointTrajectory, "/todo/change/me")
+        self._execute_client = ActionClient(
+            self, FollowJointTrajectory, "/lift_rail_joint_trajectory_controller/follow_joint_trajectory"
+        )
 
         # Target pose and planned trajectories
         self._target_q = None
@@ -301,7 +303,8 @@ class PlanAndExecuteNode(Node):
             return False, "No target set. Move the interactive marker first."
 
         joint_config = fromJointState(self._last_joint_state, self._scene, self._conversion_map)
-        self._latest_joint_positions = joint_config.positions
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
+        self._scene.setJointPositions(self._latest_joint_positions)
 
         start = JointConfiguration()
         start.positions = self._latest_joint_positions[self._q_indices]
@@ -389,7 +392,7 @@ class PlanAndExecuteNode(Node):
 
         # Reset joint positions to the latest joint state
         joint_config = fromJointState(self._last_joint_state, self._scene, self._conversion_map)
-        self._latest_joint_positions = joint_config.positions
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
 
         # Update the IK marker's seed to the current state
         self._ik_marker.set_joint_positions(self._latest_joint_positions)

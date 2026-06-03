@@ -11,13 +11,9 @@
 
   <depend>roboplan</depend>
   <depend>roboplan_simple_ik</depend>
+  <depend>roboplan_rrt</depend>
+  <depend>roboplan_toppra</depend>
   <depend>xacro</depend>
-
-  <!-- <exec_depend>controller_manager</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>joint_state_broadcaster</exec_depend>
-  <exec_depend>joint_trajectory_controller</exec_depend>
-  <exec_depend>topic_tools</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>
