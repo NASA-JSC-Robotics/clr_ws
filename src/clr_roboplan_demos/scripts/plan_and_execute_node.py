@@ -174,7 +174,7 @@ class PlanAndExecuteNode(Node):
                 1.29458704e-14,
             ]
         )
-        self._scene.setJointPositions(self._latest_joint_positions)
+        self._scene.setJointPositions(self._scene.clampToValidConfiguration(self._latest_joint_positions))
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
@@ -266,9 +266,8 @@ class PlanAndExecuteNode(Node):
         )
 
         # Setup an action client for trajectory execution
-        self._execute_client = ActionClient(
-            self, FollowJointTrajectory, "/lift_rail_joint_trajectory_controller/follow_joint_trajectory"
-        )
+        controller_action = "/clr_joint_trajectory_controller/follow_joint_trajectory"
+        self._execute_client = ActionClient(self, FollowJointTrajectory, controller_action)
 
         # Target pose and planned trajectories
         self._target_q = None

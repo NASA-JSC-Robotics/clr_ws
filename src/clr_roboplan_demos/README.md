@@ -13,7 +13,7 @@ ros2 launch clr_mujoco_config clr_mujoco.launch.py
 2. Switch to the integrated controller. (TODO: this should be automated)
 
 ```bash
-ros2 control switch_controllers --deactivate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller --activate lift_rail_joint_trajectory_controller
+ros2 control switch_controllers --deactivate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller --activate clr_joint_trajectory_controller
 ```
 
 3. Launch the RoboPlan planning and execution node, which also starts up an RViz window with an interactive marker.
