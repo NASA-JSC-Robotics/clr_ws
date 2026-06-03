@@ -12,6 +12,7 @@ reference, rather than hardened application code.
 """
 
 import os
+import time
 import threading
 import xacro
 import numpy as np
@@ -142,9 +143,7 @@ class PlanAndExecuteNode(Node):
 
         while self._last_joint_state is None:
             self.get_logger().info("Waiting for joint positions...")
-            import time
-
-            time.sleep(0.5)
+            time.sleep(1.0)
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
