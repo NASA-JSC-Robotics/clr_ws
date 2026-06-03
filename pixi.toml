@@ -44,7 +44,7 @@ clean = "rm -rf build/* install/* log/*"
 [dependencies]
 # Regular conda dependencies
 python = ">=3.11,<3.13"
-cmake = ">=3.27,<4"  # CMake >4 has an incompatibility with osqp<1
+cmake = ">=4.1.2,<5"
 ccache = ">=4.13.1,<5"
 ninja = ">=1.13.1,<2"
 mold = ">=2.40.4,<3"
