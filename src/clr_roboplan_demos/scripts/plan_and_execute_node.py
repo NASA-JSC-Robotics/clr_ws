@@ -110,13 +110,14 @@ class PlanAndExecuteNode(Node):
             yaml_config_path=yaml_config_path,
         )
 
+        # TODO: Support non-world base frames.
+        self._joint_group = "clr"
+        self._base_link = "world"
+        self._tip_link = "grasp_frame"
+
         # Subscribe to joint states to keep the scene in sync with hardware. These
         # can bog down other CBs, so putting it out here keeps the rest of the node
         # responsive.
-        self._joint_group = "clr"
-        self._base_link = "world"
-        self._tip_link = "tool0"
-
         self._js_node = Node("joint_state_listener")
         self._js_sub = self._js_node.create_subscription(
             JointState,
@@ -132,49 +133,18 @@ class PlanAndExecuteNode(Node):
         self._last_joint_state = None
         self._conversion_map = None
         self._q_indices = self._scene.getJointGroupInfo(self._joint_group).q_indices
+        self._latest_joint_positions: np.array | None = None
 
         self._js_executor = SingleThreadedExecutor()
         self._js_executor.add_node(self._js_node)
         self._js_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._js_executor,))
         self._js_thread.start()
 
-        # Start in a reasonable pose, this could come from hardware.
-        self._latest_joint_positions = np.array(
-            [
-                0.0,  # vention_rail_base_to_carriage
-                9.97381986e-03,  # ewellix_lift_lower_to_higher
-                3.19268333e00,  # shoulder_pan_joint,
-                -2.39129980e00,  # shoulder_lift_joint
-                -1.77600054e00,  # elbow_joint
-                -4.69997566e-01,  # wrist_1_joint
-                -1.61764763e00,  # wrist_2_joint
-                -1.61770000e00,  # wrist_3_joint
-                2.43603275e-02,
-                -1.00354533e-02,
-                2.16578104e-02,
-                1.07625658e-03,
-                2.02910551e-11,
-                -2.66777419e-04,
-                1.56383145e00,
-                -4.45405786e-03,
-                -4.97470896e-04,
-                -4.93714552e-06,
-                3.21778639e-02,
-                -6.74079130e-04,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                0.00000000e00,
-                -6.73367315e-38,
-                1.29458704e-14,
-            ]
-        )
-        self._scene.setJointPositions(self._scene.clampToValidConfiguration(self._latest_joint_positions))
+        while self._last_joint_state is None:
+            self.get_logger().info("Waiting for joint positions...")
+            import time
+
+            time.sleep(0.5)
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
@@ -193,9 +163,9 @@ class PlanAndExecuteNode(Node):
         # Set up planning utilities
         self._rrt_options = RRTOptions()
         self._rrt_options.group_name = self._joint_group
-        self._rrt_options.max_connection_distance = 1.0
+        self._rrt_options.max_connection_distance = 2.0
         self._rrt_options.collision_check_step_size = 0.05
-        self._rrt_options.max_planning_time = 5.0
+        self._rrt_options.max_planning_time = 10.0
         self._rrt_options.rrt_connect = True
         self._include_shortcutting = True
         self._max_shortcutting_iters = 200
@@ -280,6 +250,7 @@ class PlanAndExecuteNode(Node):
         self.create_service(Trigger, "~/reset", self._on_reset)
 
         # Reset and notify
+        self._reset()
         self.get_logger().info("Ready. Move the interactive marker to set a target.")
         self.get_logger().info("Call services: ~/plan, ~/preview, ~/execute, ~/reset")
 
@@ -298,6 +269,8 @@ class PlanAndExecuteNode(Node):
             self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
 
     def _plan(self):
+        if self._last_joint_state is None:
+            return False, "Have not yet received joint positions from hardware. Cannot plan."
         if self._target_q is None:
             return False, "No target set. Move the interactive marker first."
 

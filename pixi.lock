@@ -420,6 +420,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/pybind11-abi-11-hc364b38_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pybind11-global-3.0.3-pyh648e204_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pycodestyle-2.14.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/pycollada-0.9.3-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pycparser-2.22-pyh29332c3_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pydocstyle-6.3.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pyflakes-3.4.0-pyhd8ed1ab_0.conda
@@ -439,6 +440,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/snowballstemmer-3.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/toml-0.10.2-pyhcf101f3_3.conda
       - conda: https://prefix.dev/conda-forge/noarch/tomli-2.4.1-pyhcf101f3_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/trimesh-4.12.2-pyh7b2049a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/typeguard-4.5.2-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
@@ -773,8 +775,6 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-yaml-cpp-vendor-9.0.1-np2py312h2ed9cc7_16.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-zstd-vendor-0.26.9-np2py312h2ed9cc7_16.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros2-distro-mutex-0.14.0-jazzy_16.conda
-      - pypi: https://files.pythonhosted.org/packages/05/98/716a473cfb24750858ddd5d14e6527539dd206583a46408d08eeb2844a75/trimesh-4.12.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/07/86/f1f61b7a0701f9d1299e5293d083318019f91021a4d449f94d59dbe024e4/pycollada-0.9.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0e/b4/057c78f7b16b87871cfcecc6febe70522e77a2a33f8788960377152c224d/coacd-1.0.11-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/18/a6/907a406bb7d359e6a63f99c313846d9eec4f7e6f7437809e03aa00fa3074/absl_py-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/33/d1/8bb87d21e9aeb323cc03034f5eaf2c8f69841e40e4853c2627edf8111ed3/termcolor-3.3.0-py3-none-any.whl
@@ -1188,6 +1188,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/pybind11-abi-11-hc364b38_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pybind11-global-3.0.3-pyh648e204_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pycodestyle-2.14.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/pycollada-0.9.3-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pycparser-2.22-pyh29332c3_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pydocstyle-6.3.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/pyflakes-3.4.0-pyhd8ed1ab_0.conda
@@ -1207,6 +1208,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/snowballstemmer-3.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/toml-0.10.2-pyhcf101f3_3.conda
       - conda: https://prefix.dev/conda-forge/noarch/tomli-2.4.1-pyhcf101f3_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/trimesh-4.12.2-pyh7b2049a_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/typeguard-4.5.2-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
@@ -1540,8 +1542,6 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-yaml-cpp-vendor-9.0.1-np2py312h61f2ce4_16.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-zstd-vendor-0.26.9-np2py312h61f2ce4_16.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros2-distro-mutex-0.14.0-jazzy_16.conda
-      - pypi: https://files.pythonhosted.org/packages/05/98/716a473cfb24750858ddd5d14e6527539dd206583a46408d08eeb2844a75/trimesh-4.12.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/07/86/f1f61b7a0701f9d1299e5293d083318019f91021a4d449f94d59dbe024e4/pycollada-0.9.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/18/a6/907a406bb7d359e6a63f99c313846d9eec4f7e6f7437809e03aa00fa3074/absl_py-2.4.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2b/54/1789c455ed10176066b6e7e6da1b01e50e36f94ba584dc68d9eebfe9156d/pillow-12.2.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl
       - pypi: https://files.pythonhosted.org/packages/33/d1/8bb87d21e9aeb323cc03034f5eaf2c8f69841e40e4853c2627edf8111ed3/termcolor-3.3.0-py3-none-any.whl
@@ -13045,6 +13045,20 @@ packages:
   - pkg:pypi/pycodestyle?source=hash-mapping
   size: 35182
   timestamp: 1750616054854
+- conda: https://prefix.dev/conda-forge/noarch/pycollada-0.9.3-pyhd8ed1ab_0.conda
+  sha256: 1743c3be740be009ee7b9e6f32ed12524537d437ec701fd0e8fabfa7a4868b48
+  md5: edd875ef7cbf171d45b9e735c216dbf7
+  depends:
+  - numpy
+  - python >=3.10
+  - python-dateutil >=2.2
+  license: BSD
+  license_family: BSD
+  purls:
+  - pkg:pypi/pycollada?source=hash-mapping
+  run_exports: {}
+  size: 93525
+  timestamp: 1769429399258
 - conda: https://prefix.dev/conda-forge/noarch/pycparser-2.22-pyh29332c3_1.conda
   sha256: 79db7928d13fab2d892592223d7570f5061c192f27b9febd1a418427b719acc6
   md5: 12c566707c80111f9799308d9e265aef
@@ -13292,6 +13306,41 @@ packages:
   - pkg:pypi/tomli?source=hash-mapping
   size: 21561
   timestamp: 1774492402955
+- conda: https://prefix.dev/conda-forge/noarch/trimesh-4.12.2-pyh7b2049a_0.conda
+  sha256: ec8151a7211e7225f7d378f36a50b7f8336f114bd79935527e49bbd36e013c08
+  md5: 1cc13d0d9f4f21cbcbf99b68f2f2a130
+  depends:
+  - numpy
+  - python >=3.10
+  constrains:
+  - jsonschema
+  - shapely
+  - sympy
+  - meshio
+  - colorlog
+  - xxhash
+  - lxml
+  - chardet
+  - scikit-image
+  - rtree
+  - networkx
+  - requests
+  - setuptools
+  - pillow
+  - scipy
+  - mapbox_earcut
+  - psutil
+  - svg.path
+  - pycollada
+  - msgpack-python
+  - pyglet
+  license: MIT
+  license_family: MIT
+  purls:
+  - pkg:pypi/trimesh?source=hash-mapping
+  run_exports: {}
+  size: 602889
+  timestamp: 1777615044983
 - conda: https://prefix.dev/conda-forge/noarch/typeguard-4.5.2-pyhcf101f3_0.conda
   sha256: 59d7851d32fddb5b510272e6557aa982edeb927d349648dac27f5bf01d18bb26
   md5: 4460f039b7dedf15f7df086446ca75ae
@@ -27961,63 +28010,6 @@ packages:
   license: BSD-3-Clause
   size: 2334
   timestamp: 1771181488082
-- pypi: https://files.pythonhosted.org/packages/05/98/716a473cfb24750858ddd5d14e6527539dd206583a46408d08eeb2844a75/trimesh-4.12.2-py3-none-any.whl
-  name: trimesh
-  version: 4.12.2
-  sha256: b5b5afa63c5272345f2858f7676bc8c217dc8a89f4fadf6193fe10a81b5ff2aa
-  requires_dist:
-  - numpy>=1.20
-  - colorlog ; extra == 'easy'
-  - manifold3d>=2.3.0 ; python_full_version < '3.14' and extra == 'easy'
-  - charset-normalizer ; extra == 'easy'
-  - lxml ; extra == 'easy'
-  - jsonschema ; extra == 'easy'
-  - networkx ; extra == 'easy'
-  - svg-path ; extra == 'easy'
-  - pycollada<=0.9.0 ; python_full_version < '3.9' and extra == 'easy'
-  - pycollada ; python_full_version >= '3.9' and extra == 'easy'
-  - shapely ; extra == 'easy'
-  - xxhash ; extra == 'easy'
-  - rtree ; extra == 'easy'
-  - httpx ; extra == 'easy'
-  - scipy ; extra == 'easy'
-  - embreex ; extra == 'easy'
-  - pillow ; extra == 'easy'
-  - vhacdx ; python_full_version >= '3.9' and extra == 'easy'
-  - mapbox-earcut>=1.0.2 ; python_full_version >= '3.9' and extra == 'easy'
-  - sympy ; extra == 'recommend'
-  - pyglet<2 ; extra == 'recommend'
-  - scikit-image ; extra == 'recommend'
-  - fast-simplification ; extra == 'recommend'
-  - python-fcl ; extra == 'recommend'
-  - cascadio ; extra == 'recommend'
-  - manifold3d>=2.3.0 ; python_full_version >= '3.14' and extra == 'recommend'
-  - pytest-cov ; extra == 'test'
-  - pytest ; extra == 'test'
-  - pyinstrument ; extra == 'test'
-  - ruff ; extra == 'test'
-  - coveralls ; extra == 'test-more'
-  - ezdxf ; extra == 'test-more'
-  - meshio ; extra == 'test-more'
-  - xatlas ; extra == 'test-more'
-  - pytest-beartype ; python_full_version >= '3.10' and extra == 'test-more'
-  - matplotlib ; extra == 'test-more'
-  - pymeshlab ; python_full_version < '3.14' and extra == 'test-more'
-  - triangle ; python_full_version < '3.14' and extra == 'test-more'
-  - ipython ; extra == 'test-more'
-  - marimo ; extra == 'test-more'
-  - openctm ; extra == 'deprecated'
-  - trimesh[deprecated,easy,recommend,test,test-more] ; extra == 'all'
-  requires_python: '>=3.8'
-- pypi: https://files.pythonhosted.org/packages/07/86/f1f61b7a0701f9d1299e5293d083318019f91021a4d449f94d59dbe024e4/pycollada-0.9.3-py3-none-any.whl
-  name: pycollada
-  version: 0.9.3
-  sha256: 636e6496f60987586db82455ea7bbd9ade775e8181c6590c83b698b6cd53a9f5
-  requires_dist:
-  - python-dateutil
-  - numpy
-  - lxml ; extra == 'prettyprint'
-  - lxml ; extra == 'validation'
 - pypi: https://files.pythonhosted.org/packages/0e/b4/057c78f7b16b87871cfcecc6febe70522e77a2a33f8788960377152c224d/coacd-1.0.11-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: coacd
   version: 1.0.11
