@@ -5,6 +5,12 @@ build:
     - build-testing-on
     - ccache
     - compile-commands
+  packages-ignore:
+    - roboplan_oink  # Temporary due to OSQP version mismatch
+    - roboplan_examples
 test:
   event-handlers:
     - console_direct+
+  packages-ignore:
+    - roboplan_oink  # Temporary due to OSQP version mismatch
+    - roboplan_examples
