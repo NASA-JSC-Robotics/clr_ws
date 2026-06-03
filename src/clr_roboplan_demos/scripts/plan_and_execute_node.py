@@ -55,7 +55,7 @@ from roboplan_ros.cpp import (
 from roboplan_ros_py.trajectory_publisher import TrajectoryPublisher
 
 
-def spin_executor(executor):
+def spin_executor(executor, logger=None):
     """Helper function to spin an executor."""
     try:
         executor.spin()
@@ -63,6 +63,9 @@ def spin_executor(executor):
         pass
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        if logger:
+            logger.warning(f"Executor caught exception, shutting down: {e}")
 
 
 class PlanAndExecuteNode(Node):
@@ -111,9 +114,8 @@ class PlanAndExecuteNode(Node):
             yaml_config_path=yaml_config_path,
         )
 
-        # TODO: Support non-world base frames.
         self._joint_group = "clr"
-        self._base_link = "world"
+        self._base_link = "vention_rail_base_link"
         self._tip_link = "grasp_frame"
 
         # Subscribe to joint states to keep the scene in sync with hardware. These
@@ -138,7 +140,14 @@ class PlanAndExecuteNode(Node):
 
         self._js_executor = SingleThreadedExecutor()
         self._js_executor.add_node(self._js_node)
-        self._js_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._js_executor,))
+        self._js_thread = threading.Thread(
+            target=spin_executor,
+            daemon=True,
+            args=(
+                self._js_executor,
+                self.get_logger(),
+            ),
+        )
         self._js_thread.start()
 
         while self._last_joint_state is None:
@@ -195,7 +204,9 @@ class PlanAndExecuteNode(Node):
         # Needs its own executor for responsiveness
         self._marker_executor = SingleThreadedExecutor()
         self._marker_executor.add_node(self._marker_node)
-        self._marker_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._marker_executor,))
+        self._marker_thread = threading.Thread(
+            target=spin_executor, daemon=True, args=(self._marker_executor, self.get_logger())
+        )
         self._marker_thread.start()
 
         # Add menu to the iMarker for service access
@@ -369,7 +380,7 @@ class PlanAndExecuteNode(Node):
         self._ik_marker.set_joint_positions(self._latest_joint_positions)
 
         # Compute FK for the current state to get the marker pose
-        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link)
+        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
         pose = se3ToPose(fk)
 
         # Update the IK to the current pose
