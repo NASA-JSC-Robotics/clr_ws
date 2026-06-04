@@ -163,6 +163,7 @@ class PlanAndExecuteNode(Node):
         # Increases likelihood of finding an "optimal" solution
         ik_options.fast_return = False
         ik_options.max_iters = 500
+        ik_options.max_time = 0.025
         self._ik_marker = RoboplanIKMarker(
             scene=self._scene,
             joint_group=self._joint_group,
