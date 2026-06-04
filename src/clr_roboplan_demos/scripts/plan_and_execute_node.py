@@ -41,7 +41,7 @@ from std_srvs.srv import Trigger
 from sensor_msgs.msg import JointState
 from interactive_markers import MenuHandler
 
-from roboplan.core import JointConfiguration, PathShortcutter, Scene
+from roboplan.core import JointConfiguration, PathShortcuttingOptions, PathShortcutter, Scene
 from roboplan.simple_ik import SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode
@@ -150,6 +150,8 @@ class PlanAndExecuteNode(Node):
         ik_options.group_name = self._joint_group
         ik_options.max_iters = 100
         ik_options.step_size = 0.25
+        ik_options.max_time = 0.01
+        # ik_options.find_closest_to_seed = True
         ik_options.check_collisions = True
         self._ik_marker = RoboplanIKMarker(
             scene=self._scene,
@@ -162,17 +164,26 @@ class PlanAndExecuteNode(Node):
         # Set up planning utilities
         self._rrt_options = RRTOptions()
         self._rrt_options.group_name = self._joint_group
-        self._rrt_options.max_connection_distance = 2.0
+        self._rrt_options.max_connection_distance = 3.0
         self._rrt_options.collision_check_step_size = 0.05
-        self._rrt_options.max_planning_time = 10.0
+        self._rrt_options.max_planning_time = 5.0
         self._rrt_options.rrt_connect = True
+        self._rrt_options.max_nodes = 10000
+        self._rrt_options.goal_biasing_probability = 0.05
+        self._rrt_options.collision_check_use_bisection = True
         self._include_shortcutting = True
-        self._max_shortcutting_iters = 200
+        self._max_shortcutting_iters = 250
+
+        self._shortcutting_options = PathShortcuttingOptions(
+            group_name=self._joint_group,
+            max_step_size=self._rrt_options.collision_check_step_size,
+            max_iters=self._max_shortcutting_iters,
+        )
 
         self._rrt = RRT(self._scene, self._rrt_options)
         self._toppra = PathParameterizerTOPPRA(self._scene, self._joint_group)
-        self._shortcutter = PathShortcutter(self._scene, self._joint_group)
-        self._traj_dt = 0.01
+        self._shortcutter = PathShortcutter(self._scene, self._shortcutting_options)
+        self._traj_dt = 0.1
 
         # Default QoS for visualization
         qos = QoSProfile(
@@ -260,10 +271,7 @@ class PlanAndExecuteNode(Node):
         self._last_joint_state = msg
 
     def _on_ik_feedback(self, feedback):
-        q = self._ik_marker.process_feedback(feedback)
-        if q is None:
-            self.get_logger().warning("IK failed to solve")
-        else:
+        if q := self._ik_marker.process_feedback(feedback) is not None:
             self._target_q = q
             self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
 
@@ -284,8 +292,12 @@ class PlanAndExecuteNode(Node):
         goal.positions = self._target_q[self._q_indices]
 
         self.get_logger().info("Planning...")
+        plan_start_time = time.time()
+
         try:
+            start_time = time.time()
             path = self._rrt.plan(start, goal)
+            self.get_logger().info(f"  Finished planning in {time.time() - start_time} seconds.")
         except RuntimeError as e:
             self.get_logger().error(str(e))
             path = None
@@ -294,14 +306,19 @@ class PlanAndExecuteNode(Node):
             return False, "Planning failed."
 
         if self._include_shortcutting:
-            path = self._shortcutter.shortcut(
-                path,
-                max_step_size=self._rrt_options.collision_check_step_size,
-                max_iters=self._max_shortcutting_iters,
-            )
+            self.get_logger().info("Shortcutting...")
+            start_time = time.time()
+            path = self._shortcutter.shortcut(path)
+            self.get_logger().info(f"  Finished shortcutting in {time.time() - start_time} seconds.")
 
         self.get_logger().info("Generating trajectory...")
-        self._planned_traj = self._toppra.generate(path, self._traj_dt, SplineFittingMode.Hermite)
+        start_time = time.time()
+        self._planned_traj = self._toppra.generate(
+            path, self._traj_dt, SplineFittingMode.Adaptive, max_adaptive_iterations=5
+        )
+        self.get_logger().info(f"  Finished generating trajectory in {time.time() - start_time} seconds.")
+
+        self.get_logger().info(f"Total planning time: {time.time() - plan_start_time} seconds.")
 
         return (
             True,
