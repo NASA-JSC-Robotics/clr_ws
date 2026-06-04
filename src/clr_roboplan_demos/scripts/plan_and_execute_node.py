@@ -157,7 +157,7 @@ class PlanAndExecuteNode(Node):
         # Set the IK solver options
         ik_options = SimpleIkOptions()
         ik_options.group_name = self._joint_group
-        ik_options.max_iters = 100
+        ik_options.max_iters = 500 # Increases likelihood of finding an "optimal" solution
         ik_options.step_size = 0.25
         ik_options.check_collisions = True
         self._ik_marker = RoboplanIKMarker(
@@ -271,6 +271,7 @@ class PlanAndExecuteNode(Node):
         self._last_joint_state = msg
 
     def _on_ik_feedback(self, feedback):
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
         q = self._ik_marker.process_feedback(feedback)
         if q is None:
             self.get_logger().warning("IK failed to solve")
@@ -377,7 +378,7 @@ class PlanAndExecuteNode(Node):
         self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
 
         # Update the IK marker's seed to the current state
-        self._ik_marker.set_joint_positions(self._latest_joint_positions)
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
 
         # Compute FK for the current state to get the marker pose
         fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
