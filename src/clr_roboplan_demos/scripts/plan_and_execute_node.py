@@ -157,9 +157,13 @@ class PlanAndExecuteNode(Node):
         # Set the IK solver options
         ik_options = SimpleIkOptions()
         ik_options.group_name = self._joint_group
-        ik_options.max_iters = 500 # Increases likelihood of finding an "optimal" solution
         ik_options.step_size = 0.25
         ik_options.check_collisions = True
+
+        # Increases likelihood of finding an "optimal" solution
+        ik_options.fast_return = False
+        ik_options.max_iters = 500
+        ik_options.max_time = 0.025
         self._ik_marker = RoboplanIKMarker(
             scene=self._scene,
             joint_group=self._joint_group,
