@@ -32,10 +32,12 @@ from roboplan.visualization import (
 def main(
     # IK options
     max_iters: int = 100,
+    max_time: float = 0.025,
     step_size: float = 0.25,
     max_linear_error_norm: float = 0.001,
     max_angular_error_norm: float = 0.001,
     check_collisions: bool = True,
+    fast_return: bool = False,
     # RRT options
     max_connection_distance: float = 3.0,
     collision_check_step_size: float = 0.05,
@@ -62,10 +64,12 @@ def main(
 
     Parameters:
         max_iters: Maximum number of iterations for the IK solver.
+        max_time: Maximum amount of time to search for IK solver.
         step_size: Integration step size for the IK solver.
         max_linear_error_norm: The maximum linear error norm for the IK solver.
         max_angular_error_norm: The maximum angular error norm for the IK solver.
         check_collisions: Whether to check for collisions when solving IK.
+        fast_return: Whether or not to use the max ik solve time to try to optimize solution.
         max_connection_distance: Maximum connection distance between two search nodes.
         collision_check_step_size: Configuration-space step size for collision checking along edges.
         collision_check_use_bisection: If true, uses bisection instead of linear search for collision checking along edges.
@@ -135,10 +139,12 @@ def main(
     ik_options = SimpleIkOptions(
         group_name=group_name,
         max_iters=max_iters,
+        max_time=max_time,
         step_size=step_size,
         max_linear_error_norm=max_linear_error_norm,
         max_angular_error_norm=max_angular_error_norm,
         check_collisions=check_collisions,
+        fast_return=fast_return,
     )
     ik_solver = SimpleIk(scene, ik_options)
 
