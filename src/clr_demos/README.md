@@ -13,7 +13,7 @@ They are intended to provide starting points of how to interact with CLR using c
   * Uses MoveIt2 and basic perception capabilities to pick up a cargo transfer bag (CTB) and place it inside a bench storage container.
 * [DRT Behavior Trees](./clr_behavior_pick_and_place_demo/README.md)
   * Behavior tree enabled planning framework for constructing more complex capabilities.
-* [Planning with RoboPlan](./clr_behavior_pick_and_place_demo/README.md)
+* [Planning with RoboPlan](./clr_roboplan_demos/README.md)
   * Demonstration the motion planning capabilities of RoboPlan using CLR.
 
 ![alt text](./clr_mujoco_simulation.png "CLR MuJoCo simulation")
