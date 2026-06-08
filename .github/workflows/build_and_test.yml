@@ -63,8 +63,10 @@ jobs:
             ${{ steps.meta.outputs.tags }} \
             bash -c "
               colcon test \
-              --packages-skip-regex "mujoco_ros2_control.*|robotiq_.*|roboplan_.*" \
-              --packages-skip serial clr_functional_tests && \
+                --packages-skip-regex 'mujoco_ros2_control.*|robotiq_.*|roboplan_.*' \
+                --packages-skip \
+                  serial \
+                  clr_functional_tests && \
               colcon test-result --verbose
             "
 
