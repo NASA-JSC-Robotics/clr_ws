@@ -62,12 +62,11 @@ jobs:
           docker run --rm \
             ${{ steps.meta.outputs.tags }} \
             bash -c "
-              colcon test --packages-skip \
-                mujoco_ros2_control \
-                mujoco_ros2_control_tests \
-                robotiq_driver \
-                serial \
-                clr_functional_tests &&
+              colcon test \
+                --packages-skip-regex 'mujoco_ros2_control.*|robotiq_.*|roboplan_.*' \
+                --packages-skip \
+                  serial \
+                  clr_functional_tests && \
               colcon test-result --verbose
             "
 

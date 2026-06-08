@@ -54,6 +54,8 @@ pip = "*"
 nanobind = ">=2.8.0,<3"
 trimesh = ">=4.11.4,<5"
 pycollada = ">=0.9.3,<0.10"
+viser = ">=1.0.29,<2"
+matplotlib = ">=3.10.9,<4"
 
 # ROS dependencies
 ros-jazzy-ros-base = "*"

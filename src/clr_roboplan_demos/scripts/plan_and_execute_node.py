@@ -41,7 +41,7 @@ from std_srvs.srv import Trigger
 from sensor_msgs.msg import JointState
 from interactive_markers import MenuHandler
 
-from roboplan.core import JointConfiguration, PathShortcutter, Scene
+from roboplan.core import JointConfiguration, PathShortcuttingOptions, PathShortcutter, Scene
 from roboplan.simple_ik import SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode
@@ -55,7 +55,7 @@ from roboplan_ros.cpp import (
 from roboplan_ros_py.trajectory_publisher import TrajectoryPublisher
 
 
-def spin_executor(executor):
+def spin_executor(executor, logger=None):
     """Helper function to spin an executor."""
     try:
         executor.spin()
@@ -63,6 +63,9 @@ def spin_executor(executor):
         pass
     except KeyboardInterrupt:
         pass
+    except Exception as e:
+        if logger:
+            logger.warning(f"Executor caught exception, shutting down: {e}")
 
 
 class PlanAndExecuteNode(Node):
@@ -111,9 +114,8 @@ class PlanAndExecuteNode(Node):
             yaml_config_path=yaml_config_path,
         )
 
-        # TODO: Support non-world base frames.
         self._joint_group = "clr"
-        self._base_link = "world"
+        self._base_link = "vention_rail_base_link"
         self._tip_link = "grasp_frame"
 
         # Subscribe to joint states to keep the scene in sync with hardware. These
@@ -138,7 +140,14 @@ class PlanAndExecuteNode(Node):
 
         self._js_executor = SingleThreadedExecutor()
         self._js_executor.add_node(self._js_node)
-        self._js_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._js_executor,))
+        self._js_thread = threading.Thread(
+            target=spin_executor,
+            daemon=True,
+            args=(
+                self._js_executor,
+                self.get_logger(),
+            ),
+        )
         self._js_thread.start()
 
         while self._last_joint_state is None:
@@ -148,9 +157,13 @@ class PlanAndExecuteNode(Node):
         # Set the IK solver options
         ik_options = SimpleIkOptions()
         ik_options.group_name = self._joint_group
-        ik_options.max_iters = 100
         ik_options.step_size = 0.25
         ik_options.check_collisions = True
+
+        # Increases likelihood of finding an "optimal" solution
+        ik_options.fast_return = False
+        ik_options.max_iters = 500
+        ik_options.max_time = 0.05
         self._ik_marker = RoboplanIKMarker(
             scene=self._scene,
             joint_group=self._joint_group,
@@ -162,17 +175,26 @@ class PlanAndExecuteNode(Node):
         # Set up planning utilities
         self._rrt_options = RRTOptions()
         self._rrt_options.group_name = self._joint_group
-        self._rrt_options.max_connection_distance = 2.0
+        self._rrt_options.max_connection_distance = 3.0
         self._rrt_options.collision_check_step_size = 0.05
-        self._rrt_options.max_planning_time = 10.0
+        self._rrt_options.max_planning_time = 5.0
         self._rrt_options.rrt_connect = True
+        self._rrt_options.max_nodes = 10000
+        self._rrt_options.goal_biasing_probability = 0.05
+        self._rrt_options.collision_check_use_bisection = True
         self._include_shortcutting = True
-        self._max_shortcutting_iters = 200
+        self._max_shortcutting_iters = 250
+
+        self._shortcutting_options = PathShortcuttingOptions(
+            group_name=self._joint_group,
+            max_step_size=self._rrt_options.collision_check_step_size,
+            max_iters=self._max_shortcutting_iters,
+        )
 
         self._rrt = RRT(self._scene, self._rrt_options)
         self._toppra = PathParameterizerTOPPRA(self._scene, self._joint_group)
-        self._shortcutter = PathShortcutter(self._scene, self._joint_group)
-        self._traj_dt = 0.01
+        self._shortcutter = PathShortcutter(self._scene, self._shortcutting_options)
+        self._traj_dt = 0.1
 
         # Default QoS for visualization
         qos = QoSProfile(
@@ -195,7 +217,9 @@ class PlanAndExecuteNode(Node):
         # Needs its own executor for responsiveness
         self._marker_executor = SingleThreadedExecutor()
         self._marker_executor.add_node(self._marker_node)
-        self._marker_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._marker_executor,))
+        self._marker_thread = threading.Thread(
+            target=spin_executor, daemon=True, args=(self._marker_executor, self.get_logger())
+        )
         self._marker_thread.start()
 
         # Add menu to the iMarker for service access
@@ -260,6 +284,7 @@ class PlanAndExecuteNode(Node):
         self._last_joint_state = msg
 
     def _on_ik_feedback(self, feedback):
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
         q = self._ik_marker.process_feedback(feedback)
         if q is None:
             self.get_logger().warning("IK failed to solve")
@@ -284,8 +309,12 @@ class PlanAndExecuteNode(Node):
         goal.positions = self._target_q[self._q_indices]
 
         self.get_logger().info("Planning...")
+        plan_start_time = time.time()
+
         try:
+            start_time = time.time()
             path = self._rrt.plan(start, goal)
+            self.get_logger().info(f"  Finished planning in {time.time() - start_time} seconds.")
         except RuntimeError as e:
             self.get_logger().error(str(e))
             path = None
@@ -294,14 +323,19 @@ class PlanAndExecuteNode(Node):
             return False, "Planning failed."
 
         if self._include_shortcutting:
-            path = self._shortcutter.shortcut(
-                path,
-                max_step_size=self._rrt_options.collision_check_step_size,
-                max_iters=self._max_shortcutting_iters,
-            )
+            self.get_logger().info("Shortcutting...")
+            start_time = time.time()
+            path = self._shortcutter.shortcut(path)
+            self.get_logger().info(f"  Finished shortcutting in {time.time() - start_time} seconds.")
 
         self.get_logger().info("Generating trajectory...")
-        self._planned_traj = self._toppra.generate(path, self._traj_dt, SplineFittingMode.Hermite)
+        start_time = time.time()
+        self._planned_traj = self._toppra.generate(
+            path, self._traj_dt, SplineFittingMode.Adaptive, max_adaptive_iterations=5
+        )
+        self.get_logger().info(f"  Finished generating trajectory in {time.time() - start_time} seconds.")
+
+        self.get_logger().info(f"Total planning time: {time.time() - plan_start_time} seconds.")
 
         return (
             True,
@@ -366,10 +400,10 @@ class PlanAndExecuteNode(Node):
         self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
 
         # Update the IK marker's seed to the current state
-        self._ik_marker.set_joint_positions(self._latest_joint_positions)
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
 
         # Compute FK for the current state to get the marker pose
-        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link)
+        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
         pose = se3ToPose(fk)
 
         # Update the IK to the current pose
