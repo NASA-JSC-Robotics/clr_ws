@@ -2,9 +2,9 @@
 
 This package contains an example of the CLR robot picking up and placing a cargo transfer bag from its spawned location to the top of the bench.
 
-The purpose of this package is demonstrations of capabilities using behavior trees and the `drt_behaviors` package.
+The purpose of this package is demonstration of capabilities using BehaviorTree.cpp and the `drt_behaviors` package.
 
-For an introduction to behavior tree and their utilization, as well as the core packages that we build off, please refer to <https://www.behaviortree.dev/>.
+A comprehensive overview of BT.CPP and its usage is provided in their [documentation](https://www.behaviortree.dev/).
 
 ## Instructions
 
