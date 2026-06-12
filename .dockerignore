@@ -14,5 +14,5 @@ Dockerfile
 docker-compose.yml
 .gitlab-ci.yml
 
-.pixi/*
+**/.pixi/*
 !.pixi/config.toml
