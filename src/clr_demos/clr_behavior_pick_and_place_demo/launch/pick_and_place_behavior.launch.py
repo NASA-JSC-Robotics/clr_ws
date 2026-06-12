@@ -31,9 +31,9 @@ def launch_setup(context, *args, **kwargs):
     launch_rviz = LaunchConfiguration("launch_rviz")
     use_sim_time = LaunchConfiguration("use_sim_time")
 
-    rviz_config_file = PathJoinSubstitution([
-        FindPackageShare("clr_behavior_pick_and_place_demo"), "config", "clr_behaviors.rviz"
-    ])
+    rviz_config_file = PathJoinSubstitution(
+        [FindPackageShare("clr_behavior_pick_and_place_demo"), "config", "clr_behaviors.rviz"]
+    )
 
     move_group_nodes = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
