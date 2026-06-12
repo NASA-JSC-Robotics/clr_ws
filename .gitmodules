@@ -26,10 +26,6 @@
 	path = src/external/surface_robotics_mockups_description
 	url = https://github.com/NASA-JSC-Robotics/surface_robotics_mockups_description.git
 	branch = humble-devel
-[submodule "src/external/color_tools"]
-	path = src/external/color_tools
-	url = https://github.com/NASA-JSC-Robotics/color_tools.git
-	branch = humble-devel
 [submodule "src/external/drt_ur_gui"]
 	path = src/external/drt_ur_gui
 	url = https://github.com/NASA-JSC-Robotics/drt_ur_gui.git

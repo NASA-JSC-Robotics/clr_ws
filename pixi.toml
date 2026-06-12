@@ -44,7 +44,9 @@ clean = "rm -rf build/* install/* log/*"
 [dependencies]
 # Regular conda dependencies
 python = ">=3.11,<3.13"
-cmake = ">=4.1.2,<5"
+cmake = ">=4.3.3,<5"
+cxx-compiler = ">=1.11.0,<2"
+make = ">=4.4.1,<5"
 ccache = ">=4.13.1,<5"
 ninja = ">=1.13.1,<2"
 mold = ">=2.40.4,<3"
