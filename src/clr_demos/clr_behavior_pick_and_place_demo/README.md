@@ -24,8 +24,8 @@ ros2 launch clr_behavior_pick_and_place_demo pick_and_place_behavior.launch.py
 
 ### Running the demo
 
-The default RViz configuration provides a panel for loading, executing, and view logs from the BehaviorTree.cpp executor.
-The list of available trees is available from the drop down menu.
+The default RViz configuration provides a panel for loading, executing, and viewing status from the BehaviorTree.cpp executor.
+The list of available trees is available from the drop down menu in the panel.
 
 To execute a bag picking demonstration, run the following trees:
 
