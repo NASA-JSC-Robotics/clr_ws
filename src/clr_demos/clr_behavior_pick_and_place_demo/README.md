@@ -24,8 +24,21 @@ ros2 launch clr_behavior_pick_and_place_demo pick_and_place_behavior.launch.py
 
 ### Running the demo
 
-To successfully pick up the bag you have to position the wrist camera above the cargo transfer bag where it can see the red handle.
-You can do that by calling:
+The default RViz configuration provides a panel for loading, executing, and view logs from the BehaviorTree.cpp executor.
+The list of available trees is available from the drop down menu.
+
+To execute a bag picking demonstration, run the following trees:
+
+1. `MoveToPerceptionPose`
+
+    This should position the robot so that the wrist camera has the red bag handle in view.
+
+2. `BagPickUp`
+
+    Detects the bag handle, then plans and executes a trajectory to grasp and lift it.
+
+The tree executor also provides an action server for executing trees by name.
+The equivalent action calls as the above are:
 
 ```bash
 ros2 action send_goal /bt_execution btcpp_ros2_interfaces/action/ExecuteTree "{target_tree: 'MoveToPerceptionPose'}"
