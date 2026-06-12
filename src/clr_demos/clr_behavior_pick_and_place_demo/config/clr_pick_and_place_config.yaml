@@ -6,7 +6,6 @@ bt_action_server:
     ros_plugins_timeout: 10000  # Optional (defaults 1000 ms)
 
     plugins:
-      - btcpp_ros2_samples/bt_plugins
       - moveit_behavior/bt_plugins
       - geometry_behavior/bt_plugins
       - color_tools_behavior/bt_plugins

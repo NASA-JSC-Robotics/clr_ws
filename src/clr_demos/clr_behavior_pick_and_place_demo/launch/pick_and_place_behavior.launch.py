@@ -21,7 +21,6 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
@@ -41,24 +40,10 @@ def launch_setup(context, *args, **kwargs):
         ),
         launch_arguments={
             "launch_rviz": launch_rviz,
+            # "rviz_config_file":
             "include_mockups_in_description": include_mockups_in_description,
             "use_sim_time": use_sim_time,
         }.items(),
-    )
-
-    color_blob_node = Node(
-        package="color_blob_centroid",
-        executable="color_blob_node",
-        output="both",
-        parameters=[
-            {
-                "mock_hardware": False,
-                "show_image": False,
-                "debug": False,
-                "continuous_output": False,
-                "use_sim_time": use_sim_time,
-            }
-        ],
     )
 
     drt_behavior_nodes = IncludeLaunchDescription(
@@ -76,7 +61,7 @@ def launch_setup(context, *args, **kwargs):
         }.items(),
     )
 
-    return [move_group_nodes, color_blob_node, drt_behavior_nodes]
+    return [move_group_nodes, drt_behavior_nodes]
 
 
 def generate_launch_description():
