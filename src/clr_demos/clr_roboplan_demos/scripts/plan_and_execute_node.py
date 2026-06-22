@@ -35,7 +35,7 @@ from rclpy.qos import (
 )
 from control_msgs.action import FollowJointTrajectory
 from std_msgs.msg import ColorRGBA
-from visualization_msgs.msg import MarkerArray
+from visualization_msgs.msg import Marker, MarkerArray
 from interactive_markers import InteractiveMarkerServer
 from std_srvs.srv import Trigger
 from sensor_msgs.msg import JointState
@@ -44,8 +44,8 @@ from interactive_markers import MenuHandler
 from roboplan.core import JointConfiguration, PathShortcuttingOptions, PathShortcutter, Scene
 from roboplan.simple_ik import SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
-from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode
-from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker
+from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
+from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
 from roboplan_ros.cpp import (
     buildConversionMap,
     fromJointState,
@@ -191,10 +191,20 @@ class PlanAndExecuteNode(Node):
             max_iters=self._max_shortcutting_iters,
         )
 
+        self._shortcutting_options = PathShortcuttingOptions(
+            group_name=self._joint_group,
+            max_step_size=self._rrt_options.collision_check_step_size,
+            max_iters=self._max_shortcutting_iters,
+        )
+
         self._rrt = RRT(self._scene, self._rrt_options)
         self._toppra = PathParameterizerTOPPRA(self._scene, self._joint_group)
         self._shortcutter = PathShortcutter(self._scene, self._shortcutting_options)
+<<<<<<< HEAD:src/clr_demos/clr_roboplan_demos/scripts/plan_and_execute_node.py
         self._traj_dt = 0.1
+=======
+        self._traj_dt = 0.01
+>>>>>>> 8f46b18 (Include new RoboPlan ROS visualization updates):src/clr_roboplan_demos/scripts/plan_and_execute_node.py
 
         # Default QoS for visualization
         qos = QoSProfile(
@@ -234,6 +244,7 @@ class PlanAndExecuteNode(Node):
         # IK determined target pose in blue
         self._ik_visualizer = RoboplanVisualizer(
             scene=self._scene,
+            group_name=self._joint_group,
             urdf_xml=urdf_xml,
             frame_id="world",
             ns="roboplan_ik",
@@ -245,6 +256,7 @@ class PlanAndExecuteNode(Node):
         # published in green.
         self._traj_visualizer = RoboplanVisualizer(
             scene=self._scene,
+            group_name=self._joint_group,
             urdf_xml=urdf_xml,
             frame_id="world",
             ns="roboplan_traj",
@@ -256,6 +268,20 @@ class PlanAndExecuteNode(Node):
             self._traj_visualizer,
             self._traj_marker_pub,
             self._q_indices,
+        )
+
+        # Publish the planned end-effector path as a light green line upon planning.
+        # Unlike the IK/preview markers (which are republished continuously), the path
+        # is published exactly once per plan, so use a latched QoS.
+        latched_qos = QoSProfile(
+            depth=1,
+            reliability=QoSReliabilityPolicy.RELIABLE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+        )
+        self._planned_path_color = ColorRGBA(r=0.5, g=1.0, b=0.5, a=1.0)
+        self._planned_path_pub = self.create_publisher(
+            Marker, "/roboplan_trajectory/path", latched_qos
         )
 
         # Setup an action client for trajectory execution
@@ -323,6 +349,7 @@ class PlanAndExecuteNode(Node):
             return False, "Planning failed."
 
         if self._include_shortcutting:
+<<<<<<< HEAD:src/clr_demos/clr_roboplan_demos/scripts/plan_and_execute_node.py
             self.get_logger().info("Shortcutting...")
             start_time = time.time()
             path = self._shortcutter.shortcut(path)
@@ -336,6 +363,31 @@ class PlanAndExecuteNode(Node):
         self.get_logger().info(f"  Finished generating trajectory in {time.time() - start_time} seconds.")
 
         self.get_logger().info(f"Total planning time: {time.time() - plan_start_time} seconds.")
+=======
+            path = self._shortcutter.shortcut(path)
+
+        self.get_logger().info("Generating trajectory...")
+        self._planned_traj = self._toppra.generate(
+            path,
+            TOPPRAOptions(
+                self._traj_dt,
+                mode=SplineFittingMode.Adaptive,
+                max_adaptive_iterations=5,
+            ),
+        )
+
+        # Visualize the planned end-effector trajectory.
+        self._planned_path_pub.publish(
+            markerFromJointTrajectory(
+                self._scene,
+                self._planned_traj,
+                [self._tip_link],
+                frame_id="world",
+                ns="planned_trajectory",
+                color=self._planned_path_color,
+            )
+        )
+>>>>>>> 8f46b18 (Include new RoboPlan ROS visualization updates):src/clr_roboplan_demos/scripts/plan_and_execute_node.py
 
         return (
             True,
@@ -396,25 +448,39 @@ class PlanAndExecuteNode(Node):
             raise RuntimeError("No joint states received, cannot reset to hw state.")
 
         # Reset joint positions to the latest joint state
-        joint_config = fromJointState(self._last_joint_state, self._scene, self._conversion_map)
-        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
+        joint_config = fromJointState(
+            self._last_joint_state, self._scene, self._conversion_map
+        )
+        self._latest_joint_positions = joint_config.positions
 
         # Update the IK marker's seed to the current state
         self._ik_marker.set_seed_configuration(self._latest_joint_positions)
 
         # Compute FK for the current state to get the marker pose
+<<<<<<< HEAD:src/clr_demos/clr_roboplan_demos/scripts/plan_and_execute_node.py
         fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
+=======
+        fk = self._scene.forwardKinematics(
+            self._latest_joint_positions, self._tip_link, self._base_link
+        )
+>>>>>>> 8f46b18 (Include new RoboPlan ROS visualization updates):src/clr_roboplan_demos/scripts/plan_and_execute_node.py
         pose = se3ToPose(fk)
 
         # Update the IK to the current pose
         self._ik_server.setPose("ik_target", pose)
         self._ik_server.applyChanges()
-        self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(self._latest_joint_positions))
+        self._ik_marker_pub.publish(
+            self._ik_visualizer.markers_from_configuration(self._latest_joint_positions)
+        )
 
         # Clear the planned trajectory and target
         self._target_q = None
         self._planned_traj = None
         self._traj_marker_pub.publish(self._traj_visualizer.clear_markers())
+        delete_marker = Marker()
+        delete_marker.header.frame_id = "world"
+        delete_marker.action = Marker.DELETEALL
+        self._planned_path_pub.publish(delete_marker)
 
     # Menu callbacks
     def _on_plan_menu(self, feedback):
