@@ -7,6 +7,7 @@ build:
     - compile-commands
   packages-ignore:
     - roboplan_oink  # Temporary due to OSQP version mismatch
+    - roboplan_cartesian_planning
     - roboplan_examples
     - btcpp_ros2_samples
 test:
@@ -14,5 +15,6 @@ test:
     - console_direct+
   packages-ignore:
     - roboplan_oink  # Temporary due to OSQP version mismatch
+    - roboplan_cartesian_planning
     - roboplan_examples
     - btcpp_ros2_samples
