@@ -45,6 +45,9 @@ services:
       # default to colorized output of ros logs
       - RCUTILS_COLORIZED_OUTPUT=1
       - NVIDIA_DRIVER_CAPABILITIES=all
+      # Temporarily needed to build RoboPlan's OInK solver
+      # See https://github.com/tier4/osqp_vendor/issues/26
+      - CMAKE_POLICY_VERSION_MINIMUM=3.5
     volumes:
       # If they are present, mount DDS configurations from the host machine into the container.
       # If not, fallback to the default localhost configurations for both fastrtps and cyclonedds.

@@ -6,15 +6,9 @@ build:
     - ccache
     - compile-commands
   packages-ignore:
-    - roboplan_oink  # Temporary due to OSQP version mismatch
-    - roboplan_cartesian_planning
-    - roboplan_examples
     - btcpp_ros2_samples
 test:
   event-handlers:
     - console_direct+
   packages-ignore:
-    - roboplan_oink  # Temporary due to OSQP version mismatch
-    - roboplan_cartesian_planning
-    - roboplan_examples
     - btcpp_ros2_samples

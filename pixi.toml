@@ -27,6 +27,9 @@ LDFLAGS = "-L${CONDA_PREFIX}/lib -Wl,-rpath,${CONDA_PREFIX}/lib -fuse-ld=mold"
 COLCON_DEFAULT_OUTPUT_STYLE = "catkin_tools"
 COLCON_DEFAULTS_FILE = "${PIXI_PROJECT_ROOT}/config/colcon-defaults.yaml"
 RCUTILS_COLORIZED_OUTPUT = "1"
+# Temporarily needed to build RoboPlan's OInK solver
+# See https://github.com/tier4/osqp_vendor/issues/26
+CMAKE_POLICY_VERSION_MINIMUM = "3.5"
 
 [tasks]
 # Setup tasks
@@ -58,6 +61,7 @@ trimesh = ">=4.11.4,<5"
 pycollada = ">=0.9.3,<0.10"
 viser = ">=1.0.29,<2"
 matplotlib = ">=3.10.9,<4"
+osqp-eigen = ">=0.11.0,<0.12"
 
 # ROS dependencies
 ros-jazzy-ros-base = "*"
