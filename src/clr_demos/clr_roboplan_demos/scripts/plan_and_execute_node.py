@@ -41,8 +41,14 @@ from std_srvs.srv import Trigger
 from sensor_msgs.msg import JointState
 from interactive_markers import MenuHandler
 
-from roboplan.core import JointConfiguration, PathShortcuttingOptions, PathShortcutter, Scene
-from roboplan.simple_ik import SimpleIkOptions
+from roboplan.core import (
+    CartesianConfiguration,
+    JointConfiguration,
+    PathShortcuttingOptions,
+    PathShortcutter,
+    Scene,
+)
+from roboplan.simple_ik import SimpleIk, SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
 from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
@@ -164,12 +170,32 @@ class PlanAndExecuteNode(Node):
         ik_options.fast_return = False
         ik_options.max_iters = 500
         ik_options.max_time = 0.05
+
+        # Setup an IK solver and function to pass to the interactive marker
+        ik_solver = SimpleIk(self._scene, ik_options)
+        q_indices = self._q_indices
+        joint_group = self._joint_group
+        base_link = self._base_link
+        tip_link = self._tip_link
+        scene = self._scene
+
+        def ik_solve_fn(target_pose, seed):
+            goal = CartesianConfiguration()
+            goal.base_frame = base_link
+            goal.tip_frame = tip_link
+            goal.tform = target_pose
+            seed_jc = JointConfiguration()
+            seed_jc.positions = seed[q_indices]
+            solution = JointConfiguration()
+            if ik_solver.solveIk(goal, seed_jc, solution):
+                return scene.toFullJointPositions(joint_group, solution.positions)
+            return None
+
         self._ik_marker = RoboplanIKMarker(
             scene=self._scene,
-            joint_group=self._joint_group,
             base_link=self._base_link,
             tip_link=self._tip_link,
-            options=ik_options,
+            ik_solve_fn=ik_solve_fn,
         )
 
         # Set up planning utilities
