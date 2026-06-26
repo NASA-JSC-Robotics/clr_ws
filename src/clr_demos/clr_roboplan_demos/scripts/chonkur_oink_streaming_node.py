@@ -77,19 +77,14 @@ class CartesianServoNode(Node):
                 f"Use a config with supports_streaming=True."
             )
 
-        self.get_logger().info(
-            f"Using robot config '{self._config.name}' "
-            f"(group={self._config.joint_group})"
-        )
+        self.get_logger().info(f"Using robot config '{self._config.name}' " f"(group={self._config.joint_group})")
 
         self._scene, _, _ = create_scene()
         group_info = self._scene.getJointGroupInfo(self._config.joint_group)
         self._q_indices = group_info.q_indices
         self._joint_names = group_info.joint_names
 
-        self._js = JointStateTracker(
-            self._scene, "/joint_states", self.get_logger()
-        )
+        self._js = JointStateTracker(self._scene, "/joint_states", self.get_logger())
         self._js.wait_for_joint_state(self.get_logger())
 
         # Setup OinK
@@ -128,19 +123,12 @@ class CartesianServoNode(Node):
         self._tasks = [self._frame_task, config_task]
 
         position_limit = PositionLimit(self._oink, gain=1.0)
-        v_max = np.hstack(
-            [
-                self._scene.getJointInfo(n).limits.max_velocity
-                for n in self._joint_names
-            ]
-        )
+        v_max = np.hstack([self._scene.getJointInfo(n).limits.max_velocity for n in self._joint_names])
         velocity_limit = VelocityLimit(self._oink, self._dt, v_max)
         self._constraints = [position_limit, velocity_limit]
         self._barriers = []
 
-        initial_pose = self._scene.forwardKinematics(
-            q_home, self._config.tip_link, self._config.base_link
-        )
+        initial_pose = self._scene.forwardKinematics(q_home, self._config.tip_link, self._config.base_link)
         self._raw_target = initial_pose.copy()
         self._reference_filter = SE3LowPassFilter(tau=0.1)
         self._reference_filter.reset(initial_pose)
@@ -192,15 +180,11 @@ class CartesianServoNode(Node):
         self.create_service(Trigger, "~/reset", self._on_reset_srv)
 
         self._running = True
-        self._control_thread = threading.Thread(
-            target=self._control_loop, daemon=True
-        )
+        self._control_thread = threading.Thread(target=self._control_loop, daemon=True)
         self._control_thread.start()
 
         self._reset()
-        self.get_logger().info(
-            "Ready. Drag the marker, then right-click > Start to begin servoing."
-        )
+        self.get_logger().info("Ready. Drag the marker, then right-click > Start to begin servoing.")
 
     def _on_ik_feedback(self, feedback):
         self._ik_marker.set_seed_configuration(self._js.latest_positions)
@@ -212,16 +196,10 @@ class CartesianServoNode(Node):
 
             if self._streaming:
                 with self._lock:
-                    q_current = np.array(
-                        self._scene.getCurrentJointPositions()
-                    )
-                    self._scene.forwardKinematics(
-                        q_current, self._config.tip_link
-                    )
+                    q_current = np.array(self._scene.getCurrentJointPositions())
+                    self._scene.forwardKinematics(q_current, self._config.tip_link)
 
-                    filtered = self._reference_filter.update(
-                        self._raw_target, self._dt
-                    )
+                    filtered = self._reference_filter.update(self._raw_target, self._dt)
                     self._frame_task.setTargetFrameTransform(filtered)
 
                     try:
@@ -242,14 +220,10 @@ class CartesianServoNode(Node):
 
                     self._delta_q_full[:] = 0.0
                     self._delta_q_full[self._oink.v_indices] = self._delta_q
-                    q_current = self._scene.integrate(
-                        q_current, self._delta_q_full
-                    )
+                    q_current = self._scene.integrate(q_current, self._delta_q_full)
 
                     self._scene.setJointPositions(q_current)
-                    self._scene.forwardKinematics(
-                        q_current, self._config.tip_link
-                    )
+                    self._scene.forwardKinematics(q_current, self._config.tip_link)
                     self._js.latest_positions = q_current
 
                 if self._skip_next_command:
@@ -275,9 +249,7 @@ class CartesianServoNode(Node):
         with self._lock:
             self._scene.setJointPositions(q)
             self._scene.forwardKinematics(q, self._config.tip_link)
-            current_pose = self._scene.forwardKinematics(
-                q, self._config.tip_link, self._config.base_link
-            )
+            current_pose = self._scene.forwardKinematics(q, self._config.tip_link, self._config.base_link)
             self._reference_filter.reset(current_pose)
             self._js.latest_positions = q
         self._skip_next_command = True
@@ -296,9 +268,7 @@ class CartesianServoNode(Node):
         with self._lock:
             self._scene.setJointPositions(q)
             self._scene.forwardKinematics(q, self._config.tip_link)
-            initial_pose = self._scene.forwardKinematics(
-                q, self._config.tip_link, self._config.base_link
-            )
+            initial_pose = self._scene.forwardKinematics(q, self._config.tip_link, self._config.base_link)
             self._raw_target = initial_pose.copy()
             self._reference_filter.reset(initial_pose)
 

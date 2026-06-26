@@ -26,14 +26,12 @@ stay focused on their workflow.
 import os
 import time
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-import numpy as np
 import xacro
 
 from ament_index_python.packages import get_package_share_directory
 
-import rclpy
 from rclpy.node import Node
 from rclpy.executors import SingleThreadedExecutor, ExternalShutdownException
 from rclpy.qos import (
@@ -96,9 +94,7 @@ def get_robot_config(name: str) -> RobotConfig:
     """Look up a robot configuration by name, raising on unknown names."""
     if name not in ROBOT_CONFIGS:
         available = ", ".join(ROBOT_CONFIGS.keys())
-        raise ValueError(
-            f"Unknown robot config '{name}'. Available: {available}"
-        )
+        raise ValueError(f"Unknown robot config '{name}'. Available: {available}")
     return ROBOT_CONFIGS[name]
 
 
@@ -164,14 +160,10 @@ class JointStateTracker:
         self.latest_positions = None
 
         self._node = Node("joint_state_listener")
-        self._sub = self._node.create_subscription(
-            JointState, topic, self._on_msg, BEST_EFFORT_QOS
-        )
+        self._sub = self._node.create_subscription(JointState, topic, self._on_msg, BEST_EFFORT_QOS)
         self._executor = SingleThreadedExecutor()
         self._executor.add_node(self._node)
-        self._thread = threading.Thread(
-            target=spin_executor, daemon=True, args=(self._executor, logger)
-        )
+        self._thread = threading.Thread(target=spin_executor, daemon=True, args=(self._executor, logger))
         self._thread.start()
 
     def _on_msg(self, msg):
@@ -188,12 +180,8 @@ class JointStateTracker:
 
     def sync_to_hardware(self):
         """Read the latest joint state into the scene, return positions."""
-        joint_config = fromJointState(
-            self.last_msg, self.scene, self.conversion_map
-        )
-        self.latest_positions = self.scene.clampToValidConfiguration(
-            joint_config.positions
-        )
+        joint_config = fromJointState(self.last_msg, self.scene, self.conversion_map)
+        self.latest_positions = self.scene.clampToValidConfiguration(joint_config.positions)
         return self.latest_positions
 
     def shutdown(self):
