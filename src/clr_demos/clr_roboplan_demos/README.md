@@ -34,8 +34,20 @@ ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ros2 control switch_controllers --deactivate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller --activate clr_joint_trajectory_controller
 ```
 
-3. Launch the RoboPlan planning and execution node, which also starts up an RViz window with an interactive marker.
+Or to switch back (for IK streaming):
 
 ```bash
+ros2 control switch_controllers --deactivate clr_joint_trajectory_controller --activate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller
+```
+
+3. Launch one of the RoboPlan demo nodes, which also starts up an RViz window with an interactive marker.
+
+```bash
+# Launches a sample set, plan, preview, move demo using all of CLR.
+# Requires the clr_joint_trajectory_controller to be active.
 ros2 launch clr_roboplan_demos clr_example_planning.launch.yaml
+
+# Launches a sample Cartesian IK streaming demo with ChonkUR.
+# Requires the joint_trajectory_controller to be active.
+ros2 launch clr_roboplan_demos chonkur_example_streaming.launch.yaml
 ```
