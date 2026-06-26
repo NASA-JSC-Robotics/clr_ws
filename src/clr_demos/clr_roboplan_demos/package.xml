@@ -8,9 +8,11 @@
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>roboplan</depend>
   <depend>roboplan_simple_ik</depend>
+  <depend>roboplan_oink</depend>
   <depend>roboplan_rrt</depend>
   <depend>roboplan_toppra</depend>
   <depend>xacro</depend>

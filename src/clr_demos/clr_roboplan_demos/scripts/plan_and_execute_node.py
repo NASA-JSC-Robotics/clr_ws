@@ -1,4 +1,21 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) 2025, United States Government, as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+#
+# All rights reserved.
+#
+# This software is licensed under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with the
+# License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
 """
 Example node demonstrating a basic plan, preview, and move workflow:
@@ -11,22 +28,13 @@ Intended as an example _only_. Consumers are expected to use this as a
 reference, rather than hardened application code.
 """
 
-import os
 import time
 import threading
-import xacro
-import numpy as np
-
-from ament_index_python.packages import get_package_share_directory
 
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
-from rclpy.executors import (
-    MultiThreadedExecutor,
-    SingleThreadedExecutor,
-    ExternalShutdownException,
-)
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.qos import (
     QoSProfile,
     QoSReliabilityPolicy,
@@ -36,42 +44,29 @@ from rclpy.qos import (
 from control_msgs.action import FollowJointTrajectory
 from std_msgs.msg import ColorRGBA
 from visualization_msgs.msg import Marker, MarkerArray
-from interactive_markers import InteractiveMarkerServer
+from interactive_markers import InteractiveMarkerServer, MenuHandler
 from std_srvs.srv import Trigger
-from sensor_msgs.msg import JointState
-from interactive_markers import MenuHandler
 
 from roboplan.core import (
     CartesianConfiguration,
     JointConfiguration,
     PathShortcuttingOptions,
     PathShortcutter,
-    Scene,
 )
 from roboplan.simple_ik import SimpleIk, SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
 from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
-from roboplan_ros.cpp import (
-    buildConversionMap,
-    fromJointState,
-    toJointTrajectory,
-    se3ToPose,
-)
+from roboplan_ros.cpp import se3ToPose, toJointTrajectory
 from roboplan_ros_py.trajectory_publisher import TrajectoryPublisher
 
-
-def spin_executor(executor, logger=None):
-    """Helper function to spin an executor."""
-    try:
-        executor.spin()
-    except ExternalShutdownException:
-        pass
-    except KeyboardInterrupt:
-        pass
-    except Exception as e:
-        if logger:
-            logger.warning(f"Executor caught exception, shutting down: {e}")
+from clr_roboplan_demos import (
+    BEST_EFFORT_QOS,
+    create_scene,
+    get_robot_config,
+    spin_executor,
+    JointStateTracker,
+)
 
 
 class PlanAndExecuteNode(Node):
@@ -88,77 +83,28 @@ class PlanAndExecuteNode(Node):
     def __init__(self):
         super().__init__("plan_and_execute_node")
 
-        # Get robot description files and setup the scene
-        model_xacro_path = os.path.join(
-            get_package_share_directory("clr_mujoco_config"),
-            "urdf",
-            "clr_mujoco_xacro.urdf",
-        )
-        urdf_xml = xacro.process_file(model_xacro_path).toxml()
-        self._urdf_xml = urdf_xml
-
-        srdf_xacro_path = os.path.join(
-            get_package_share_directory("clr_moveit_config"),
-            "srdf",
-            "clr_and_sim_mockups.srdf.xacro",
-        )
-        srdf_xml = xacro.process_file(srdf_xacro_path).toxml()
-
-        yaml_config_path = os.path.join(
-            get_package_share_directory("clr_roboplan_demos"),
-            "config",
-            "clr_roboplan_config.yaml",
-        )
-        package_paths = [
-            get_package_share_directory("clr_mujoco_config"),
-        ]
-        self._scene = Scene(
-            name="plan_execute_scene",
-            urdf=urdf_xml,
-            srdf=srdf_xml,
-            package_paths=package_paths,
-            yaml_config_path=yaml_config_path,
+        self.declare_parameter("robot", "clr")
+        self._config = get_robot_config(self.get_parameter("robot").value)
+        self.get_logger().info(
+            f"Using robot config '{self._config.name}' "
+            f"(group={self._config.joint_group})"
         )
 
-        self._joint_group = "clr"
-        self._base_link = "vention_rail_base_link"
-        self._tip_link = "grasp_frame"
+        # Scene setup
+        self._scene, urdf_xml, _ = create_scene()
 
-        # Subscribe to joint states to keep the scene in sync with hardware. These
-        # can bog down other CBs, so putting it out here keeps the rest of the node
-        # responsive.
-        self._js_node = Node("joint_state_listener")
-        self._js_sub = self._js_node.create_subscription(
-            JointState,
-            "/joint_states",
-            self._on_joint_state,
-            QoSProfile(
-                depth=1,
-                reliability=QoSReliabilityPolicy.BEST_EFFORT,
-                history=QoSHistoryPolicy.KEEP_LAST,
-                durability=QoSDurabilityPolicy.VOLATILE,
-            ),
+        self._joint_group = self._config.joint_group
+        self._base_link = self._config.base_link
+        self._tip_link = self._config.tip_link
+
+        group_info = self._scene.getJointGroupInfo(self._joint_group)
+        self._q_indices = group_info.q_indices
+
+        # Joint state tracking
+        self._js = JointStateTracker(
+            self._scene, "/joint_states", self.get_logger()
         )
-        self._last_joint_state = None
-        self._conversion_map = None
-        self._q_indices = self._scene.getJointGroupInfo(self._joint_group).q_indices
-        self._latest_joint_positions: np.array | None = None
-
-        self._js_executor = SingleThreadedExecutor()
-        self._js_executor.add_node(self._js_node)
-        self._js_thread = threading.Thread(
-            target=spin_executor,
-            daemon=True,
-            args=(
-                self._js_executor,
-                self.get_logger(),
-            ),
-        )
-        self._js_thread.start()
-
-        while self._last_joint_state is None:
-            self.get_logger().info("Waiting for joint positions...")
-            time.sleep(1.0)
+        self._js.wait_for_joint_state(self.get_logger())
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
@@ -217,24 +163,10 @@ class PlanAndExecuteNode(Node):
             max_iters=self._max_shortcutting_iters,
         )
 
-        self._shortcutting_options = PathShortcuttingOptions(
-            group_name=self._joint_group,
-            max_step_size=self._rrt_options.collision_check_step_size,
-            max_iters=self._max_shortcutting_iters,
-        )
-
         self._rrt = RRT(self._scene, self._rrt_options)
         self._toppra = PathParameterizerTOPPRA(self._scene, self._joint_group)
         self._shortcutter = PathShortcutter(self._scene, self._shortcutting_options)
         self._traj_dt = 0.01
-
-        # Default QoS for visualization
-        qos = QoSProfile(
-            depth=1,
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
-            history=QoSHistoryPolicy.KEEP_LAST,
-            durability=QoSDurabilityPolicy.VOLATILE,
-        )
 
         # Configure elements for determining and previewing poses from the
         # iMarker
@@ -272,7 +204,9 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_ik",
             color=ColorRGBA(r=0.0, g=0.0, b=1.0, a=0.5),
         )
-        self._ik_marker_pub = self.create_publisher(MarkerArray, "roboplan_ik/markers", qos)
+        self._ik_marker_pub = self.create_publisher(
+            MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS
+        )
 
         # Configure tools for previewing trajectories, the markers will be
         # published in green.
@@ -284,7 +218,9 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_traj",
             color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=0.3),
         )
-        self._traj_marker_pub = self.create_publisher(MarkerArray, "roboplan_trajectory/markers", qos)
+        self._traj_marker_pub = self.create_publisher(
+            MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS
+        )
         self._player = TrajectoryPublisher(
             self._scene,
             self._traj_visualizer,
@@ -305,8 +241,9 @@ class PlanAndExecuteNode(Node):
         self._planned_path_pub = self.create_publisher(Marker, "/roboplan_trajectory/path", latched_qos)
 
         # Setup an action client for trajectory execution
-        controller_action = "/clr_joint_trajectory_controller/follow_joint_trajectory"
-        self._execute_client = ActionClient(self, FollowJointTrajectory, controller_action)
+        self._execute_client = ActionClient(
+            self, FollowJointTrajectory, self._config.controller_action
+        )
 
         # Target pose and planned trajectories
         self._target_q = None
@@ -323,14 +260,8 @@ class PlanAndExecuteNode(Node):
         self.get_logger().info("Ready. Move the interactive marker to set a target.")
         self.get_logger().info("Call services: ~/plan, ~/preview, ~/execute, ~/reset")
 
-    def _on_joint_state(self, msg):
-        if self._conversion_map is None:
-            self._conversion_map = buildConversionMap(self._scene, msg)
-
-        self._last_joint_state = msg
-
     def _on_ik_feedback(self, feedback):
-        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
+        self._ik_marker.set_seed_configuration(self._js.latest_positions)
         q = self._ik_marker.process_feedback(feedback)
         if q is None:
             self.get_logger().warning("IK failed to solve")
@@ -339,17 +270,16 @@ class PlanAndExecuteNode(Node):
             self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
 
     def _plan(self):
-        if self._last_joint_state is None:
+        if self._js.last_msg is None:
             return False, "Have not yet received joint positions from hardware. Cannot plan."
         if self._target_q is None:
             return False, "No target set. Move the interactive marker first."
 
-        joint_config = fromJointState(self._last_joint_state, self._scene, self._conversion_map)
-        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
-        self._scene.setJointPositions(self._latest_joint_positions)
+        q = self._js.sync_to_hardware()
+        self._scene.setJointPositions(q)
 
         start = JointConfiguration()
-        start.positions = self._latest_joint_positions[self._q_indices]
+        start.positions = q[self._q_indices]
 
         goal = JointConfiguration()
         goal.positions = self._target_q[self._q_indices]
@@ -455,26 +385,19 @@ class PlanAndExecuteNode(Node):
 
     def _reset(self):
         """Clears all plans and resets to a hardware state."""
-        if self._last_joint_state is None:
+        if self._js.last_msg is None:
             raise RuntimeError("No joint states received, cannot reset to hw state.")
 
-        # Reset joint positions to the latest joint state
-        joint_config = fromJointState(self._last_joint_state, self._scene, self._conversion_map)
-        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
+        q = self._js.sync_to_hardware()
 
-        # Update the IK marker's seed to the current state
-        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
-
-        # Compute FK for the current state to get the marker pose
-        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
+        self._ik_marker.set_seed_configuration(q)
+        fk = self._scene.forwardKinematics(q, self._tip_link, self._base_link)
         pose = se3ToPose(fk)
 
-        # Update the IK to the current pose
         self._ik_server.setPose("ik_target", pose)
         self._ik_server.applyChanges()
-        self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(self._latest_joint_positions))
+        self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
 
-        # Clear the planned trajectory and target
         self._target_q = None
         self._planned_traj = None
         self._traj_marker_pub.publish(self._traj_visualizer.clear_markers())
@@ -530,11 +453,21 @@ class PlanAndExecuteNode(Node):
 
     def destroy_node(self):
         self._player.stop()
-        self._js_executor.shutdown()
+        self._js.shutdown()
         self._marker_executor.shutdown()
-        self._js_thread.join(timeout=0.25)
         self._marker_thread.join(timeout=0.25)
         self._marker_node.destroy_node()
+
+        # Explicitly deconstruct things
+        self._ik_marker = None
+        self._ik_visualizer = None
+        self._traj_visualizer = None
+        self._ik_solver = None
+        self._rrt = None
+        self._toppra = None
+        self._shortcutter = None
+        self._scene = None
+
         super().destroy_node()
 
 

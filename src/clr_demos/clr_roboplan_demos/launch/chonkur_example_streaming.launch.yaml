@@ -9,7 +9,7 @@ launch:
         pkg: rviz2
         exec: rviz2
         name: rviz2
-        args: "-d $(find-pkg-share clr_roboplan_demos)/config/clr_roboplan_config.rviz"
+        args: "-d $(find-pkg-share clr_roboplan_demos)/config/clr_oink_config.rviz"
         param:
         - name: use_sim_time
           value: $(var use_sim_time)
@@ -17,7 +17,7 @@ launch:
   # IK planning and execution node
   - node:
       pkg: clr_roboplan_demos
-      exec: plan_and_execute_node.py
+      exec: chonkur_oink_streaming_node.py
       param:
         - name: use_sim_time
           value: $(var use_sim_time)
