@@ -85,10 +85,7 @@ class PlanAndExecuteNode(Node):
 
         self.declare_parameter("robot", "clr")
         self._config = get_robot_config(self.get_parameter("robot").value)
-        self.get_logger().info(
-            f"Using robot config '{self._config.name}' "
-            f"(group={self._config.joint_group})"
-        )
+        self.get_logger().info(f"Using robot config '{self._config.name}' " f"(group={self._config.joint_group})")
 
         # Scene setup
         self._scene, urdf_xml, _ = create_scene()
@@ -101,9 +98,7 @@ class PlanAndExecuteNode(Node):
         self._q_indices = group_info.q_indices
 
         # Joint state tracking
-        self._js = JointStateTracker(
-            self._scene, "/joint_states", self.get_logger()
-        )
+        self._js = JointStateTracker(self._scene, "/joint_states", self.get_logger())
         self._js.wait_for_joint_state(self.get_logger())
 
         # Set the IK solver options
@@ -204,9 +199,7 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_ik",
             color=ColorRGBA(r=0.0, g=0.0, b=1.0, a=0.5),
         )
-        self._ik_marker_pub = self.create_publisher(
-            MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS
-        )
+        self._ik_marker_pub = self.create_publisher(MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS)
 
         # Configure tools for previewing trajectories, the markers will be
         # published in green.
@@ -218,9 +211,7 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_traj",
             color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=0.3),
         )
-        self._traj_marker_pub = self.create_publisher(
-            MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS
-        )
+        self._traj_marker_pub = self.create_publisher(MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS)
         self._player = TrajectoryPublisher(
             self._scene,
             self._traj_visualizer,
@@ -241,9 +232,7 @@ class PlanAndExecuteNode(Node):
         self._planned_path_pub = self.create_publisher(Marker, "/roboplan_trajectory/path", latched_qos)
 
         # Setup an action client for trajectory execution
-        self._execute_client = ActionClient(
-            self, FollowJointTrajectory, self._config.controller_action
-        )
+        self._execute_client = ActionClient(self, FollowJointTrajectory, self._config.controller_action)
 
         # Target pose and planned trajectories
         self._target_q = None
