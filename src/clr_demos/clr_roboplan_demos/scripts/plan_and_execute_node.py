@@ -34,7 +34,7 @@ import threading
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
+from rclpy.executors import SingleThreadedExecutor
 from rclpy.qos import (
     QoSProfile,
     QoSReliabilityPolicy,
@@ -57,16 +57,22 @@ from roboplan.simple_ik import SimpleIk, SimpleIkOptions
 from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
 from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
-from roboplan_ros.cpp import se3ToPose, toJointTrajectory
+from roboplan_ros.cpp import (
+    buildConversionMap,
+    fromJointState,
+    se3ToPose,
+    toJointTrajectory,
+)
 from roboplan_ros_py.trajectory_publisher import TrajectoryPublisher
 
 from clr_roboplan_demos import (
     BEST_EFFORT_QOS,
     create_scene,
     get_robot_config,
+    run_node,
     spin_executor,
-    JointStateTracker,
 )
+from clr_roboplan_demos.utils import JointStateSubscriber
 
 
 class PlanAndExecuteNode(Node):
@@ -97,9 +103,20 @@ class PlanAndExecuteNode(Node):
         group_info = self._scene.getJointGroupInfo(self._joint_group)
         self._q_indices = group_info.q_indices
 
-        # Joint state tracking
-        self._js = JointStateTracker(self._scene, "/joint_states", self.get_logger())
-        self._js.wait_for_joint_state(self.get_logger())
+        # Subscribe to joint states to keep the scene in sync with hardware. These
+        # can bog down other CBs, so putting it out here keeps the rest of the node
+        # responsive.
+        self._js_subscriber = JointStateSubscriber("clr_joint_state_listener", "/joint_states")
+
+        # Wait for joint states
+        while self._js_subscriber.last_joint_state is None:
+            self.get_logger().info("Waiting for joint positions...")
+            time.sleep(1.0)
+
+        # Once we have joint states we can build the conversion map
+        self._conversion_map = buildConversionMap(
+            self._scene, self._js_subscriber.last_joint_state
+        )
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
@@ -146,7 +163,7 @@ class PlanAndExecuteNode(Node):
         self._rrt_options.collision_check_step_size = 0.05
         self._rrt_options.max_planning_time = 5.0
         self._rrt_options.rrt_connect = True
-        self._rrt_options.max_nodes = 10000
+        self._rrt_options.max_nodes = 1000
         self._rrt_options.goal_biasing_probability = 0.05
         self._rrt_options.collision_check_use_bisection = True
         self._include_shortcutting = True
@@ -177,7 +194,7 @@ class PlanAndExecuteNode(Node):
         self._marker_executor = SingleThreadedExecutor()
         self._marker_executor.add_node(self._marker_node)
         self._marker_thread = threading.Thread(
-            target=spin_executor, daemon=True, args=(self._marker_executor, self.get_logger())
+            target=spin_executor, daemon=True, args=(self._marker_executor,)
         )
         self._marker_thread.start()
 
@@ -199,7 +216,9 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_ik",
             color=ColorRGBA(r=0.0, g=0.0, b=1.0, a=0.5),
         )
-        self._ik_marker_pub = self.create_publisher(MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS)
+        self._ik_marker_pub = self.create_publisher(
+            MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS
+        )
 
         # Configure tools for previewing trajectories, the markers will be
         # published in green.
@@ -211,7 +230,9 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_traj",
             color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=0.3),
         )
-        self._traj_marker_pub = self.create_publisher(MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS)
+        self._traj_marker_pub = self.create_publisher(
+            MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS
+        )
         self._player = TrajectoryPublisher(
             self._scene,
             self._traj_visualizer,
@@ -229,10 +250,14 @@ class PlanAndExecuteNode(Node):
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
         )
         self._planned_path_color = ColorRGBA(r=0.5, g=1.0, b=0.5, a=1.0)
-        self._planned_path_pub = self.create_publisher(Marker, "/roboplan_trajectory/path", latched_qos)
+        self._planned_path_pub = self.create_publisher(
+            Marker, "/roboplan_trajectory/path", latched_qos
+        )
 
         # Setup an action client for trajectory execution
-        self._execute_client = ActionClient(self, FollowJointTrajectory, self._config.controller_action)
+        self._execute_client = ActionClient(
+            self, FollowJointTrajectory, self._config.controller_action
+        )
 
         # Target pose and planned trajectories
         self._target_q = None
@@ -250,25 +275,34 @@ class PlanAndExecuteNode(Node):
         self.get_logger().info("Call services: ~/plan, ~/preview, ~/execute, ~/reset")
 
     def _on_ik_feedback(self, feedback):
-        self._ik_marker.set_seed_configuration(self._js.latest_positions)
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
         q = self._ik_marker.process_feedback(feedback)
-        if q is None:
-            self.get_logger().warning("IK failed to solve")
-        else:
+        if q is not None:
             self._target_q = q
-            self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
+            self._ik_marker_pub.publish(
+                self._ik_visualizer.markers_from_configuration(q)
+            )
 
     def _plan(self):
-        if self._js.last_msg is None:
-            return False, "Have not yet received joint positions from hardware. Cannot plan."
         if self._target_q is None:
             return False, "No target set. Move the interactive marker first."
 
-        q = self._js.sync_to_hardware()
-        self._scene.setJointPositions(q)
+        joint_config = fromJointState(
+            self._js_subscriber.last_joint_state, self._scene, self._conversion_map
+        )
+
+        self._latest_joint_positions = joint_config.positions
+
+        # MuJoCo, in particular, can push joints an epsilon past their limits, so this
+        # is a little hacky but prevents planning failures due to constraint violations.
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(
+            joint_config.positions
+        )
+
+        self._scene.setJointPositions(self._latest_joint_positions)
 
         start = JointConfiguration()
-        start.positions = q[self._q_indices]
+        start.positions = self._latest_joint_positions[self._q_indices]
 
         goal = JointConfiguration()
         goal.positions = self._target_q[self._q_indices]
@@ -279,7 +313,9 @@ class PlanAndExecuteNode(Node):
         try:
             start_time = time.time()
             path = self._rrt.plan(start, goal)
-            self.get_logger().info(f"  Finished planning in {time.time() - start_time} seconds.")
+            self.get_logger().info(
+                f"  Finished planning in {time.time() - start_time} seconds."
+            )
         except RuntimeError as e:
             self.get_logger().error(str(e))
             path = None
@@ -291,7 +327,9 @@ class PlanAndExecuteNode(Node):
             self.get_logger().info("Shortcutting...")
             start_time = time.time()
             path = self._shortcutter.shortcut(path)
-            self.get_logger().info(f"  Finished shortcutting in {time.time() - start_time} seconds.")
+            self.get_logger().info(
+                f"  Finished shortcutting in {time.time() - start_time} seconds."
+            )
 
         self.get_logger().info("Generating trajectory...")
         start_time = time.time()
@@ -303,9 +341,13 @@ class PlanAndExecuteNode(Node):
                 max_adaptive_iterations=5,
             ),
         )
-        self.get_logger().info(f"  Finished generating trajectory in {time.time() - start_time} seconds.")
+        self.get_logger().info(
+            f"  Finished generating trajectory in {time.time() - start_time} seconds."
+        )
 
-        self.get_logger().info(f"Total planning time: {time.time() - plan_start_time} seconds.")
+        self.get_logger().info(
+            f"Total planning time: {time.time() - plan_start_time} seconds."
+        )
 
         # Visualize the planned end-effector trajectory.
         self._planned_path_pub.publish(
@@ -347,7 +389,9 @@ class PlanAndExecuteNode(Node):
         goal.trajectory = toJointTrajectory(self._planned_traj)
 
         self.get_logger().info("Sending trajectory for execution...")
-        future = self._execute_client.send_goal_async(goal, feedback_callback=self._execute_feedback)
+        future = self._execute_client.send_goal_async(
+            goal, feedback_callback=self._execute_feedback
+        )
         future.add_done_callback(self._execute_goal_response)
 
         return True, "Trajectory sent for execution."
@@ -370,23 +414,41 @@ class PlanAndExecuteNode(Node):
         if result.error_code == FollowJointTrajectory.Result.SUCCESSFUL:
             self.get_logger().info("Trajectory execution complete.")
         else:
-            self.get_logger().error(f"Trajectory execution failed with error code: {result.error_code}")
+            self.get_logger().error(
+                f"Trajectory execution failed with error code: {result.error_code}"
+            )
 
     def _reset(self):
         """Clears all plans and resets to a hardware state."""
-        if self._js.last_msg is None:
+        if self._js_subscriber.last_joint_state is None:
             raise RuntimeError("No joint states received, cannot reset to hw state.")
 
-        q = self._js.sync_to_hardware()
+        # Reset joint positions to the latest joint state
+        joint_config = fromJointState(
+            self._js_subscriber.last_joint_state, self._scene, self._conversion_map
+        )
+        self._latest_joint_positions = joint_config.positions
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(
+            joint_config.positions
+        )
 
-        self._ik_marker.set_seed_configuration(q)
-        fk = self._scene.forwardKinematics(q, self._tip_link, self._base_link)
+        # Update the IK marker's seed to the current state
+        self._ik_marker.set_seed_configuration(self._latest_joint_positions)
+
+        # Compute FK for the current state to get the marker pose
+        fk = self._scene.forwardKinematics(
+            self._latest_joint_positions, self._tip_link, self._base_link
+        )
         pose = se3ToPose(fk)
 
+        # Update the IK to the current pose
         self._ik_server.setPose("ik_target", pose)
         self._ik_server.applyChanges()
-        self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
+        self._ik_marker_pub.publish(
+            self._ik_visualizer.markers_from_configuration(self._latest_joint_positions)
+        )
 
+        # Clear the planned trajectory and target
         self._target_q = None
         self._planned_traj = None
         self._traj_marker_pub.publish(self._traj_visualizer.clear_markers())
@@ -409,11 +471,8 @@ class PlanAndExecuteNode(Node):
         self.get_logger().info(msg)
 
     def _on_reset_menu(self, feedback):
-        try:
-            self._reset()
-            self.get_logger().info("Reset node to current state.")
-        except Exception as e:
-            self.get_logger().error(f"Failed to reset the node: {e}")
+        self._reset()
+        self.get_logger().info("Reset node to current state.")
 
     # Trigger service callbacks
     def _on_plan(self, request, response):
@@ -429,52 +488,26 @@ class PlanAndExecuteNode(Node):
         return response
 
     def _on_reset(self, request, response):
-        try:
-            self._reset()
-            response.success = True
-            response.message = "Reset node to current state."
-            self.get_logger().info(response.message)
-        except Exception as e:
-            response.success = False
-            response.message = f"Failed to reset the node: {e}"
-            self.get_logger().info(response.message)
+        self._reset()
+        response.success = True
+        response.message = "Reset node to current state."
+        self.get_logger().info(response.message)
         return response
 
     def destroy_node(self):
         self._player.stop()
-        self._js.shutdown()
+        self._js_subscriber.shutdown()
         self._marker_executor.shutdown()
         self._marker_thread.join(timeout=0.25)
         self._marker_node.destroy_node()
 
-        # Explicitly deconstruct things
+        # Manually remove self referenced nanobind objects before destruction.
+        # https://nanobind.readthedocs.io/en/latest/refleaks.html
         self._ik_marker = None
-        self._ik_visualizer = None
-        self._traj_visualizer = None
-        self._ik_solver = None
-        self._rrt = None
-        self._toppra = None
-        self._shortcutter = None
-        self._scene = None
 
         super().destroy_node()
 
 
-def main(args=None):
-    rclpy.init(args=args)
-    node = PlanAndExecuteNode()
-    executor = MultiThreadedExecutor()
-    executor.add_node(node)
-
-    try:
-        executor.spin()
-    except KeyboardInterrupt:
-        pass
-    finally:
-        executor.shutdown()
-        node.destroy_node()
-        rclpy.try_shutdown()
-
-
 if __name__ == "__main__":
-    main()
+    rclpy.init()
+    run_node(PlanAndExecuteNode())

@@ -16,34 +16,26 @@
 # under the License.
 
 """
-Common utilities for CLR RoboPlan demo nodes.
-
-Provides robot configurations, scene construction, joint-state tracking,
-and interactive-marker infrastructure so that individual demo scripts
-stay focused on their workflow.
+Small helper functions for CLR's roboplan demos.
 """
 
 import os
-import time
-import threading
 from dataclasses import dataclass
 
 import xacro
 
 from ament_index_python.packages import get_package_share_directory
 
-from rclpy.node import Node
-from rclpy.executors import SingleThreadedExecutor, ExternalShutdownException
+import rclpy
+from rclpy.executors import MultiThreadedExecutor, ExternalShutdownException
 from rclpy.qos import (
     QoSProfile,
     QoSReliabilityPolicy,
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
-from sensor_msgs.msg import JointState
 
 from roboplan.core import Scene
-from roboplan_ros.cpp import buildConversionMap, fromJointState
 
 
 BEST_EFFORT_QOS = QoSProfile(
@@ -98,6 +90,20 @@ def get_robot_config(name: str) -> RobotConfig:
     return ROBOT_CONFIGS[name]
 
 
+def run_node(node):
+    """Spins a node using a MultiThreadedExecutor and handles exceptions shutdowns."""
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        executor.shutdown()
+        node.destroy_node()
+        rclpy.try_shutdown()
+
+
 def spin_executor(executor, logger=None):
     """Spin an executor until shutdown, swallowing expected exceptions."""
     try:
@@ -143,48 +149,3 @@ def create_scene():
     )
     return scene, urdf_xml, package_paths
 
-
-class JointStateTracker:
-    """
-    Subscribes to joint states on a dedicated node/executor/thread.
-
-    Keeps the latest JointState message and builds the conversion map
-    lazily on the first message. Call wait_for_joint_state() after
-    construction to block until hardware is online.
-    """
-
-    def __init__(self, scene, topic="/joint_states", logger=None):
-        self.scene = scene
-        self.last_msg = None
-        self.conversion_map = None
-        self.latest_positions = None
-
-        self._node = Node("joint_state_listener")
-        self._sub = self._node.create_subscription(JointState, topic, self._on_msg, BEST_EFFORT_QOS)
-        self._executor = SingleThreadedExecutor()
-        self._executor.add_node(self._node)
-        self._thread = threading.Thread(target=spin_executor, daemon=True, args=(self._executor, logger))
-        self._thread.start()
-
-    def _on_msg(self, msg):
-        if self.conversion_map is None:
-            self.conversion_map = buildConversionMap(self.scene, msg)
-        self.last_msg = msg
-
-    def wait_for_joint_state(self, logger=None):
-        """Block until the first JointState arrives."""
-        while self.last_msg is None:
-            if logger:
-                logger.info("Waiting for joint positions...")
-            time.sleep(1.0)
-
-    def sync_to_hardware(self):
-        """Read the latest joint state into the scene, return positions."""
-        joint_config = fromJointState(self.last_msg, self.scene, self.conversion_map)
-        self.latest_positions = self.scene.clampToValidConfiguration(joint_config.positions)
-        return self.latest_positions
-
-    def shutdown(self):
-        self._executor.shutdown()
-        self._thread.join(timeout=0.25)
-        self._node.destroy_node()
