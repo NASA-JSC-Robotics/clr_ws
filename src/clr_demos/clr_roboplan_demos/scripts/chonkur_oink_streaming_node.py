@@ -32,6 +32,7 @@ Intended as an example _only_.
 import time
 import threading
 import numpy as np
+from scipy.spatial.transform import Rotation, Slerp
 
 import rclpy
 from rclpy.node import Node
@@ -41,7 +42,6 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from interactive_markers import InteractiveMarkerServer, MenuHandler
 
 from roboplan.core import CartesianConfiguration
-from roboplan.filters import SE3LowPassFilter
 from roboplan.optimal_ik import (
     ConfigurationTask,
     ConfigurationTaskOptions,
@@ -99,9 +99,14 @@ class CartesianServoNode(Node):
         self.declare_parameter("regularization", 1e-5)
         self.declare_parameter("position_cost", 1.0)
         self.declare_parameter("orientation_cost", 1.0)
-        self.declare_parameter("control_freq", 20.0)
-        self.declare_parameter("reference_filter_tau", 0.1)
+        self.declare_parameter("control_freq", 25.0)
         self.declare_parameter("command_duration_ms", 0)
+
+        # Commanded linear and angular velocities, along with a maximum tracking
+        # error as a very basic safety mechanism.
+        self.declare_parameter("linear_velocity", 0.1)
+        self.declare_parameter("angular_velocity", 0.1)
+        self.declare_parameter("max_tracking_error", 0.1)
 
         control_freq = self.get_parameter("control_freq").value
         task_gain = self.get_parameter("task_gain").value
@@ -109,8 +114,10 @@ class CartesianServoNode(Node):
         self._regularization = self.get_parameter("regularization").value
         position_cost = self.get_parameter("position_cost").value
         orientation_cost = self.get_parameter("orientation_cost").value
-        self._reference_filter_tau = self.get_parameter("reference_filter_tau").value
         self._command_duration_ms = self.get_parameter("command_duration_ms").value
+        self._linear_velocity = self.get_parameter("linear_velocity").value
+        self._angular_velocity = self.get_parameter("angular_velocity").value
+        self._max_tracking_error = self.get_parameter("max_tracking_error").value
 
         # Control loop time step for Cartesian tracking
         self._dt = 1.0 / control_freq
@@ -181,14 +188,13 @@ class CartesianServoNode(Node):
         # Thread-safe access to scene and target
         self._lock = threading.Lock()
 
-        # Reference filter for smooth target tracking
+        # Constant-velocity reference pose — steps toward _raw_target each tick
         q_full = self._scene.getCurrentJointPositions()
         initial_pose = self._scene.forwardKinematics(
             q_full, self._config.tip_link, self._config.base_link
         )
         self._raw_target = initial_pose.copy()
-        self._reference_filter = SE3LowPassFilter(tau=self._reference_filter_tau)
-        self._reference_filter.reset(initial_pose)
+        self._reference_pose = initial_pose.copy()
 
         self._delta_q = np.zeros(self._num_variables)
         self._delta_q_full = np.zeros(len(q_full))
@@ -244,6 +250,10 @@ class CartesianServoNode(Node):
         self._control_thread = threading.Thread(target=self._control_loop, daemon=True)
         self._control_thread.start()
 
+        # Start a background thread for safety checks
+        self._safety_thread = threading.Thread(target=self._safety_loop, daemon=True)
+        self._safety_thread.start()
+
         # Reset and notify
         self._reset()
         self.get_logger().info(
@@ -257,22 +267,32 @@ class CartesianServoNode(Node):
         self._ik_marker.process_feedback(feedback)
 
     def _control_loop(self):
-        """Continuously run one OInK step per tick while not paused"""
+        """Continuously run one OInK step per tick while not paused
+
+        Will update commands based on the physical pose of the robot.
+        """
         while self._running:
             loop_start = time.time()
 
             if not self._paused:
                 with self._lock:
-                    q_current = np.array(self._scene.getCurrentJointPositions())
+                    # Update control step from the last known joint position
+                    if self._js_subscriber.last_joint_state is not None:
+                        joint_config = fromJointState(
+                            self._js_subscriber.last_joint_state,
+                            self._scene,
+                            self._conversion_map,
+                        )
+                        q_current = joint_config.positions
+                    else:
+                        q_current = np.array(self._scene.getCurrentJointPositions())
+
+                    self._scene.setJointPositions(q_current)
                     self._scene.forwardKinematics(q_current, self._config.tip_link)
 
-                    if self._reference_filter_tau > 0:
-                        filtered = self._reference_filter.update(
-                            self._raw_target, self._dt
-                        )
-                        self._frame_task.setTargetFrameTransform(filtered)
-                    else:
-                        self._frame_task.setTargetFrameTransform(self._raw_target)
+                    # Compute the target reference pose
+                    self._step_reference()
+                    self._frame_task.setTargetFrameTransform(self._reference_pose)
 
                     try:
                         self._oink.solveIk(
@@ -291,16 +311,52 @@ class CartesianServoNode(Node):
 
                     self._delta_q_full[:] = 0.0
                     self._delta_q_full[self._oink.v_indices] = self._delta_q
-                    q_current = self._scene.integrate(q_current, self._delta_q_full)
+                    q_commanded = self._scene.integrate(q_current, self._delta_q_full)
 
-                    self._scene.setJointPositions(q_current)
-                    self._scene.forwardKinematics(q_current, self._config.tip_link)
-                    self._latest_joint_positions = q_current
+                    # Update scene to commanded state for FK consistency
+                    self._scene.setJointPositions(q_commanded)
+                    self._scene.forwardKinematics(q_commanded, self._config.tip_link)
+                    self._latest_joint_positions = q_current  # seed marker from hw
 
-                self._publish_joint_command(q_current)
+                self._publish_joint_command(q_commanded)
 
             elapsed = time.time() - loop_start
             time.sleep(max(0, self._dt - elapsed))
+
+    def _step_reference(self):
+        """Advance the reference_pose towards the raw_target at a constant linear/angular velocity."""
+        # Translation distance is just euclidean norm
+        t_curr = self._reference_pose[:3, 3]
+        t_targ = self._raw_target[:3, 3]
+        t_diff = t_targ - t_curr
+        trans_dist = np.linalg.norm(t_diff)
+
+        # Rotation with the axis-angle of relative rotation
+        r_curr = Rotation.from_matrix(self._reference_pose[:3, :3])
+        r_targ = Rotation.from_matrix(self._raw_target[:3, :3])
+        rot_angle = (r_curr.inv() * r_targ).magnitude()
+
+        # Compute the time each component needs to arrive based on velocities
+        t_trans = trans_dist / self._linear_velocity if trans_dist > 1e-8 else 0.0
+        t_rot = rot_angle / self._angular_velocity if rot_angle > 1e-6 else 0.0
+        t_arrive = max(t_trans, t_rot)
+
+        # If we'd arrive within one tick, snap to target
+        if t_arrive <= self._dt:
+            self._reference_pose = self._raw_target.copy()
+            return
+
+        # Scale the linear and rotational interpolations so that
+        # they arrive at the same time
+        alpha = self._dt / t_arrive
+
+        # Linear interpolation of translation
+        self._reference_pose[:3, 3] = t_curr + alpha * t_diff
+
+        # Slerp for rotation interpolation
+        if rot_angle > 1e-6:
+            slerp = Slerp([0.0, 1.0], Rotation.concatenate([r_curr, r_targ]))
+            self._reference_pose[:3, :3] = slerp(alpha).as_matrix()
 
     def _publish_joint_command(self, q):
         """Publish a single-point JointTrajectory to command the robot."""
@@ -313,6 +369,41 @@ class CartesianServoNode(Node):
         ).to_msg()
         msg.points = [point]
         self._cmd_pub.publish(msg)
+
+    def _safety_loop(self):
+        """Monitor tracking error and pause if the robot can't keep up.
+
+        TODO: This is pretty band-aid-y but could be improved with collision checking, etc.
+        """
+        while self._running:
+            if not self._paused and self._js_subscriber.last_joint_state is not None:
+                try:
+                    joint_config = fromJointState(
+                        self._js_subscriber.last_joint_state,
+                        self._scene,
+                        self._conversion_map,
+                    )
+                    q_hw = joint_config.positions
+                    actual_pose = self._scene.forwardKinematics(
+                        q_hw, self._config.tip_link, self._config.base_link
+                    )
+                    tracking_error = np.linalg.norm(
+                        actual_pose[:3, 3] - self._reference_pose[:3, 3]
+                    )
+                    if tracking_error > self._max_tracking_error:
+                        self._paused = True
+                        self.get_logger().error(
+                            f"Tracking error {tracking_error:.3f}m exceeds limit "
+                            f"{self._max_tracking_error:.3f}m — pausing. "
+                            f"Reset and restart to continue."
+                        )
+                except Exception as e:
+                    self.get_logger().warn(
+                        f"Safety monitor thread crashed! {e}",
+                        throttle_duration_sec=1.0,
+                    )
+            # Hardcoding to 10 hz for now
+            time.sleep(0.1)
 
     def _on_start_menu(self, _):
         self._reset()
@@ -354,8 +445,7 @@ class CartesianServoNode(Node):
                 self._latest_joint_positions, self._config.tip_link, self._config.base_link
             )
             self._raw_target = initial_pose.copy()
-            if self._reference_filter_tau > 0:
-                self._reference_filter.reset(initial_pose)
+            self._reference_pose = initial_pose.copy()
 
         self._ik_marker.set_seed_configuration(self._latest_joint_positions)
         pose = se3ToPose(initial_pose)
@@ -366,6 +456,7 @@ class CartesianServoNode(Node):
         # Stop the control loop first so it releases the lock
         self._running = False
         self._control_thread.join(timeout=1.0)
+        self._safety_thread.join(timeout=1.0)
 
         # Shut down executors and join their threads
         self._js_subscriber.shutdown()
