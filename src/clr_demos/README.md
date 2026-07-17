@@ -12,7 +12,9 @@ They are intended to provide starting points of how to interact with CLR using c
 * [Pick and Place with a CTB](./clr_pick_and_place_demo/README.md)
   * Uses MoveIt2 and basic perception capabilities to pick up a cargo transfer bag (CTB) and place it inside a bench storage container.
 * [DRT Behavior Trees](./clr_behavior_pick_and_place_demo/README.md)
-  * Behavior tree enabled planning framework for constructing more complex capabilities.
+  * C++ (BehaviorTree.CPP) based behavior tree framework for constructing more complex capabilities.
+* [iMETRO Behavior Trees](./clr_behavior_demos/README.md)
+  * Python (PyTrees) based behavior tree framework for constructing more complex capabilities.
 * [Planning with RoboPlan](./clr_roboplan_demos/README.md)
   * Demonstration the motion planning capabilities of RoboPlan using CLR.
 
