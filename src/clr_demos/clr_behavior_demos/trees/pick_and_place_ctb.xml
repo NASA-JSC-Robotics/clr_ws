@@ -17,11 +17,13 @@
         group_name="clr"
         target_pose="{perception_pose}"
         target_frame="grasp_frame"
+        preview="true"
       />
       <SubTree ID="DetectBlobs"
         name="DetectHandle"
         target_color="red"
         blob_pose="{ctb_handle_pose}"
+        debug_viz="true"
       />
       <TransformPose name="TransformToBase"
         input_pose="{ctb_handle_pose}"
@@ -44,6 +46,7 @@
         group_name="clr"
         target_pose="{ctb_approach_pose}"
         target_frame="grasp_frame"
+        preview="true"
       />
       <OffsetPoseStamped name="CalculateGraspPose"
         input_pose="{ctb_handle_pose_aligned}"
@@ -57,6 +60,7 @@
         group_name="clr"
         target_pose="{ctb_grasp_pose}"
         target_frame="grasp_frame"
+        preview="true"
       />
       <SubTree ID="CloseGripper" name="close_gripper" />
       <OffsetPoseStamped name="CalculateLiftPose"
@@ -71,6 +75,7 @@
         group_name="clr"
         target_pose="{ctb_lift_pose}"
         target_frame="grasp_frame"
+        preview="true"
       />
       <CreatePoseStamped
         name="set_drop_pose"
@@ -86,6 +91,7 @@
         group_name="clr"
         target_pose="{drop_pose}"
         target_frame="grasp_frame"
+        preview="true"
       />
       <SubTree ID="OpenGripper" name="open_gripper_end" />
     </Sequence>
@@ -105,11 +111,13 @@
         tolerance="0.005"
         trajectory="{trajectory}"
       />
-      <PreviewTrajectoryBehavior
-        name="preview_trajectory"
-        action_name="/preview_trajectory"
-        trajectory="{trajectory}"
-      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
       <ExecuteTrajectoryBehavior
         name="execute_trajectory"
         action_name="/execute_trajectory"
@@ -132,11 +140,13 @@
         orientation_tolerance="0.005, 0.005, 0.005"
         trajectory="{trajectory}"
       />
-      <PreviewTrajectoryBehavior
-        name="preview_trajectory"
-        action_name="/preview_trajectory"
-        trajectory="{trajectory}"
-      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
       <ExecuteTrajectoryBehavior
         name="execute_trajectory"
         action_name="/execute_trajectory"
@@ -156,6 +166,7 @@
       tolerance="0.0001"
       max_velocity_scaling="0.5"
       max_acceleration_scaling="0.5"
+      preview="false"
     />
   </BehaviorTree>
 
@@ -170,18 +181,19 @@
       tolerance="0.0001"
       max_velocity_scaling="0.5"
       max_acceleration_scaling="0.5"
+      preview="false"
     />
   </BehaviorTree>
 
   <!-- Perception behavior -->
   <BehaviorTree ID="DetectBlobs">
     <Sequence name="Sequence">
-      <!-- <Parallel name="Parallel"> -->
-          <!-- TODO: uncomment when we are using polled cameras
+      <!-- TODO: uncomment when we are using polled cameras
+          <Parallel name="Parallel">
             <Repeat name="repeat" num_success="-1">
               <CallTriggerService
               name="trigger_camera"
-              service_name="/phoebe/phoebe_left_wrist_mounted_camera/request_images"
+              service_name="/wrist_mounted_camera/request_images"
             />
           </Repeat> -->
           <GetSyncedImagePointCloudDepth
@@ -205,7 +217,7 @@
         depth_image="{depth_image}"
         target_color="{target_color}"
         min_blob_size="10"
-        debug_viz="false"
+        debug_viz="{debug_viz}"
         masked_image="{masked_image}"
         blob_pose="{blob_pose}"
       />

@@ -29,6 +29,7 @@ from imetro_behavior.executor import BehaviorTreeExecutor
 # These imports auto-register behaviors, so we should grab them all
 from imetro_behavior.basic_behaviors import *  # noqa: F401,F403
 from imetro_behavior.color_behaviors import *  # noqa: F401,F403
+from imetro_behavior.decorators import *  # noqa: F401,F403
 from imetro_behavior.geometry_behaviors import *  # noqa: F401,F403
 from imetro_behavior.moveit_behaviors import *  # noqa: F401,F403
 from imetro_behavior.nav_behaviors import *  # noqa: F401,F403
