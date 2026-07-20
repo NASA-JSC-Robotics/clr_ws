@@ -5,13 +5,8 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclpy REQUIRED)
 
-install(DIRECTORY launch trees
+install(DIRECTORY config launch trees
   DESTINATION share/${PROJECT_NAME}
-)
-
-install(PROGRAMS
-  scripts/run_behavior.py
-  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()

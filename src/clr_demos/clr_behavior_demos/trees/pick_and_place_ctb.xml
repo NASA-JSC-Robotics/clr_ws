@@ -2,6 +2,18 @@
   <!-- Top-level behavior tree -->
   <BehaviorTree ID="MainTree">
     <Sequence name="Sequence">
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
       <SubTree ID="OpenGripper" name="open_gripper_start" />
       <CreatePoseStamped
         name="set_perception_pose"
@@ -156,32 +168,18 @@
   </BehaviorTree>
 
   <BehaviorTree ID="OpenGripper">
-    <SubTree ID="MoveToJoint"
+    <CommandGripper
       name="OpenGripper"
-      pipeline="ompl"
-      planner="RRTConnect"
-      group_name="hand"
-      joint_names="finger_1_joint"
-      joint_positions="0.023"
-      tolerance="0.0001"
-      max_velocity_scaling="0.5"
-      max_acceleration_scaling="0.5"
-      preview="false"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.023"
     />
   </BehaviorTree>
 
   <BehaviorTree ID="CloseGripper">
-    <SubTree ID="MoveToJoint"
+    <CommandGripper
       name="CloseGripper"
-      pipeline="ompl"
-      planner="RRTConnect"
-      group_name="hand"
-      joint_names="finger_1_joint"
-      joint_positions="0.001"
-      tolerance="0.0001"
-      max_velocity_scaling="0.5"
-      max_acceleration_scaling="0.5"
-      preview="false"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.0005"
     />
   </BehaviorTree>
 

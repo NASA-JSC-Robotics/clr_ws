@@ -26,12 +26,6 @@ ros2 launch clr_behavior_demos run_behavior.launch.xml gui:=true
 If `gui:=true`, this will start a GUI for trajectory previewing and stopping.
 Set this to false if you don't need to preview any trajectories.
 
-Switch to the integrated controller. (TODO: this should be automated)
-
-```bash
-ros2 control switch_controllers --deactivate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller --activate clr_joint_trajectory_controller
-```
-
 Then, send an action goal with the desired behavior name.
 
 ```bash

@@ -3,7 +3,9 @@
   <arg name="gui" default="true" description="Boolean flag to conditionally launch the behavior GUI for trajectory previews." />
 
   <!-- The main behavior tree executor -->
-  <node pkg="clr_behavior_demos" exec="run_behavior.py" name="behavior_node" output="screen" />
+  <node pkg="imetro_behavior" exec="run_behavior.py" name="behavior_node" output="screen">
+    <param name="behavior_config" value="$(find-pkg-share clr_behavior_demos)/config/clr_behavior_config.yaml" />
+  </node>
 
   <!-- The trajectory preview GUI -->
   <group if="$(var gui)">

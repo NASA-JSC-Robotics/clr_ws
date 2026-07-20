@@ -50,6 +50,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     gdbserver \
     git \
     less \
+    libxcb-cursor0 \
     python3-colcon-clean \
     python3-colcon-common-extensions \
     python3-colcon-mixin \
