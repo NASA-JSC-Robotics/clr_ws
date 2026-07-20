@@ -39,3 +39,6 @@
 [submodule "external/roboplan-ros"]
 	path = src/external/roboplan-ros
 	url = https://github.com/open-planning/roboplan-ros.git
+[submodule "src/external/crisp_controllers"]
+	path = src/external/crisp_controllers
+	url = https://github.com/utiasDSL/crisp_controllers.git
