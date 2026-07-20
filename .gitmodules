@@ -41,4 +41,4 @@
 	url = https://github.com/open-planning/roboplan-ros.git
 [submodule "src/external/crisp_controllers"]
 	path = src/external/crisp_controllers
-	url = https://github.com/utiasDSL/crisp_controllers.git
+	url = git@js-er-code.jsc.nasa.gov:alvu/crisp-controllers.git
