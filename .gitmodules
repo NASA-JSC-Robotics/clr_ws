@@ -39,3 +39,6 @@
 [submodule "external/roboplan-ros"]
 	path = src/external/roboplan-ros
 	url = https://github.com/open-planning/roboplan-ros.git
+[submodule "src/external/imetro_behavior"]
+	path = src/external/imetro_behavior
+	url = https://github.com/NASA-JSC-Robotics/imetro_behavior.git

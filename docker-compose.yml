@@ -22,13 +22,13 @@ services:
     privileged: true
     network_mode: host
     # If using an nvidia driver uncomment these lines
-    # runtime: nvidia
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - capabilities: [gpu]
-    #           count: all
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              count: all
     environment:
       # Pass the ROS_DOMAIN_ID from the host, if available, otherwise we default to 1 to avoid spamming networks
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-1}

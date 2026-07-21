@@ -1,0 +1,37 @@
+<root main_tree_to_execute="MainTree">
+  <!-- Top-level behavior tree -->
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
+      <SubTree ID="OpenGripper" name="open_gripper_start" />
+      <CreatePoseStamped
+        name="set_perception_pose"
+        position_xyz="0.45, 0.75, 1.29"
+        orientation_wxyz="0.0, 0.0, 1.0, 0.0"
+        frame="world"
+        msg="{perception_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToPerceptionPose"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{perception_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <SubTree ID="OpenGripper" name="open_gripper_end" />
+    </Sequence>
+  </BehaviorTree>
+</root>
