@@ -15,7 +15,6 @@ def main(args=None):
 
     node = Node(
         "run_behavior",
-        automatically_declare_parameters_from_overrides=True,
         parameter_overrides=[
             rclpy.parameter.Parameter("behavior_config", value=config_path)
         ]
