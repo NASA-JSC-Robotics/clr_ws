@@ -11,7 +11,7 @@ on:
       - '*-devel'
   pull_request:
     branches:
-      - '*'
+      - '**'
   workflow_dispatch:
 
 # Do not run multiple jobs for the same branch
