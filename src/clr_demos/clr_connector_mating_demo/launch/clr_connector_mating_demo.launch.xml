@@ -4,10 +4,10 @@
 
   <!-- The main behavior tree executor -->
   <node pkg="imetro_behavior" exec="run_behavior.py" name="behavior_node" output="screen">
-    <param name="behavior_config" value="$(find-pkg-share clr_connector_mating_demo)/config/clr_connector_mating_config.yaml" /> 
+    <param name="behavior_config" value="$(find-pkg-share clr_connector_mating_demo)/config/clr_connector_mating_config.yaml" />
   </node>
 
-  <!-- Run custom Python script node -->
+  <!-- Alt: Run BT executor with Python script node -->
   <!-- <node pkg="clr_connector_mating_demo" exec="run_connector_mating_demo.py" name="behavior_node" output="screen" /> -->
 
   <!-- The trajectory preview GUI -->
