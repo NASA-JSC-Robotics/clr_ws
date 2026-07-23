@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="clr">
+  <xacro:arg name="tf_prefix" default="" />
+  <xacro:arg name="headless_mode" default="false" />
+  <xacro:arg name="finger_xacro" default="fngr_v6"/>
+  <xacro:arg name="add_grasp_push_frames" default="true"/>
+  <xacro:arg name="use_pregenerated_mjcf" default="false"/>
+  <!-- Legacy argument to leave out the environment mockups, though for now we generally -->
+  <!-- always want this to be true. -->
+  <xacro:arg name="model_env" default="true"/>
+  <xacro:arg name="include_scene_objects" default="false"/>
+  <xacro:arg name="sim_speed" default="1.0"/>
+  <xacro:arg name="headless" default="false" />
+  <xacro:arg name="ctb_orientation_deg" default="90"/>
+  <xacro:arg name="ctb_position_x" default="0.8"/>
+  <xacro:arg name="ctb_position_y" default="0.8"/>
+
+
+  <xacro:property name="model_env" value="$(arg model_env)"/>
+  <xacro:property name="tf_prefix" value="$(arg tf_prefix)"/>
+
+  <xacro:include filename="$(find clr_imetro_environments)/urdf/clr_trainer_multi_hatch_macro.xacro"/>
+  <xacro:include filename="$(find clr_description)/urdf/clr_macro.xacro"/>
+  <xacro:include filename="$(find ctb)/urdf/ctb_macro.xacro"/>
+
+  <link name="world" />
+
+  <xacro:if value="${model_env}">
+    <xacro:imetro_env
+      tf_prefix="$(arg tf_prefix)"
+      use_fake_hardware="false"
+      headless_mode="$(arg headless_mode)"
+      add_grasp_push_frames="$(arg add_grasp_push_frames)"
+      finger_xacro="$(arg finger_xacro)"
+      use_camera_mesh="false"
+      generate_ros2_control_tag="false"
+      clr="true"
+      shelf="false"
+      ceiling_prop="false"
+      hatch_4040="false"
+      express_rack="true"
+      hatch_4060="true"
+      second_trainer="false"
+    />
+  </xacro:if>
+  <xacro:if value="${not model_env}">
+    <xacro:clr
+      tf_prefix="$(arg tf_prefix)"
+      use_fake_hardware="false"
+      headless_mode="$(arg headless_mode)"
+      finger_xacro="$(arg finger_xacro)"
+      add_grasp_push_frames="$(arg add_grasp_push_frames)"
+      use_camera_mesh="false"
+      generate_ros2_control_tag="false"/>
+  </xacro:if>
+
+  <xacro:if value="$(arg include_scene_objects)">
+    <xacro:ctb prefix="" parent="world">
+      <origin xyz="$(arg ctb_position_x) $(arg ctb_position_y) 0.25" rpy="0 0 ${radians($(arg ctb_orientation_deg))}"/>
+    </xacro:ctb>
+  </xacro:if>
+
+  <!-- special inputs for mujoco processing-->
+  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_raw_inputs.xacro"/>
+  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_processed_inputs.xacro"/>
+  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_scene.xacro"/>
+  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_ros2_control_macros.xacro"/>
+
+  <mujoco_inputs>
+    <raw_inputs>
+      <xacro:clr_mujoco_raw_inputs tf_prefix="${tf_prefix}" model_env="${model_env}"/>
+    </raw_inputs>
+    <processed_inputs>
+      <xacro:clr_mujoco_processed_inputs
+        include_scene_objects="$(arg include_scene_objects)"
+        tf_prefix="${tf_prefix}"
+        finger_xacro="$(arg finger_xacro)"
+        model_env="${model_env}"
+      />
+    </processed_inputs>
+    <xacro:clr_mujoco_scene/>
+  </mujoco_inputs>
+
+
+  <ros2_control name="${tf_prefix}MujocoSystem" type="system">
+    <hardware>
+      <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+      <xacro:if value="$(arg use_pregenerated_mjcf)">
+        <param name="mujoco_model">$(find clr_mujoco_config)/description/scene.xml</param>
+      </xacro:if>
+
+      <!-- Optionally run headless -->
+      <param name="headless">$(arg headless)</param>
+
+      <!-- Increase this parameter to run the sim faster than realtime. -->
+      <param name="sim_speed_factor">$(arg sim_speed)</param>
+
+      <!-- Publish camera images at 5 hz -->
+      <param name="camera_publish_rate">5.0</param>
+    </hardware>
+
+    <xacro:clr_mujoco_ros2_control_sensors tf_prefix="${tf_prefix}"/>
+    <xacro:clr_mujoco_ros2_control_joints tf_prefix="${tf_prefix}"/>
+
+    <xacro:if value="${model_env}">
+      <xacro:clr_mujoco_ros2_control_env/>
+      <xacro:clr_mujoco_ros2_control_sensors/>
+    </xacro:if>
+
+  </ros2_control>
+</robot>
