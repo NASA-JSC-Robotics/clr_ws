@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2025, United States Government, as represented by the
+# Copyright (c) 2026, United States Government, as represented by the
 # Administrator of the National Aeronautics and Space Administration.
 #
 # All rights reserved.
@@ -50,6 +50,8 @@ from roboplan.optimal_ik import (
     Oink,
     PositionLimit,
     VelocityLimit,
+    SelfCollisionBarrier,
+    SelfCollisionBarrierOptions,
 )
 from roboplan_ros.visualization import RoboplanIKMarker
 from roboplan_ros.cpp import (
@@ -96,16 +98,23 @@ class CartesianServoNode(Node):
         # Optimal IK params
         self.declare_parameter("task_gain", 1.0)
         self.declare_parameter("lm_damping", 0.01)
-        self.declare_parameter("regularization", 1e-5)
+        self.declare_parameter("regularization", 1e-3)
         self.declare_parameter("position_cost", 1.0)
-        self.declare_parameter("orientation_cost", 1.0)
+        self.declare_parameter("orientation_cost", 0.1)
         self.declare_parameter("control_freq", 25.0)
         self.declare_parameter("command_duration_ms", 0)
+
+        # Collision related parameters.
+        self.declare_parameter("avoid_collisions", False)
+        self.declare_parameter("n_collision_pairs", 2)
+        self.declare_parameter("min_collision_distance", 0.02)
+        self.declare_parameter("max_collision_distance", 0.2)
+        self.declare_parameter("safe_displacement_gain", 0.01)
 
         # Commanded linear and angular velocities, along with a maximum tracking
         # error as a very basic safety mechanism.
         self.declare_parameter("linear_velocity", 0.1)
-        self.declare_parameter("angular_velocity", 0.1)
+        self.declare_parameter("angular_velocity", 0.5)
         self.declare_parameter("max_tracking_error", 0.1)
 
         control_freq = self.get_parameter("control_freq").value
@@ -118,6 +127,7 @@ class CartesianServoNode(Node):
         self._linear_velocity = self.get_parameter("linear_velocity").value
         self._angular_velocity = self.get_parameter("angular_velocity").value
         self._max_tracking_error = self.get_parameter("max_tracking_error").value
+        avoid_collisions = self.get_parameter("avoid_collisions").value
 
         # Control loop time step for Cartesian tracking
         self._dt = 1.0 / control_freq
@@ -184,6 +194,19 @@ class CartesianServoNode(Node):
 
         # TODO: Add self collision / env collision barriers
         self._barriers = []
+        if avoid_collisions:
+            barrier_options = SelfCollisionBarrierOptions(
+                n_collision_pairs=self.get_parameter("n_collision_pairs").value,
+                d_min=self.get_parameter("min_collision_distance").value,
+                d_max=self.get_parameter("max_collision_distance").value,
+                safe_displacement_gain=self.get_parameter(
+                    "safe_displacement_gain"
+                ).value,
+            )
+            self._barriers.append(
+                SelfCollisionBarrier(self._oink, self._scene, self._dt, barrier_options)
+            )
+
 
         # Thread-safe access to scene and target
         self._lock = threading.Lock()
@@ -311,6 +334,13 @@ class CartesianServoNode(Node):
 
                     self._delta_q_full[:] = 0.0
                     self._delta_q_full[self._oink.v_indices] = self._delta_q
+                    if self._barriers:
+                        self._oink.enforceBarriers(
+                            self._scene,
+                            self._barriers,
+                            self._delta_q_full,
+                            tolerance=0.0,
+                        )
                     q_commanded = self._scene.integrate(q_current, self._delta_q_full)
 
                     # Update scene to commanded state for FK consistency

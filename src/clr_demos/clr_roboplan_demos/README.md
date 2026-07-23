@@ -28,7 +28,7 @@ To do so, find your `ViserVisualizer` (i.e., through your IDE) and replace its c
 ros2 launch clr_mujoco_config clr_mujoco.launch.py
 ```
 
-2. Switch to the integrated controller. (TODO: this should be automated)
+2. Switch to the integrated controller. (TODO: this should be configurable at launch time)
 
 ```bash
 ros2 control switch_controllers --deactivate joint_trajectory_controller lift_position_trajectory_controller rail_position_trajectory_controller --activate clr_joint_trajectory_controller

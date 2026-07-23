@@ -14,7 +14,7 @@ launch:
         - name: use_sim_time
           value: $(var use_sim_time)
 
-  # IK planning and execution node
+  # IK streaming node
   - node:
       pkg: clr_roboplan_demos
       exec: chonkur_oink_streaming_node.py
@@ -22,3 +22,4 @@ launch:
         - name: use_sim_time
           value: $(var use_sim_time)
       output: screen
+      emulate_tty: true
