@@ -37,9 +37,7 @@ class JointStateSubscriber:
 
         self._js_executor = SingleThreadedExecutor()
         self._js_executor.add_node(self._js_node)
-        self._js_thread = threading.Thread(
-            target=spin_executor, daemon=True, args=(self._js_executor,)
-        )
+        self._js_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._js_executor,))
         self._js_thread.start()
 
     def shutdown(self):

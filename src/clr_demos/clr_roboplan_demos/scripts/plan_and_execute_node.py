@@ -114,9 +114,7 @@ class PlanAndExecuteNode(Node):
             time.sleep(1.0)
 
         # Once we have joint states we can build the conversion map
-        self._conversion_map = buildConversionMap(
-            self._scene, self._js_subscriber.last_joint_state
-        )
+        self._conversion_map = buildConversionMap(self._scene, self._js_subscriber.last_joint_state)
 
         # Set the IK solver options
         ik_options = SimpleIkOptions()
@@ -193,9 +191,7 @@ class PlanAndExecuteNode(Node):
         # Needs its own executor for responsiveness
         self._marker_executor = SingleThreadedExecutor()
         self._marker_executor.add_node(self._marker_node)
-        self._marker_thread = threading.Thread(
-            target=spin_executor, daemon=True, args=(self._marker_executor,)
-        )
+        self._marker_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._marker_executor,))
         self._marker_thread.start()
 
         # Add menu to the iMarker for service access
@@ -216,9 +212,7 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_ik",
             color=ColorRGBA(r=0.0, g=0.0, b=1.0, a=0.5),
         )
-        self._ik_marker_pub = self.create_publisher(
-            MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS
-        )
+        self._ik_marker_pub = self.create_publisher(MarkerArray, "roboplan_ik/markers", BEST_EFFORT_QOS)
 
         # Configure tools for previewing trajectories, the markers will be
         # published in green.
@@ -230,9 +224,7 @@ class PlanAndExecuteNode(Node):
             ns="roboplan_traj",
             color=ColorRGBA(r=0.0, g=1.0, b=0.0, a=0.3),
         )
-        self._traj_marker_pub = self.create_publisher(
-            MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS
-        )
+        self._traj_marker_pub = self.create_publisher(MarkerArray, "roboplan_trajectory/markers", BEST_EFFORT_QOS)
         self._player = TrajectoryPublisher(
             self._scene,
             self._traj_visualizer,
@@ -250,14 +242,10 @@ class PlanAndExecuteNode(Node):
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
         )
         self._planned_path_color = ColorRGBA(r=0.5, g=1.0, b=0.5, a=1.0)
-        self._planned_path_pub = self.create_publisher(
-            Marker, "/roboplan_trajectory/path", latched_qos
-        )
+        self._planned_path_pub = self.create_publisher(Marker, "/roboplan_trajectory/path", latched_qos)
 
         # Setup an action client for trajectory execution
-        self._execute_client = ActionClient(
-            self, FollowJointTrajectory, self._config.controller_action
-        )
+        self._execute_client = ActionClient(self, FollowJointTrajectory, self._config.controller_action)
 
         # Target pose and planned trajectories
         self._target_q = None
@@ -279,25 +267,19 @@ class PlanAndExecuteNode(Node):
         q = self._ik_marker.process_feedback(feedback)
         if q is not None:
             self._target_q = q
-            self._ik_marker_pub.publish(
-                self._ik_visualizer.markers_from_configuration(q)
-            )
+            self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(q))
 
     def _plan(self):
         if self._target_q is None:
             return False, "No target set. Move the interactive marker first."
 
-        joint_config = fromJointState(
-            self._js_subscriber.last_joint_state, self._scene, self._conversion_map
-        )
+        joint_config = fromJointState(self._js_subscriber.last_joint_state, self._scene, self._conversion_map)
 
         self._latest_joint_positions = joint_config.positions
 
         # MuJoCo, in particular, can push joints an epsilon past their limits, so this
         # is a little hacky but prevents planning failures due to constraint violations.
-        self._latest_joint_positions = self._scene.clampToValidConfiguration(
-            joint_config.positions
-        )
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
 
         self._scene.setJointPositions(self._latest_joint_positions)
 
@@ -313,9 +295,7 @@ class PlanAndExecuteNode(Node):
         try:
             start_time = time.time()
             path = self._rrt.plan(start, goal)
-            self.get_logger().info(
-                f"  Finished planning in {time.time() - start_time} seconds."
-            )
+            self.get_logger().info(f"  Finished planning in {time.time() - start_time} seconds.")
         except RuntimeError as e:
             self.get_logger().error(str(e))
             path = None
@@ -327,9 +307,7 @@ class PlanAndExecuteNode(Node):
             self.get_logger().info("Shortcutting...")
             start_time = time.time()
             path = self._shortcutter.shortcut(path)
-            self.get_logger().info(
-                f"  Finished shortcutting in {time.time() - start_time} seconds."
-            )
+            self.get_logger().info(f"  Finished shortcutting in {time.time() - start_time} seconds.")
 
         self.get_logger().info("Generating trajectory...")
         start_time = time.time()
@@ -341,13 +319,9 @@ class PlanAndExecuteNode(Node):
                 max_adaptive_iterations=5,
             ),
         )
-        self.get_logger().info(
-            f"  Finished generating trajectory in {time.time() - start_time} seconds."
-        )
+        self.get_logger().info(f"  Finished generating trajectory in {time.time() - start_time} seconds.")
 
-        self.get_logger().info(
-            f"Total planning time: {time.time() - plan_start_time} seconds."
-        )
+        self.get_logger().info(f"Total planning time: {time.time() - plan_start_time} seconds.")
 
         # Visualize the planned end-effector trajectory.
         self._planned_path_pub.publish(
@@ -389,9 +363,7 @@ class PlanAndExecuteNode(Node):
         goal.trajectory = toJointTrajectory(self._planned_traj)
 
         self.get_logger().info("Sending trajectory for execution...")
-        future = self._execute_client.send_goal_async(
-            goal, feedback_callback=self._execute_feedback
-        )
+        future = self._execute_client.send_goal_async(goal, feedback_callback=self._execute_feedback)
         future.add_done_callback(self._execute_goal_response)
 
         return True, "Trajectory sent for execution."
@@ -414,9 +386,7 @@ class PlanAndExecuteNode(Node):
         if result.error_code == FollowJointTrajectory.Result.SUCCESSFUL:
             self.get_logger().info("Trajectory execution complete.")
         else:
-            self.get_logger().error(
-                f"Trajectory execution failed with error code: {result.error_code}"
-            )
+            self.get_logger().error(f"Trajectory execution failed with error code: {result.error_code}")
 
     def _reset(self):
         """Clears all plans and resets to a hardware state."""
@@ -424,29 +394,21 @@ class PlanAndExecuteNode(Node):
             raise RuntimeError("No joint states received, cannot reset to hw state.")
 
         # Reset joint positions to the latest joint state
-        joint_config = fromJointState(
-            self._js_subscriber.last_joint_state, self._scene, self._conversion_map
-        )
+        joint_config = fromJointState(self._js_subscriber.last_joint_state, self._scene, self._conversion_map)
         self._latest_joint_positions = joint_config.positions
-        self._latest_joint_positions = self._scene.clampToValidConfiguration(
-            joint_config.positions
-        )
+        self._latest_joint_positions = self._scene.clampToValidConfiguration(joint_config.positions)
 
         # Update the IK marker's seed to the current state
         self._ik_marker.set_seed_configuration(self._latest_joint_positions)
 
         # Compute FK for the current state to get the marker pose
-        fk = self._scene.forwardKinematics(
-            self._latest_joint_positions, self._tip_link, self._base_link
-        )
+        fk = self._scene.forwardKinematics(self._latest_joint_positions, self._tip_link, self._base_link)
         pose = se3ToPose(fk)
 
         # Update the IK to the current pose
         self._ik_server.setPose("ik_target", pose)
         self._ik_server.applyChanges()
-        self._ik_marker_pub.publish(
-            self._ik_visualizer.markers_from_configuration(self._latest_joint_positions)
-        )
+        self._ik_marker_pub.publish(self._ik_visualizer.markers_from_configuration(self._latest_joint_positions))
 
         # Clear the planned trajectory and target
         self._target_q = None

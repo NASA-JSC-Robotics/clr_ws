@@ -148,4 +148,3 @@ def create_scene():
         yaml_config_path=yaml_config_path,
     )
     return scene, urdf_xml, package_paths
-

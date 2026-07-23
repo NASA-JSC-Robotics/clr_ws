@@ -143,9 +143,7 @@ class CartesianServoNode(Node):
             time.sleep(1.0)
 
         # Once we have joint states we can build the conversion map
-        self._conversion_map = buildConversionMap(
-            self._scene, self._js_subscriber.last_joint_state
-        )
+        self._conversion_map = buildConversionMap(self._scene, self._js_subscriber.last_joint_state)
 
         # Set up the solver
         self._oink = Oink(self._scene, self._config.joint_group)
@@ -183,12 +181,7 @@ class CartesianServoNode(Node):
 
         # Constraints: joint position and velocity limits
         position_limit = PositionLimit(self._oink, gain=1.0)
-        v_max = np.hstack(
-            [
-                self._scene.getJointInfo(name).limits.max_velocity
-                for name in self._joint_names
-            ]
-        )
+        v_max = np.hstack([self._scene.getJointInfo(name).limits.max_velocity for name in self._joint_names])
         velocity_limit = VelocityLimit(self._oink, self._dt, v_max)
         self._constraints = [position_limit, velocity_limit]
 
@@ -199,23 +192,16 @@ class CartesianServoNode(Node):
                 n_collision_pairs=self.get_parameter("n_collision_pairs").value,
                 d_min=self.get_parameter("min_collision_distance").value,
                 d_max=self.get_parameter("max_collision_distance").value,
-                safe_displacement_gain=self.get_parameter(
-                    "safe_displacement_gain"
-                ).value,
+                safe_displacement_gain=self.get_parameter("safe_displacement_gain").value,
             )
-            self._barriers.append(
-                SelfCollisionBarrier(self._oink, self._scene, self._dt, barrier_options)
-            )
-
+            self._barriers.append(SelfCollisionBarrier(self._oink, self._scene, self._dt, barrier_options))
 
         # Thread-safe access to scene and target
         self._lock = threading.Lock()
 
         # Constant-velocity reference pose — steps toward _raw_target each tick
         q_full = self._scene.getCurrentJointPositions()
-        initial_pose = self._scene.forwardKinematics(
-            q_full, self._config.tip_link, self._config.base_link
-        )
+        initial_pose = self._scene.forwardKinematics(q_full, self._config.tip_link, self._config.base_link)
         self._raw_target = initial_pose.copy()
         self._reference_pose = initial_pose.copy()
 
@@ -257,9 +243,7 @@ class CartesianServoNode(Node):
 
         self._marker_executor = SingleThreadedExecutor()
         self._marker_executor.add_node(self._marker_node)
-        self._marker_thread = threading.Thread(
-            target=spin_executor, daemon=True, args=(self._marker_executor,)
-        )
+        self._marker_thread = threading.Thread(target=spin_executor, daemon=True, args=(self._marker_executor,))
         self._marker_thread.start()
 
         # Joint command publisher
@@ -279,9 +263,7 @@ class CartesianServoNode(Node):
 
         # Reset and notify
         self._reset()
-        self.get_logger().info(
-            "Ready. Drag the interactive marker, then right-click > Start to begin servoing."
-        )
+        self.get_logger().info("Ready. Drag the interactive marker, then right-click > Start to begin servoing.")
 
     def _on_ik_feedback(self, feedback):
         """Pass feedback through the marker. solve_fn stores the target;
@@ -328,9 +310,7 @@ class CartesianServoNode(Node):
                         )
                     except RuntimeError as e:
                         self._delta_q[:] = 0.0
-                        self.get_logger().warn(
-                            f"IK solver failed: {e}", throttle_duration_sec=1.0
-                        )
+                        self.get_logger().warn(f"IK solver failed: {e}", throttle_duration_sec=1.0)
 
                     self._delta_q_full[:] = 0.0
                     self._delta_q_full[self._oink.v_indices] = self._delta_q
@@ -394,9 +374,7 @@ class CartesianServoNode(Node):
         msg.joint_names = list(self._joint_names)
         point = JointTrajectoryPoint()
         point.positions = q[self._q_indices].tolist()
-        point.time_from_start = rclpy.duration.Duration(
-            nanoseconds=self._command_duration_ms * 1E6
-        ).to_msg()
+        point.time_from_start = rclpy.duration.Duration(nanoseconds=self._command_duration_ms * 1e6).to_msg()
         msg.points = [point]
         self._cmd_pub.publish(msg)
 
@@ -414,12 +392,8 @@ class CartesianServoNode(Node):
                         self._conversion_map,
                     )
                     q_hw = joint_config.positions
-                    actual_pose = self._scene.forwardKinematics(
-                        q_hw, self._config.tip_link, self._config.base_link
-                    )
-                    tracking_error = np.linalg.norm(
-                        actual_pose[:3, 3] - self._reference_pose[:3, 3]
-                    )
+                    actual_pose = self._scene.forwardKinematics(q_hw, self._config.tip_link, self._config.base_link)
+                    tracking_error = np.linalg.norm(actual_pose[:3, 3] - self._reference_pose[:3, 3])
                     if tracking_error > self._max_tracking_error:
                         self._paused = True
                         self.get_logger().error(
@@ -463,9 +437,7 @@ class CartesianServoNode(Node):
         # Pause it
         self._on_pause_menu(None)
 
-        joint_config = fromJointState(
-            self._js_subscriber.last_joint_state, self._scene, self._conversion_map
-        )
+        joint_config = fromJointState(self._js_subscriber.last_joint_state, self._scene, self._conversion_map)
         self._latest_joint_positions = joint_config.positions
 
         with self._lock:
