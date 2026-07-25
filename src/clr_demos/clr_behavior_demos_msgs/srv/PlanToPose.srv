@@ -1,0 +1,22 @@
+# Plans a collision-free motion to a target pose for the server's tip link,
+# using inverse kinematics to find a goal configuration followed by free-space
+# motion planning.
+#
+# The joint group to plan for. An empty string uses the server's default group.
+string group_name
+
+# The pose is interpreted in the frame given by its header.frame_id, which must
+# be a frame known to the planning scene. An empty frame_id means the planning
+# group's base link.
+geometry_msgs/PoseStamped target_pose
+
+# Optional scaling factors in (0, 1] applied to the joint limits when
+# time-parameterizing the trajectory. Values <= 0 use the server's defaults.
+float64 velocity_scaling
+float64 acceleration_scaling
+
+---
+
+bool success
+string message
+trajectory_msgs/JointTrajectory trajectory

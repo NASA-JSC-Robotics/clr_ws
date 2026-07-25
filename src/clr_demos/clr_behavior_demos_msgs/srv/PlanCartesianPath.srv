@@ -1,0 +1,22 @@
+# Plans a straight-line Cartesian motion from the current end effector pose to
+# the target pose, interpolating a single path segment and solving IK along it.
+#
+# The joint group to plan for. An empty string uses the server's default group.
+string group_name
+
+# The pose is interpreted in the frame given by its header.frame_id, which must
+# be a frame known to the planning scene. An empty frame_id means the planning
+# group's base link.
+geometry_msgs/PoseStamped target_pose
+
+# Optional tool speed limits along the path. Values <= 0 use the server's
+# defaults. Only applies when the server's Cartesian speed mode is "bounded";
+# in "time_optimal" mode the trajectory is timed against the joint limits.
+float64 max_linear_speed
+float64 max_angular_speed
+
+---
+
+bool success
+string message
+trajectory_msgs/JointTrajectory trajectory
