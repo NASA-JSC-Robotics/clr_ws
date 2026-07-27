@@ -42,3 +42,12 @@
 [submodule "src/external/crisp_controllers"]
 	path = src/external/crisp_controllers
 	url = https://github.com/sea-bass/crisp_controllers.git
+[submodule "src/external/Universal_Robots_Client_Library"]
+	path = src/external/Universal_Robots_Client_Library
+	url = https://github.com/UniversalRobots/Universal_Robots_Client_Library.git
+[submodule "src/external/Universal_Robots_ROS2_Driver"]
+	path = src/external/Universal_Robots_ROS2_Driver
+	url = https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver.git
+[submodule "src/external/ur_msgs"]
+	path = src/external/ur_msgs
+	url = https://github.com/ros-industrial/ur_msgs.git
