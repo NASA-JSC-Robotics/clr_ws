@@ -65,10 +65,10 @@ def generate_launch_description():
     headless = LaunchConfiguration("headless")
     model_env = LaunchConfiguration("model_env")
 
-    clr_mujoco_package_name = "clr_mujoco_config"
+    clr_mujoco_package_name = "clr_connector_mating_demo"
 
     generate_mjcf = include_launch_file(
-        package_name="clr_mujoco_config",
+        package_name="clr_connector_mating_demo",
         launch_file="generate_clr_mjcf.launch.py",
         launch_arguments={
             "save_only": "false",

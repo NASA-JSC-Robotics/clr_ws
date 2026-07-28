@@ -1,0 +1,16 @@
+/**:
+  ros__parameters:
+    mujoco_plugins:
+      mujoco_camera_plugin:
+        type: "mujoco_ros2_control_plugins/CameraPlugin"
+        camera_publish_rate: 2.0
+        $(var tf_prefix)wrist_mounted_camera:
+          frame_name: $(var tf_prefix)wrist_mounted_camera_color_optical_frame
+          info_topic: /$(var tf_prefix)wrist_mounted_camera/color/camera_info
+          image_topic: /$(var tf_prefix)wrist_mounted_camera/color/image_raw
+          depth_topic: /$(var tf_prefix)wrist_mounted_camera/aligned_depth_to_color/image_raw
+        $(var tf_prefix)lift_camera:
+          frame_name: $(var tf_prefix)lift_camera_color_optical_frame
+          info_topic: /$(var tf_prefix)lift_camera/color/camera_info
+          image_topic: /$(var tf_prefix)lift_camera/color/image_raw
+          depth_topic: /$(var tf_prefix)lift_camera/aligned_depth_to_color/image_raw
