@@ -53,33 +53,61 @@
         input_pose="{ctb_handle_pose_base}"
         output_pose="{ctb_handle_pose_aligned}"
       />
+      <!-- Splitting this into two steps to simplify the Cartesian path -->
+      <!-- Constrained RRT could help with some of these moves... -->
       <OffsetPoseStamped name="CalculateApproachPose"
         input_pose="{ctb_handle_pose_aligned}"
-        translation_xyz="0.0, 0.0, 0.1"
+        translation_xyz="0.0, 0.0, 0.15"
         output_pose="{ctb_approach_pose}"
       />
-      <SubTree ID="MoveToPose"
-        name="MoveToApproach"
-        group_name="clr"
-        target_pose="{ctb_approach_pose}"
+      <OffsetPoseStamped name="CalculatePreGraspPose"
+        input_pose="{ctb_handle_pose_aligned}"
+        translation_xyz="0.0, 0.0, 0.05"
+        output_pose="{ctb_pregrasp_pose}"
       />
       <OffsetPoseStamped name="CalculateGraspPose"
         input_pose="{ctb_handle_pose_aligned}"
         translation_xyz="0.0, 0.0, -0.03"
         output_pose="{ctb_grasp_pose}"
       />
-      <SubTree ID="MoveToPoseCartesian"
-        name="MoveToGrasp"
+      <SubTree ID="MoveToPose"
+        name="MoveToApproach"
         group_name="clr"
-        target_pose="{ctb_grasp_pose}"
+        target_pose="{ctb_approach_pose}"
       />
+      <!-- TODO: Yeet an actual reasonable retry approach? -->
+      <Retry name="retry_pregrasp_and_grasp" num_failures="3">
+        <Sequence>
+          <SubTree ID="MoveToPose"
+            name="MoveToPreGrasp"
+            group_name="clr"
+            target_pose="{ctb_pregrasp_pose}"
+          />
+          <SubTree ID="MoveToPoseCartesian"
+            name="MoveToGrasp"
+            group_name="clr"
+            target_pose="{ctb_grasp_pose}"
+          />
+        </Sequence>
+      </Retry>
       <SubTree ID="CloseGripper" name="close_gripper" />
+      <OffsetPoseStamped name="CalculateClearPose"
+        input_pose="{ctb_handle_pose_aligned}"
+        translation_xyz="0.0, 0.0, 0.15"
+        output_pose="{ctb_clear_pose}"
+      />
       <OffsetPoseStamped name="CalculateLiftPose"
         input_pose="{ctb_handle_pose_aligned}"
         translation_xyz="0.0, 0.0, 0.6"
         output_pose="{ctb_lift_pose}"
       />
       <SubTree ID="MoveToPoseCartesian"
+        name="ClearBin"
+        group_name="clr"
+        target_pose="{ctb_clear_pose}"
+      />
+      <!-- This is a little dangerous if there's a flip, but it's a straight line RRT. -->
+      <SubTree ID="MoveToPose"
         name="LiftBag"
         group_name="clr"
         target_pose="{ctb_lift_pose}"
@@ -129,15 +157,13 @@
   <!-- Straight-line Cartesian plan, ghost preview, and execute -->
   <BehaviorTree ID="MoveToPoseCartesian">
     <Sequence name="Sequence">
-      <Retry name="retry" num_failures="3">
-        <RoboplanPlanCartesianPath
-          name="plan_cartesian_path"
-          service_name="/roboplan_planning_server/plan_cartesian_path"
-          group_name="{group_name}"
-          target_pose="{target_pose}"
-          trajectory="{trajectory}"
-        />
-      </Retry>
+      <RoboplanPlanCartesianPath
+        name="plan_cartesian_path"
+        service_name="/roboplan_planning_server/plan_cartesian_path"
+        group_name="{group_name}"
+        target_pose="{target_pose}"
+        trajectory="{trajectory}"
+      />
       <CallTriggerService
         name="preview_trajectory"
         service_name="/roboplan_planning_server/preview"
