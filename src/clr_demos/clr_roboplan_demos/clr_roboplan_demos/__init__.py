@@ -117,14 +117,20 @@ def spin_executor(executor, logger=None):
             logger.warning(f"Executor caught exception, shutting down: {e}")
 
 
-def create_scene():
-    """Build and return (scene, urdf_xml, package_paths) for the CLR cell."""
-    model_xacro_path = os.path.join(
-        get_package_share_directory("clr_mujoco_config"),
-        "urdf",
-        "clr_mujoco_xacro.urdf",
-    )
-    urdf_xml = xacro.process_file(model_xacro_path).toxml()
+def create_scene(urdf_xml=None):
+    """
+    Build and return (scene, urdf_xml, package_paths) for the CLR cell.
+
+    If `urdf_xml` is provided (e.g. from the robot description topic), it is
+    used directly; otherwise the URDF is processed from the xacro files.
+    """
+    if urdf_xml is None:
+        model_xacro_path = os.path.join(
+            get_package_share_directory("clr_mujoco_config"),
+            "urdf",
+            "clr_mujoco_xacro.urdf",
+        )
+        urdf_xml = xacro.process_file(model_xacro_path).toxml()
 
     srdf_xacro_path = os.path.join(
         get_package_share_directory("clr_moveit_config"),
