@@ -122,6 +122,7 @@ class RoboplanPlanToPose(RosServiceClientBase):
             "target_pose": PortInformation(data_type=PoseStamped, required=True),
             "velocity_scaling": PortInformation(data_type=float, required=False),
             "acceleration_scaling": PortInformation(data_type=float, required=False),
+            "constrain_gripper_top_down": PortInformation(data_type=bool, required=False),
         }
 
     @classmethod
@@ -136,6 +137,7 @@ class RoboplanPlanToPose(RosServiceClientBase):
             target_pose=self.get_input("target_pose"),
             velocity_scaling=self.get_input("velocity_scaling", 0.0),
             acceleration_scaling=self.get_input("acceleration_scaling", 0.0),
+            constrain_gripper_top_down=self.get_input("constrain_gripper_top_down", False),
         )
 
     def process_response(self, response: PlanToPose.Response) -> Status:

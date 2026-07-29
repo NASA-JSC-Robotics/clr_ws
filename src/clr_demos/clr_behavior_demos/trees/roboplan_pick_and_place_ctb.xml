@@ -4,9 +4,9 @@
 
     Same task as pick_and_place_ctb.xml, with the motion planning swapped to
     the RoboPlan services: transit motions use free-space (RRT) planning,
-    while the pre-grasp descent and post-grasp lift use straight-line
-    Cartesian planning. Trajectories are previewed as an RViz ghost before
-    executing on the ROS 2 controllers.
+    while the pre-grasp descent and post-grasp clear use constrained RRT*
+    planning that keeps the gripper facing straight down. Trajectories are
+    previewed as an RViz ghost before executing on the ROS 2 controllers.
 
     Requires the RoboPlan planning server, e.g.:
       ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
@@ -37,6 +37,7 @@
         name="MoveToPerceptionPose"
         group_name="clr"
         target_pose="{perception_pose}"
+        constrain_gripper_top_down="false"
       />
       <SubTree ID="DetectBlobs"
         name="DetectHandle"
@@ -53,17 +54,10 @@
         input_pose="{ctb_handle_pose_base}"
         output_pose="{ctb_handle_pose_aligned}"
       />
-      <!-- Splitting this into two steps to simplify the Cartesian path -->
-      <!-- Constrained RRT could help with some of these moves... -->
       <OffsetPoseStamped name="CalculateApproachPose"
         input_pose="{ctb_handle_pose_aligned}"
-        translation_xyz="0.0, 0.0, 0.15"
+        translation_xyz="0.0, 0.0, 0.1"
         output_pose="{ctb_approach_pose}"
-      />
-      <OffsetPoseStamped name="CalculatePreGraspPose"
-        input_pose="{ctb_handle_pose_aligned}"
-        translation_xyz="0.0, 0.0, 0.05"
-        output_pose="{ctb_pregrasp_pose}"
       />
       <OffsetPoseStamped name="CalculateGraspPose"
         input_pose="{ctb_handle_pose_aligned}"
@@ -74,40 +68,21 @@
         name="MoveToApproach"
         group_name="clr"
         target_pose="{ctb_approach_pose}"
+        constrain_gripper_top_down="true"
       />
-      <!-- TODO: Yeet an actual reasonable retry approach? -->
-      <Retry name="retry_pregrasp_and_grasp" num_failures="3">
-        <Sequence>
-          <SubTree ID="MoveToPose"
-            name="MoveToPreGrasp"
-            group_name="clr"
-            target_pose="{ctb_pregrasp_pose}"
-          />
-          <SubTree ID="MoveToPoseCartesian"
-            name="MoveToGrasp"
-            group_name="clr"
-            target_pose="{ctb_grasp_pose}"
-          />
-        </Sequence>
-      </Retry>
+      <SubTree ID="MoveToPose"
+        name="MoveToGrasp"
+        group_name="clr"
+        target_pose="{ctb_grasp_pose}"
+        constrain_gripper_top_down="true"
+      />
       <SubTree ID="CloseGripper" name="close_gripper" />
-      <OffsetPoseStamped name="CalculateClearPose"
-        input_pose="{ctb_handle_pose_aligned}"
-        translation_xyz="0.0, 0.0, 0.15"
-        output_pose="{ctb_clear_pose}"
-      />
       <OffsetPoseStamped name="CalculateLiftPose"
         input_pose="{ctb_handle_pose_aligned}"
         translation_xyz="0.0, 0.0, 0.6"
         output_pose="{ctb_lift_pose}"
       />
       <SubTree ID="MoveToPoseCartesian"
-        name="ClearBin"
-        group_name="clr"
-        target_pose="{ctb_clear_pose}"
-      />
-      <!-- This is a little dangerous if there's a flip, but it's a straight line RRT. -->
-      <SubTree ID="MoveToPose"
         name="LiftBag"
         group_name="clr"
         target_pose="{ctb_lift_pose}"
@@ -119,7 +94,7 @@
         frame="world"
         msg="{drop_pose}"
       />
-      <SubTree ID="MoveToPose"
+      <SubTree ID="MoveToPoseCartesian"
         name="MoveToDropPose"
         group_name="clr"
         target_pose="{drop_pose}"
@@ -128,7 +103,9 @@
     </Sequence>
   </BehaviorTree>
 
-  <!-- Free-space (RRT) plan, ghost preview, and execute -->
+  <!-- Free-space (RRT) plan, ghost preview, and execute. Setting
+       constrain_gripper_top_down switches to constrained (RRT*) planning
+       that keeps the gripper facing straight down along the whole path. -->
   <BehaviorTree ID="MoveToPose">
     <Sequence name="Sequence">
       <Retry name="retry" num_failures="3">
@@ -139,6 +116,7 @@
           target_pose="{target_pose}"
           velocity_scaling="1.0"
           acceleration_scaling="1.0"
+          constrain_gripper_top_down="{constrain_gripper_top_down}"
           trajectory="{trajectory}"
         />
       </Retry>

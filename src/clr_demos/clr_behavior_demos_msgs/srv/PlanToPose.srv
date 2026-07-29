@@ -15,6 +15,10 @@ geometry_msgs/PoseStamped target_pose
 float64 velocity_scaling
 float64 acceleration_scaling
 
+# If true, the whole path keeps the gripper facing straight down: its tilt
+# from the world vertical is bounded, while position and yaw are left free.
+bool constrain_gripper_top_down
+
 ---
 
 bool success

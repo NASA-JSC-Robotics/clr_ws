@@ -75,7 +75,13 @@ from roboplan.cartesian_planning import (
     CartesianSpeedMode,
 )
 from roboplan.simple_ik import SimpleIk, SimpleIkOptions
-from roboplan.rrt import RRT, RRTOptions
+from roboplan.rrt import (
+    ConstraintProjector,
+    ConstraintProjectorOptions,
+    PoseConstraint,
+    RRT,
+    RRTOptions,
+)
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
 from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
 from roboplan_ros.cpp import (
@@ -139,6 +145,13 @@ class GroupPlanningContext:
     q_indices: object = None
     ik_solver: object = None
     rrt: object = None
+
+    # Canned RRT option sets. The planner is reconfigured with one of these on
+    # every request, depending on whether the top-down constraint is enabled.
+    rrt_options: object = None
+    constrained_rrt_options: object = None
+    top_down_constraint: object = None
+    constraint_projector: object = None
     shortcutter: object = None
     toppra: object = None
     visualizer: object = None
@@ -182,6 +195,10 @@ class RoboplanPlanningServer(Node):
         # checks in the planners from numerical drift alone, so start
         # configurations are nudged this far inside the limits.
         self.declare_parameter("joint_limit_margin", 1.0e-4)
+
+        # Roll and pitch bound, in degrees, for the top-down gripper
+        # constraint offered by ~/plan_to_pose.
+        self.declare_parameter("top_down_tilt_bound_degrees", 5.0)
 
         # Cartesian planner settings. In "time_optimal" mode the trajectory is
         # re-timed optimally against the joint limits; in "bounded" mode the
@@ -433,12 +450,53 @@ class RoboplanPlanningServer(Node):
                 max_iters=self._max_shortcutting_iters,
             )
 
+            # Constrained planning walks the trees in small projected hops, so
+            # it wants a very different tuning: many more nodes, short connections,
+            # RRT* rewiring to collapse the zigzag the hops leave behind, and no
+            # fast return so the whole time budget is spent optimizing.
+            constraint_projection = ConstraintProjectorOptions(path_step_size=0.1)
+            constrained_rrt_options = RRTOptions(
+                group_name=group_name,
+                max_nodes=10000,
+                max_connection_distance=1.0,
+                collision_check_step_size=rrt_options.collision_check_step_size,
+                collision_check_use_bisection=True,
+                max_planning_time=3.0,
+                rrt_connect=True,
+                rrt_star=True,
+                rewire_distance=3.0,
+                fast_return=False,
+                constraint_projection=constraint_projection,
+            )
+
+            # The top-down constraint keeps the tip link's approach (z) axis
+            # near straight down in the world: the region frame's half turn
+            # about x points its z axis down, and only roll and pitch relative
+            # to it are bounded. Position and yaw are left unconstrained.
+            tilt_bound = np.deg2rad(self.get_parameter("top_down_tilt_bound_degrees").value)
+            region_tform = np.eye(4)
+            region_tform[:3, :3] = np.diag([1.0, -1.0, -1.0])
+            top_down_constraint = PoseConstraint(
+                self._scene,
+                group_name,
+                self._tip_link,
+                lower_bounds=np.array([-np.inf, -np.inf, -np.inf, -tilt_bound, -tilt_bound, -np.pi]),
+                upper_bounds=np.array([np.inf, np.inf, np.inf, tilt_bound, tilt_bound, np.pi]),
+                tform=region_tform,
+            )
+
             ctx = GroupPlanningContext(
                 name=group_name,
                 joint_names=list(group_info.joint_names),
                 q_indices=group_info.q_indices,
                 ik_solver=SimpleIk(self._scene, self._make_ik_options(group_name)),
                 rrt=RRT(self._scene, rrt_options),
+                rrt_options=rrt_options,
+                constrained_rrt_options=constrained_rrt_options,
+                top_down_constraint=top_down_constraint,
+                constraint_projector=ConstraintProjector(
+                    self._scene, group_name, [top_down_constraint], constraint_projection
+                ),
                 shortcutter=PathShortcutter(self._scene, shortcutting_options),
                 toppra=PathParameterizerTOPPRA(self._scene, group_name),
                 visualizer=RoboplanVisualizer(
@@ -570,13 +628,49 @@ class RoboplanPlanningServer(Node):
             last.accelerations = [0.0] * len(last.accelerations)
         return ros_traj
 
-    def _plan_to_configuration(self, ctx, q_target_full, velocity_scaling=0.0, acceleration_scaling=0.0):
+    def _project_to_top_down(self, ctx, q_full):
+        """
+        Returns the configuration projected onto the group's top-down gripper
+        constraint, or None if the projection did not converge. Configurations
+        already satisfying the constraint are returned unchanged.
+        """
+        if ctx.constraint_projector.satisfies(q_full):
+            return q_full
+        return ctx.constraint_projector.project(q_full)
+
+    def _plan_to_configuration(
+        self, ctx, q_target_full, velocity_scaling=0.0, acceleration_scaling=0.0, constrain_gripper_top_down=False
+    ):
         """
         Plans from the current hardware state to a target full configuration
         using RRT, shortcutting, and TOPP-RA time parameterization.
+
+        With the top-down gripper constraint enabled, the planner switches to
+        the constrained option set and shortcutting is skipped, since a
+        straight configuration-space shortcut leaves the constraint manifold.
         """
         with self._planning_lock:
             q_start_full = self._sync_to_hardware()
+
+            constraints = []
+            include_shortcutting = self._include_shortcutting
+            if constrain_gripper_top_down:
+                constraints = [ctx.top_down_constraint]
+                include_shortcutting = False
+
+                # The planner roots its trees at the start and goal, so both
+                # must sit on the constraint. IK converges to its own tolerance
+                # and hardware states carry noise, so project them first.
+                q_start_full = self._project_to_top_down(ctx, q_start_full)
+                if q_start_full is None:
+                    return False, "The current configuration could not be projected onto the top-down constraint."
+                q_target_full = self._project_to_top_down(ctx, q_target_full)
+                if q_target_full is None:
+                    return False, "The goal configuration could not be projected onto the top-down constraint."
+
+            # Reconfiguring the planner is cheap, so just set the option set
+            # matching the request every time.
+            ctx.rrt.setOptions(ctx.constrained_rrt_options if constrain_gripper_top_down else ctx.rrt_options)
 
             start = JointConfiguration()
             start.positions = q_start_full[ctx.q_indices]
@@ -584,20 +678,21 @@ class RoboplanPlanningServer(Node):
             goal = JointConfiguration()
             goal.positions = q_target_full[ctx.q_indices]
 
-            self.get_logger().info(f"Planning for group '{ctx.name}'...")
+            constraint_note = " with the top-down gripper constraint" if constrain_gripper_top_down else ""
+            self.get_logger().info(f"Planning for group '{ctx.name}'{constraint_note}...")
             plan_start_time = time.time()
 
             # A failed plan is reported as-is; callers (e.g. behavior trees)
             # are expected to handle retries.
             try:
                 start_time = time.time()
-                path = ctx.rrt.plan(start, goal)
+                path = ctx.rrt.plan(start, goal, constraints)
                 self.get_logger().info(f"  Finished planning in {time.time() - start_time} seconds.")
             except RuntimeError as e:
                 return False, f"Planning failed: {e}"
 
             try:
-                if self._include_shortcutting:
+                if include_shortcutting:
                     self.get_logger().info("Shortcutting...")
                     start_time = time.time()
                     path = ctx.shortcutter.shortcut(path)
@@ -654,7 +749,14 @@ class RoboplanPlanningServer(Node):
             q_target_full = self._scene.toFullJointPositions(ctx.name, group_positions)
             return self._plan_to_configuration(ctx, q_target_full, velocity_scaling, acceleration_scaling)
 
-    def _plan_to_pose(self, group_name, pose_stamped, velocity_scaling=0.0, acceleration_scaling=0.0):
+    def _plan_to_pose(
+        self,
+        group_name,
+        pose_stamped,
+        velocity_scaling=0.0,
+        acceleration_scaling=0.0,
+        constrain_gripper_top_down=False,
+    ):
         """Plans a free-space motion to a target pose via IK."""
         ctx, error = self._get_group_context(group_name)
         if ctx is None:
@@ -679,7 +781,9 @@ class RoboplanPlanningServer(Node):
             # follow-up Cartesian motion prone to spurious limit violations.
             q_target_full = self._nudge_within_limits(ctx, q_target_full)
 
-            return self._plan_to_configuration(ctx, q_target_full, velocity_scaling, acceleration_scaling)
+            return self._plan_to_configuration(
+                ctx, q_target_full, velocity_scaling, acceleration_scaling, constrain_gripper_top_down
+            )
 
     def _plan_cartesian(self, group_name, pose_stamped, max_linear_speed=0.0, max_angular_speed=0.0):
         """Plans a straight-line Cartesian motion from the current pose to a target pose."""
@@ -879,6 +983,7 @@ class RoboplanPlanningServer(Node):
                 request.target_pose,
                 request.velocity_scaling,
                 request.acceleration_scaling,
+                request.constrain_gripper_top_down,
             )
             if response.success:
                 response.trajectory = self._to_ros_trajectory(self._planned_traj)
