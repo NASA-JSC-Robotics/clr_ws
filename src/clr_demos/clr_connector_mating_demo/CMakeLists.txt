@@ -9,9 +9,4 @@ install(DIRECTORY config launch trees urdf meshes description
   DESTINATION share/${PROJECT_NAME}
 )
 
-install(PROGRAMS
-  scripts/run_connector_mating_demo.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 ament_package()
