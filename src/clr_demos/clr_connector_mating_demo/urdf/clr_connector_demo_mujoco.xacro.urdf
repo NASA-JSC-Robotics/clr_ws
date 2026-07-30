@@ -60,7 +60,7 @@
       <origin xyz="$(arg ctb_position_x) $(arg ctb_position_y) 0.25" rpy="0 0 ${radians($(arg ctb_orientation_deg))}"/>
     </xacro:ctb>
     <xacro:receptacle prefix="" parent="world">
-      <origin xyz="0.8 0.8 0.50" rpy="0 0 1.57"/>
+      <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
     </xacro:receptacle>
   </xacro:if>
 

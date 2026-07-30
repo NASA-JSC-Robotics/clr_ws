@@ -14,11 +14,11 @@
 
 <!-- ===================== RECEPTACLE ===================== -->
 
-    <link name="receptacle">
+  <link name="receptacle">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl"/>
+          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="receptacle_black">
             <color rgba="0.1 0.1 0.1 1"/>
@@ -27,7 +27,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl"/>
+          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -48,7 +48,7 @@
    <joint name="apriltag_0_joint" type="fixed">
      <parent link="receptacle"/>
      <child link="apriltag_0"/>
-     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <origin xyz="0 -0.105 0.0127" rpy="0 1.57 1.57"/>
    </joint>
 
   </xacro:macro>
