@@ -1,0 +1,21 @@
+<mujoco model="crank_handle">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <texture type="2d" name="material_crank_handle_0" file="material_crank_handle_0.png"/>
+    <material name="material_crank_handle_0" texture="material_crank_handle_0" specular="0.4000000000000001" shininess="0.001"/>
+    <mesh file="crank_handle.obj"/>
+  </asset>
+  <worldbody>
+    <body name="crank_handle">
+      <geom material="material_crank_handle_0" mesh="crank_handle" class="visual"/>
+      <geom mesh="crank_handle" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

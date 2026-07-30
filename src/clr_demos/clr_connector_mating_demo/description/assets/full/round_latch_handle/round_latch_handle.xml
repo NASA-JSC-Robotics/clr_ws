@@ -1,0 +1,20 @@
+<mujoco model="round_latch_handle">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_round_latch_handle" specular="0.20000000000000004" shininess="1.0" rgba="0.00000000 0.00000000 1.00000000 1.0"/>
+    <mesh file="round_latch_handle.obj"/>
+  </asset>
+  <worldbody>
+    <body name="round_latch_handle">
+      <geom material="mtl_round_latch_handle" mesh="round_latch_handle" class="visual"/>
+      <geom mesh="round_latch_handle" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

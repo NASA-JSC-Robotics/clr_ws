@@ -1,0 +1,19 @@
+<mujoco model="hande">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <mesh file="hande.obj"/>
+  </asset>
+  <worldbody>
+    <body name="hande">
+      <geom mesh="hande" class="visual"/>
+      <geom mesh="hande" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

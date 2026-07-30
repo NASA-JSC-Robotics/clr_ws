@@ -1,0 +1,20 @@
+<mujoco model="mtc_robot_side">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_mtc_robot_side_0" specular="0.20000000000000004" shininess="1.0" rgba="0.80000000 0.80000000 0.80000000 1.0"/>
+    <mesh file="mtc_robot_side.obj"/>
+  </asset>
+  <worldbody>
+    <body name="mtc_robot_side">
+      <geom material="material_mtc_robot_side_0" mesh="mtc_robot_side" class="visual"/>
+      <geom mesh="mtc_robot_side" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

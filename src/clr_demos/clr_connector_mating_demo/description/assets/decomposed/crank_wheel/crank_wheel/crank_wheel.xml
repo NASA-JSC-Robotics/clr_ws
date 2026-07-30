@@ -1,0 +1,81 @@
+<mujoco model="crank_wheel">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_crank_wheel" specular="0.20000000000000004" shininess="1.0" rgba="0.00000000 0.00000000 0.00000000 1.0"/>
+    <mesh file="crank_wheel.obj"/>
+    <mesh file="crank_wheel_collision_0.obj"/>
+    <mesh file="crank_wheel_collision_1.obj"/>
+    <mesh file="crank_wheel_collision_2.obj"/>
+    <mesh file="crank_wheel_collision_3.obj"/>
+    <mesh file="crank_wheel_collision_4.obj"/>
+    <mesh file="crank_wheel_collision_5.obj"/>
+    <mesh file="crank_wheel_collision_6.obj"/>
+    <mesh file="crank_wheel_collision_7.obj"/>
+    <mesh file="crank_wheel_collision_8.obj"/>
+    <mesh file="crank_wheel_collision_9.obj"/>
+    <mesh file="crank_wheel_collision_10.obj"/>
+    <mesh file="crank_wheel_collision_11.obj"/>
+    <mesh file="crank_wheel_collision_12.obj"/>
+    <mesh file="crank_wheel_collision_13.obj"/>
+    <mesh file="crank_wheel_collision_14.obj"/>
+    <mesh file="crank_wheel_collision_15.obj"/>
+    <mesh file="crank_wheel_collision_16.obj"/>
+    <mesh file="crank_wheel_collision_17.obj"/>
+    <mesh file="crank_wheel_collision_18.obj"/>
+    <mesh file="crank_wheel_collision_19.obj"/>
+    <mesh file="crank_wheel_collision_20.obj"/>
+    <mesh file="crank_wheel_collision_21.obj"/>
+    <mesh file="crank_wheel_collision_22.obj"/>
+    <mesh file="crank_wheel_collision_23.obj"/>
+    <mesh file="crank_wheel_collision_24.obj"/>
+    <mesh file="crank_wheel_collision_25.obj"/>
+    <mesh file="crank_wheel_collision_26.obj"/>
+    <mesh file="crank_wheel_collision_27.obj"/>
+    <mesh file="crank_wheel_collision_28.obj"/>
+    <mesh file="crank_wheel_collision_29.obj"/>
+    <mesh file="crank_wheel_collision_30.obj"/>
+  </asset>
+  <worldbody>
+    <body name="crank_wheel">
+      <geom material="mtl_crank_wheel" mesh="crank_wheel" class="visual"/>
+      <geom mesh="crank_wheel_collision_0" rgba="0.651934063231425 0.829556218604165 0.04047950518056398 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_1" rgba="0.46014833453824633 0.004455673483302447 0.8172768459727364 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_2" rgba="0.2521389856963784 0.3820082473383518 0.5765505476690966 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_3" rgba="0.0022822554673613826 0.06133161677458243 0.7634651926475172 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_4" rgba="0.5199700471093315 0.4278922255159715 0.5926933035958848 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_5" rgba="0.9402307351275373 0.6424719776316613 0.28447466903814334 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_6" rgba="0.5647242309267037 0.8074282466901318 0.896806181571709 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_7" rgba="0.8676764905324549 0.041575858735577675 0.09826877675246548 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_8" rgba="0.9885763273282218 0.08473049975519331 0.43411102328648266 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_9" rgba="0.11774501533485304 0.677621466392404 0.5700838128543545 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_10" rgba="0.5092511862778822 0.41240264716908503 0.18719109551596802 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_11" rgba="0.7675349205223553 0.2218256383977576 0.8087971963397422 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_12" rgba="0.639065377786511 0.6349410757130894 0.5617791424295062 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_13" rgba="0.12797209137604315 0.08169964367487592 0.21864854931839528 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_14" rgba="0.29514223483928115 0.1646360871162752 0.23932680382634886 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_15" rgba="0.5504028083598344 0.061271513773644704 0.8766285713871121 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_16" rgba="0.6492082553118286 0.8734160313030653 0.12522539554783496 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_17" rgba="0.3475346432636972 0.8801296272245271 0.4415824260984259 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_18" rgba="0.011392223016500669 0.8521263929730452 0.3116327062316748 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_19" rgba="0.40709180157799507 0.610257470722152 0.9236419762434807 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_20" rgba="0.0734654636573352 0.40704716382416606 0.5188013266038745 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_21" rgba="0.7233381454658655 0.5138122209602873 0.8497366175434575 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_22" rgba="0.7788248110740262 0.7674839984710159 0.023658793975843806 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_23" rgba="0.3987294396686687 0.34188144822046007 0.17376619912907187 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_24" rgba="0.6044568131794184 0.9098972317305581 0.7636106761568192 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_25" rgba="0.8692269748854593 0.6259284814766941 0.22043053924762868 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_26" rgba="0.35909477072950835 0.3122047070985784 0.7305559787983733 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_27" rgba="0.46901838698467946 0.5317028202446682 0.5617556033118104 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_28" rgba="0.881731689409036 0.5514903873209007 0.853458216665114 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_29" rgba="0.18988109725698998 0.8398416009499976 0.7362040819235015 1" class="collision"/>
+      <geom mesh="crank_wheel_collision_30" rgba="0.196203981735538 0.2118528540369221 0.20450335440230683 1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

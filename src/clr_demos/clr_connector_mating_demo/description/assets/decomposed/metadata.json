@@ -1,0 +1,11 @@
+{
+    "crank_wheel": 0.05,
+    "imetro_hatch_handle": 0.05,
+    "finger_v6": 0.05,
+    "clr_base": 0.05,
+    "simplified_hatch_4060_face": 0.05,
+    "ivr_hatch_frame_no_left": 0.05,
+    "hatch_4060_frame": 0.05,
+    "bench_lid": 0.05,
+    "ctb_handle": 0.01
+}

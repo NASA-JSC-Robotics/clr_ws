@@ -1,0 +1,37 @@
+<mujoco model="hatch_4060_frame">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_hatch_4060_frame" specular="0.20000000000000004" shininess="1.0" rgba="0.85098039 0.85098039 0.85098039 1.0"/>
+    <mesh file="hatch_4060_frame.obj"/>
+    <mesh file="hatch_4060_frame_collision_0.obj"/>
+    <mesh file="hatch_4060_frame_collision_1.obj"/>
+    <mesh file="hatch_4060_frame_collision_2.obj"/>
+    <mesh file="hatch_4060_frame_collision_3.obj"/>
+    <mesh file="hatch_4060_frame_collision_4.obj"/>
+    <mesh file="hatch_4060_frame_collision_5.obj"/>
+    <mesh file="hatch_4060_frame_collision_6.obj"/>
+    <mesh file="hatch_4060_frame_collision_7.obj"/>
+    <mesh file="hatch_4060_frame_collision_8.obj"/>
+  </asset>
+  <worldbody>
+    <body name="hatch_4060_frame">
+      <geom material="mtl_hatch_4060_frame" mesh="hatch_4060_frame" class="visual"/>
+      <geom mesh="hatch_4060_frame_collision_0" rgba="0.753443967031105 0.27572140197881057 0.7302660317783868 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_1" rgba="0.608477522656368 0.29822540864437874 0.5018301732234806 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_2" rgba="0.6301518176046553 0.2687226715857267 0.2816313986254009 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_3" rgba="0.7975673772266976 0.14072258816612793 0.28816831399086784 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_4" rgba="0.7547705600308158 0.728442144030894 0.1330085546867974 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_5" rgba="0.2855494031762247 0.3174493113264969 0.5776380193371845 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_6" rgba="0.48998930288526465 0.18324101841602525 0.9285191236189658 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_7" rgba="0.6172587628767384 0.8632778710514316 0.6520552862759277 1" class="collision"/>
+      <geom mesh="hatch_4060_frame_collision_8" rgba="0.5409054873278653 0.14898656521218956 0.7946899614685137 1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

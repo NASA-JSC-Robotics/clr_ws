@@ -1,0 +1,7 @@
+# https://github.com/mikedh/trimesh
+
+newmtl mtl_ivr_hatch_frame_no_left
+Ka 0.40000000 0.40000000 0.40000000
+Kd 0.85098039 0.85098039 0.85098039
+Ks 0.20000000 0.20000000 0.20000000
+Ns 1000.00000000
