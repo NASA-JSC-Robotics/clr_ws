@@ -18,7 +18,7 @@
       <CreatePoseStamped
         name="set_perception_pose"
         position_xyz="0.45, 0.75, 1.29"
-        orientation_wxyz="0.0, 0.0, 1.0, 0.0"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         frame="world"
         msg="{perception_pose}"
       />
@@ -92,7 +92,7 @@
       <CreatePoseStamped
         name="set_drop_pose"
         position_xyz="-1.5675, 0.753, 1.3"
-        orientation_wxyz="0.0, 0.0, 1.0, 0.0"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         frame="world"
         msg="{drop_pose}"
       />
