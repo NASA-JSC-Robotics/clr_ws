@@ -14,10 +14,10 @@
         controller_info="{controller_info}"
         activate_controllers="clr_joint_trajectory_controller"
       />
-      <SubTree ID="OpenGripper" name="open_gripper_start" />
-      <CreatePoseStamped
+      <SubTree ID="CloseGripper" name="close_gripper_start" />
+      <!-- <CreatePoseStamped
         name="set_perception_pose"
-        position_xyz="0.45, 0.75, 1.29"
+        position_xyz="0.25, 0.50, 0.85"
         orientation_wxyz="0.0, 0.0, 1.0, 0.0"
         frame="world"
         msg="{perception_pose}"
@@ -29,6 +29,15 @@
         group_name="clr"
         target_pose="{perception_pose}"
         target_frame="grasp_frame"
+        preview="true"
+      /> -->
+      <SubTree ID="MoveToJoint"
+        name="MoveToReceptacle"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        joint_names="vention_rail_base_to_carriage, ewellix_lift_lower_to_higher, shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="1.948, 0.073, 3.142, -2.339, -1.955, -0.349, -1.606, -1.571"
         preview="true"
       />
       <SubTree ID="OpenGripper" name="open_gripper_end" />
