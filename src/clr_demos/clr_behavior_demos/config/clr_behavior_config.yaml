@@ -1,0 +1,22 @@
+# CLR configuration for behavior tree executor.
+
+# Behavior executor parameters.
+params:
+  dt: 0.1  # Execution sample time
+
+# Behavior tree node import locations.
+imports:
+  - imetro_behavior.basic_behaviors
+  - imetro_behavior.color_behaviors
+  - imetro_behavior.control_behaviors
+  - imetro_behavior.decorators
+  - imetro_behavior.geometry_behaviors
+  - imetro_behavior.moveit_behaviors
+  - imetro_behavior.ros_behaviors
+
+# Paths for which to search for behavior tree XML files.
+tree_search_paths:
+  - package: imetro_behavior
+    path: trees
+  - package: clr_behavior_demos
+    path: trees

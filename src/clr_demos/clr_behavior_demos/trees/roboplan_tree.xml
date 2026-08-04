@@ -1,0 +1,102 @@
+<root main_tree_to_execute="MainTree">
+  <!--
+    Simple RoboPlan-based motion demo:
+      1. Free-space plan and move to a target pose.
+      2. Cartesian plan and move to an offset pose (straight line).
+      3. Cartesian plan and move back to the target pose.
+
+    Requires the RoboPlan planning server, e.g.:
+      ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
+  -->
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
+      <CreatePoseStamped
+        name="set_target_pose"
+        position_xyz="0.45, 0.75, 1.29"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
+        frame="world"
+        msg="{target_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToTargetPose"
+        group_name="clr"
+        target_pose="{target_pose}"
+      />
+      <OffsetPoseStamped name="CalculateOffsetPose"
+        input_pose="{target_pose}"
+        translation_xyz="0.0, 0.0, -0.25"
+        output_pose="{offset_pose}"
+      />
+      <SubTree ID="MoveToPoseCartesian"
+        name="CartesianMoveToOffsetPose"
+        group_name="clr"
+        target_pose="{offset_pose}"
+      />
+      <SubTree ID="MoveToPoseCartesian"
+        name="CartesianMoveBack"
+        group_name="clr"
+        target_pose="{target_pose}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Free-space (RRT) plan, preview, and execute -->
+  <BehaviorTree ID="MoveToPose">
+    <Sequence name="Sequence">
+      <RoboplanPlanToPose
+        name="plan_to_pose"
+        service_name="/roboplan_planning_server/plan_to_pose"
+        group_name="{group_name}"
+        target_pose="{target_pose}"
+        acceleration_scaling="0.5"
+        trajectory="{trajectory}"
+      />
+      <CallTriggerService
+        name="preview_trajectory"
+        service_name="/roboplan_planning_server/preview"
+      />
+      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
+      <ExecuteJointTrajectory
+        name="execute_trajectory"
+        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Straight-line Cartesian plan, preview, and execute -->
+  <BehaviorTree ID="MoveToPoseCartesian">
+    <Sequence name="Sequence">
+      <RoboplanPlanCartesianPath
+        name="plan_cartesian_path"
+        service_name="/roboplan_planning_server/plan_cartesian_path"
+        group_name="{group_name}"
+        target_pose="{target_pose}"
+        trajectory="{trajectory}"
+      />
+      <CallTriggerService
+        name="preview_trajectory"
+        service_name="/roboplan_planning_server/preview"
+      />
+      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
+      <ExecuteJointTrajectory
+        name="execute_trajectory"
+        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+</root>

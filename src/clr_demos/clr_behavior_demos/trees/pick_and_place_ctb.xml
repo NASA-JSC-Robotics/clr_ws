@@ -1,0 +1,225 @@
+<root main_tree_to_execute="MainTree">
+  <!-- Top-level behavior tree -->
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
+      <SubTree ID="OpenGripper" name="open_gripper_start" />
+      <CreatePoseStamped
+        name="set_perception_pose"
+        position_xyz="0.45, 0.75, 1.29"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
+        frame="world"
+        msg="{perception_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToPerceptionPose"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{perception_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <SubTree ID="DetectBlobs"
+        name="DetectHandle"
+        target_color="red"
+        blob_pose="{ctb_handle_pose}"
+        debug_viz="true"
+      />
+      <TransformPose name="TransformToBase"
+        input_pose="{ctb_handle_pose}"
+        source_frame="world"
+        output_pose="{ctb_handle_pose_base}"
+      />
+      <AlignPoseToNearestAxis name="AlignHandlePose"
+        input_pose="{ctb_handle_pose_base}"
+        output_pose="{ctb_handle_pose_aligned}"
+      />
+      <OffsetPoseStamped name="CalculateApproachPose"
+        input_pose="{ctb_handle_pose_aligned}"
+        translation_xyz="0.0, 0.0, 0.1"
+        output_pose="{ctb_approach_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToApproach"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{ctb_approach_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <OffsetPoseStamped name="CalculateGraspPose"
+        input_pose="{ctb_handle_pose_aligned}"
+        translation_xyz="0.0, 0.0, -0.03"
+        output_pose="{ctb_grasp_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToGrasp"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{ctb_grasp_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <SubTree ID="CloseGripper" name="close_gripper" />
+      <OffsetPoseStamped name="CalculateLiftPose"
+        input_pose="{ctb_handle_pose_aligned}"
+        translation_xyz="0.0, 0.0, 0.6"
+        output_pose="{ctb_lift_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="LiftBag"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{ctb_lift_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <CreatePoseStamped
+        name="set_drop_pose"
+        position_xyz="-1.5675, 0.753, 1.3"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
+        frame="world"
+        msg="{drop_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToDropPose"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{drop_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+      <SubTree ID="OpenGripper" name="open_gripper_end" />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Motion planning behaviors -->
+  <BehaviorTree ID="MoveToJoint">
+    <Sequence name="Sequence">
+      <PlanToJointState
+        name="plan_to_joint"
+        service_name="/plan_kinematic_path"
+        pipeline="{pipeline}"
+        planner="{planner}"
+        group_name="{group_name}"
+        joint_names="{joint_names}"
+        joint_positions="{joint_positions}"
+        tolerance="0.005"
+        trajectory="{trajectory}"
+      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
+      <ExecuteTrajectoryBehavior
+        name="execute_trajectory"
+        action_name="/execute_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MoveToPose">
+    <Sequence name="Sequence">
+      <PlanToPose
+        name="plan_to_pose"
+        service_name="/plan_kinematic_path"
+        pipeline="{pipeline}"
+        planner="{planner}"
+        group_name="{group_name}"
+        target_frame="{target_frame}"
+        target_pose="{target_pose}"
+        position_tolerance="0.005"
+        orientation_tolerance="0.005, 0.005, 0.005"
+        trajectory="{trajectory}"
+      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
+      <ExecuteTrajectoryBehavior
+        name="execute_trajectory"
+        action_name="/execute_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="OpenGripper">
+    <CommandGripper
+      name="OpenGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.023"
+    />
+  </BehaviorTree>
+
+  <BehaviorTree ID="CloseGripper">
+    <CommandGripper
+      name="CloseGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.0005"
+    />
+  </BehaviorTree>
+
+  <!-- Perception behavior -->
+  <BehaviorTree ID="DetectBlobs">
+    <Sequence name="Sequence">
+      <!-- TODO: uncomment when we are using polled cameras
+          <Parallel name="Parallel">
+            <Repeat name="repeat" num_success="-1">
+              <CallTriggerService
+              name="trigger_camera"
+              service_name="/wrist_mounted_camera/request_images"
+            />
+          </Repeat> -->
+          <GetSyncedImagePointCloudDepth
+            name="get_synced_images_pointcloud"
+            camera_info_topic="/wrist_mounted_camera/color/camera_info"
+            rgb_image_topic="/wrist_mounted_camera/color/image_raw"
+            depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
+            point_cloud_topic="/wrist_mounted_camera/depth/color/points"
+            time_slop="0.1"
+            sync_timeout="3.0"
+            camera_info="{camera_info}"
+            rgb_image="{rgb_image}"
+            depth_image="{depth_image}"
+            point_cloud="{point_cloud}"
+          />
+      <!-- </Parallel> -->
+      <DetectColorBlobs
+        name="detect_color_blobs"
+        camera_info="{camera_info}"
+        rgb_image="{rgb_image}"
+        depth_image="{depth_image}"
+        target_color="{target_color}"
+        min_blob_size="10"
+        debug_viz="{debug_viz}"
+        masked_image="{masked_image}"
+        blob_pose="{blob_pose}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+</root>

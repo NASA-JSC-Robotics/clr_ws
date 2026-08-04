@@ -1,0 +1,21 @@
+# Plans a collision-free joint-space motion to a target joint configuration.
+#
+# The joint group to plan for. An empty string uses the server's default group.
+string group_name
+
+# Joint names may be provided in any order, and are validated against the
+# joints of the planning group. Any joints in the group that are not listed
+# hold their current positions.
+string[] joint_names
+float64[] joint_positions
+
+# Optional scaling factors in (0, 1] applied to the joint limits when
+# time-parameterizing the trajectory. Values <= 0 use the server's defaults.
+float64 velocity_scaling
+float64 acceleration_scaling
+
+---
+
+bool success
+string message
+trajectory_msgs/JointTrajectory trajectory
