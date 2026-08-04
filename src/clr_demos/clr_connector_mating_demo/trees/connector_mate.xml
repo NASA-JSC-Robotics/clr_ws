@@ -15,32 +15,75 @@
         activate_controllers="clr_joint_trajectory_controller"
       />
       <SubTree ID="CloseGripper" name="close_gripper_start" />
-      <!-- <CreatePoseStamped
-        name="set_perception_pose"
-        position_xyz="0.25, 0.50, 0.85"
-        orientation_wxyz="0.0, 0.0, 1.0, 0.0"
-        frame="world"
-        msg="{perception_pose}"
-      />
-      <SubTree ID="MoveToPose"
-        name="MoveToPerceptionPose"
-        pipeline="ompl"
-        planner="RRTConnect"
-        group_name="clr"
-        target_pose="{perception_pose}"
-        target_frame="grasp_frame"
-        preview="true"
-      /> -->
+
       <SubTree ID="MoveToJoint"
-        name="MoveToReceptacle"
+        name="MoveToReadAprilTag"
         pipeline="ompl"
         planner="RRTConnect"
         group_name="clr"
         joint_names="vention_rail_base_to_carriage, ewellix_lift_lower_to_higher, shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
-        joint_positions="1.948, 0.073, 3.142, -2.339, -1.955, -0.349, -1.606, -1.571"
+        joint_positions="1.89, 0.00, 3.037, -2.356, -1.920, -0.384, -1.606, -1.484"
         preview="true"
       />
+
+      <SubTree ID="DetectAprilTag"
+        name="FindAprilTag"
+        tag_id="0"
+        tag_pose="{apriltag_pose}"
+      />
+      <TransformPose name="TransformTagToBase"
+        input_pose="{apriltag_pose}"
+        source_frame="wrist_mounted_camera_color_optical_frame"
+        output_pose="{apriltag_pose_base}"
+      />
+      <OffsetPoseStamped name="CalculateTagOffsetPose"
+        input_pose="{apriltag_pose_base}"
+        translation_xyz="0.0, 0.0, 0.2"
+        output_pose="{apriltag_offset_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToTagOffset"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{apriltag_offset_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
+
       <SubTree ID="OpenGripper" name="open_gripper_end" />
+
+    </Sequence>
+  </BehaviorTree>
+
+<!-- AprilTag Detection Subtree -->
+  <BehaviorTree ID="DetectAprilTag">
+    <Sequence name="Sequence">
+      <GetSyncedImagePointCloudDepth
+        name="get_synced_images_pointcloud"
+        camera_info_topic="/wrist_mounted_camera/color/camera_info"
+        rgb_image_topic="/wrist_mounted_camera/color/image_raw"
+        depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
+        point_cloud_topic="/wrist_mounted_camera/depth/color/points"
+        time_slop="0.1"
+        sync_timeout="3.0"
+        camera_info="{camera_info}"
+        rgb_image="{rgb_image}"
+        depth_image="{depth_image}"
+        point_cloud="{point_cloud}"
+      />
+      <LookupTransform
+        name="detect_apriltag"
+        source_frame="wrist_mounted_camera_color_optical_frame"
+        target_frame="tag36h11:0"
+        output_transform_stamped="{tag_transform}"
+      />
+      <!-- Wrote this in imetro_behaviors - added class in geometry_behaviors.py. Need to make branch. -->
+      <TransformToPose
+        name="convert_transform_to_pose"
+        input_transform="{tag_transform}"
+        output_pose="{tag_pose}"
+      />
     </Sequence>
   </BehaviorTree>
 

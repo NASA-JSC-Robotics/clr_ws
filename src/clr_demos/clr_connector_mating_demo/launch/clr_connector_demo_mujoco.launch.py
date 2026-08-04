@@ -123,4 +123,23 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription(declared_arguments + [generate_mjcf, clr_launch, point_cloud_proc])
+    apriltag_node = Node(
+        package="apriltag_ros",
+        executable="apriltag_node",
+        name="apriltag_node",
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": True,
+                "family": "36h11",
+                "size": 0.073,
+                "tag_ids": [0],
+            }
+        ],
+        remappings=[
+            ("image_rect", "/wrist_mounted_camera/color/image_raw"),
+            ("camera_info", "/wrist_mounted_camera/color/camera_info"),
+        ],
+    )
+
+    return LaunchDescription(declared_arguments + [generate_mjcf, clr_launch, point_cloud_proc, apriltag_node])
