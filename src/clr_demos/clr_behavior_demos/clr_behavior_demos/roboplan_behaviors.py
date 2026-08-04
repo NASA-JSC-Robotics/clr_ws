@@ -220,12 +220,12 @@ class ExecuteJointTrajectory(RosActionClientBase):
 
     def process_result(self, result: Any) -> Status:
         """Process the trajectory execution action result."""
-        error_code = result.result.error_code
+        error_code = result.error_code
         if error_code == FollowJointTrajectory.Result.SUCCESSFUL:
             self.node.get_logger().info("Trajectory execution succeeded!")
             return Status.SUCCESS
         else:
             error_code_str = FOLLOW_JOINT_TRAJECTORY_ERROR_DICT.get(error_code, "UNKNOWN")
             self.node.get_logger().error(f"Trajectory execution failed with error code: {error_code_str}")
-            self.node.get_logger().error(f"Message: {result.result.error_string}")
+            self.node.get_logger().error(f"Message: {result.error_string}")
             return Status.FAILURE
