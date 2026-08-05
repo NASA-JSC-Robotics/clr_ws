@@ -9,8 +9,6 @@ These include behaviors requiring color/depth perception, force/torque sensors, 
 
 They are intended to provide starting points of how to interact with CLR using commonly available open source tools:
 
-* [Pick and Place with a CTB](./clr_pick_and_place_demo/README.md)
-  * Uses MoveIt2 and basic perception capabilities to pick up a cargo transfer bag (CTB) and place it inside a bench storage container.
 * [iMETRO Behavior Trees](./clr_behavior_demos/README.md)
   * Python (PyTrees) based behavior tree framework for constructing more complex capabilities.
 * [Planning with RoboPlan](./clr_roboplan_demos/README.md)
