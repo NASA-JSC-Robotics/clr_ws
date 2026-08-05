@@ -416,7 +416,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/colcon-bash-0.5.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-cd-0.1.1-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-cmake-0.2.30-pyhd8ed1ab_0.conda
-      - conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.19.0-pyhd8ed1ab_1.conda
+      - conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.21.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-defaults-0.2.9-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-devtools-0.3.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-library-path-0.2.1-pyhd8ed1ab_1.conda
@@ -504,7 +504,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/rich-14.3.4-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rosdistro-1.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rospkg-1.6.1-pyhd8ed1ab_0.conda
-      - conda: https://prefix.dev/conda-forge/noarch/setuptools-83.0.0-pyh332efcf_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/setuptools-79.0.1-pyhff2d567_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/six-1.17.0-pyhe01879c_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/snowballstemmer-3.1.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/sysroot_linux-aarch64-2.34-h96c1060_3.conda
@@ -1276,7 +1276,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/colcon-bash-0.5.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-cd-0.1.1-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-cmake-0.2.30-pyhd8ed1ab_0.conda
-      - conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.19.0-pyhd8ed1ab_1.conda
+      - conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.21.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-defaults-0.2.9-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-devtools-0.3.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/colcon-library-path-0.2.1-pyhd8ed1ab_1.conda
@@ -1364,7 +1364,7 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/rich-14.3.4-pyhcf101f3_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rosdistro-1.0.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/rospkg-1.6.1-pyhd8ed1ab_0.conda
-      - conda: https://prefix.dev/conda-forge/noarch/setuptools-83.0.0-pyh332efcf_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/setuptools-79.0.1-pyhff2d567_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/six-1.17.0-pyhe01879c_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/snowballstemmer-3.1.1-pyhd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/sysroot_linux-64-2.34-h087de78_3.conda
@@ -15134,10 +15134,11 @@ packages:
   run_exports: {}
   size: 30528
   timestamp: 1781648219269
-- conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.19.0-pyhd8ed1ab_1.conda
-  sha256: 565322c13eb28db869d8de16f5ae14caebb2b58f76c11ab8eaddeb5eaa2e50e9
-  md5: d7c6db7125d9f78ec34451f4b4d471cb
+- conda: https://prefix.dev/conda-forge/noarch/colcon-core-0.21.0-pyhcf101f3_0.conda
+  sha256: b30d73297ab86e5117c9eebf11d6bc86616be6a7e0ead9d14fec77077c760261
+  md5: 16256753ef2123996897bc6773080893
   depends:
+  - python >=3.10
   - coloredlogs
   - distlib
   - empy
@@ -15145,16 +15146,17 @@ packages:
   - pytest-cov
   - pytest-repeat
   - pytest-rerunfailures
-  - python >=3.9
-  - setuptools >=30.3.0
+  - setuptools >=30.3.0,<80
+  - tomli >=1.0.0
+  - python
   license: Apache-2.0
   license_family: APACHE
   purls:
   - pkg:pypi/colcon-core?source=hash-mapping
   - pkg:pypi/colcon-distutils-commands?source=hash-mapping
   run_exports: {}
-  size: 88696
-  timestamp: 1742163247059
+  size: 96785
+  timestamp: 1780438171992
 - conda: https://prefix.dev/conda-forge/noarch/colcon-defaults-0.2.9-pyhd8ed1ab_1.conda
   sha256: dd89f3e92a80532b9c6427ec9dd12742be9e27c3d6639555a4f786787fb5f33d
   md5: 1bc984ddc9434fd2fdabde2e0e44dd14
@@ -16330,18 +16332,18 @@ packages:
   run_exports: {}
   size: 31852
   timestamp: 1766125246079
-- conda: https://prefix.dev/conda-forge/noarch/setuptools-83.0.0-pyh332efcf_0.conda
-  sha256: 48a9f96016505debadfc67f06de7ac548decbc38d327409b24b0432ef6f16335
-  md5: 6bf6acbab2499830180ec88c3aff2fa4
+- conda: https://prefix.dev/conda-forge/noarch/setuptools-79.0.1-pyhff2d567_0.conda
+  sha256: 5ebc4bb71fbdc8048b08848519150c8d44b8eb18445711d3258c9d402ba87a2c
+  md5: fa6669cc21abd4b7b6c5393b7bc71914
   depends:
-  - python >=3.10
+  - python >=3.9
   license: MIT
   license_family: MIT
   purls:
-  - pkg:pypi/setuptools?source=compressed-mapping
+  - pkg:pypi/setuptools?source=hash-mapping
   run_exports: {}
-  size: 642081
-  timestamp: 1783619174976
+  size: 787541
+  timestamp: 1745484086827
 - conda: https://prefix.dev/conda-forge/noarch/six-1.17.0-pyhe01879c_1.conda
   sha256: 458227f759d5e3fcec5d9b7acce54e10c9e1f4f4b7ec978f3bfd54ce4ee9853d
   md5: 3339e3b65d58accf4ca4fb8748ab16b3

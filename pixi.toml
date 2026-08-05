@@ -72,6 +72,9 @@ scipy = ">=1.18.0,<2"
 libopencv = { version = ">=4.12.0,<5", build = "qt6*" }  # Ensure we aren't installing opencv headless
 py-opencv = { version = ">=4.12.0,<5", build = "qt6*" }
 
+# Ensure symlink install compatibility with pure python packages (like py_trees_js)
+setuptools = "<80"
+
 # ROS dependencies
 ros-jazzy-ros-base = "*"
 ros-jazzy-admittance-controller = "*"
