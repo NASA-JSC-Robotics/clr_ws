@@ -38,3 +38,6 @@
 [submodule "src/external/imetro_behavior"]
 	path = src/external/imetro_behavior
 	url = https://github.com/NASA-JSC-Robotics/imetro_behavior.git
+[submodule "src/external/color_tools"]
+	path = src/external/color_tools
+	url = https://github.com/NASA-JSC-Robotics/color_tools.git
