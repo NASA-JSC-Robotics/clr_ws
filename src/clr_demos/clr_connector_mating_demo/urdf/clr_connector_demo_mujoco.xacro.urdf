@@ -98,9 +98,6 @@
 
       <!-- Increase this parameter to run the sim faster than realtime. -->
       <param name="sim_speed_factor">$(arg sim_speed)</param>
-
-      <!-- Publish camera images at 5 hz -->
-      <param name="camera_publish_rate">5.0</param>
     </hardware>
 
     <xacro:clr_mujoco_ros2_control_sensors tf_prefix="${tf_prefix}"/>

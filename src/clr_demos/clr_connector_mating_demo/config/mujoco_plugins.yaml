@@ -4,6 +4,7 @@
       mujoco_camera_plugin:
         type: "mujoco_ros2_control_plugins/CameraPlugin"
         camera_publish_rate: 2.0
+        policy: polled
         $(var tf_prefix)wrist_mounted_camera:
           frame_name: $(var tf_prefix)wrist_mounted_camera_color_optical_frame
           info_topic: /$(var tf_prefix)wrist_mounted_camera/color/camera_info

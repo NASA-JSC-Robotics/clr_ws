@@ -31,14 +31,20 @@
         tag_id="0"
         tag_pose="{apriltag_pose}"
       />
-      <TransformPose name="TransformTagToBase"
+
+      <!-- WIP! : Making an offset from the april tag  -->
+      <!-- <TransformPose name="TransformTagToBase"
         input_pose="{apriltag_pose}"
         source_frame="wrist_mounted_camera_color_optical_frame"
         output_pose="{apriltag_pose_base}"
       />
-      <OffsetPoseStamped name="CalculateTagOffsetPose"
+      <AlignPoseToNearestAxis name="SnapOrientationToAxis"
         input_pose="{apriltag_pose_base}"
-        translation_xyz="0.0, 0.0, 0.2"
+        output_pose="{apriltag_aligned_pose}"
+      />
+      <OffsetPoseStamped name="CalculateStandoffPose"
+        input_pose="{apriltag_aligned_pose}"
+        translation_xyz="0.0, 0.0, -0.15"
         output_pose="{apriltag_offset_pose}"
       />
       <SubTree ID="MoveToPose"
@@ -49,7 +55,7 @@
         target_pose="{apriltag_offset_pose}"
         target_frame="grasp_frame"
         preview="true"
-      />
+      /> -->
 
       <SubTree ID="OpenGripper" name="open_gripper_end" />
 
@@ -72,17 +78,13 @@
         depth_image="{depth_image}"
         point_cloud="{point_cloud}"
       />
-      <LookupTransform
-        name="detect_apriltag"
-        source_frame="wrist_mounted_camera_color_optical_frame"
-        target_frame="tag36h11:0"
-        output_transform_stamped="{tag_transform}"
-      />
-      <!-- Wrote this in imetro_behaviors - added class in geometry_behaviors.py. Need to make branch. -->
-      <TransformToPose
-        name="convert_transform_to_pose"
-        input_transform="{tag_transform}"
-        output_pose="{tag_pose}"
+      <DetectAprilTagLocal
+        name="detect_apriltag_locally"
+        rgb_image="{rgb_image}"
+        camera_info="{camera_info}"
+        tag_id="{tag_id}"
+        tag_size="0.073"
+        tag_pose="{tag_pose}"
       />
     </Sequence>
   </BehaviorTree>
