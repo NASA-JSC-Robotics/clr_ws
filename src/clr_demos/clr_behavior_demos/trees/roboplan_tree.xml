@@ -42,12 +42,12 @@
       <SubTree ID="MoveToPoseCartesian"
         name="CartesianMoveToOffsetPose"
         group_name="clr"
-        target_pose="{offset_pose}"
+        target_poses="{offset_pose}"
       />
       <SubTree ID="MoveToPoseCartesian"
         name="CartesianMoveBack"
         group_name="clr"
-        target_pose="{target_pose}"
+        target_poses="{target_pose}"
       />
     </Sequence>
   </BehaviorTree>
@@ -83,7 +83,7 @@
         name="plan_cartesian_path"
         service_name="/roboplan_planning_server/plan_cartesian_path"
         group_name="{group_name}"
-        target_pose="{target_pose}"
+        target_poses="{target_poses}"
         trajectory="{trajectory}"
       />
       <CallTriggerService

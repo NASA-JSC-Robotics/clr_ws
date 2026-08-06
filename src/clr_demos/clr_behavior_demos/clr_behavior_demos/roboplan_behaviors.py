@@ -38,7 +38,13 @@ from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import PoseStamped
 from trajectory_msgs.msg import JointTrajectory
 
-from clr_behavior_demos_msgs.srv import PlanCartesianPath, PlanToJointState, PlanToPose
+from clr_behavior_demos_msgs.srv import (
+    PlanCartesianPath,
+    PlanToJointState,
+    PlanToPose,
+    SetCollisions,
+)
+
 from imetro_behavior.ros_behaviors.action_client import RosActionClientBase
 from imetro_behavior.ros_behaviors.service_client import RosServiceClientBase
 
@@ -154,7 +160,11 @@ class RoboplanPlanToPose(RosServiceClientBase):
 class RoboplanPlanCartesianPath(RosServiceClientBase):
     """
     Uses a RoboPlan planning server to plan a straight-line Cartesian motion
-    from the current end effector pose to a target pose.
+    through one or more target poses from the current end effector pose.
+
+    The target_poses port accepts a single PoseStamped or a list of
+    PoseStamped. A single pose produces a straight line to one target;
+    a list is used for multi-waypoint paths.
     """
 
     def __init__(self, name: str, **kwargs: Any):
@@ -165,7 +175,7 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
         """Return the input port declarations."""
         return {
             "group_name": PortInformation(data_type=str, required=False),
-            "target_pose": PortInformation(data_type=PoseStamped, required=True),
+            "target_poses": PortInformation(data_type=object, required=True),
             "max_linear_speed": PortInformation(data_type=float, required=False),
             "max_angular_speed": PortInformation(data_type=float, required=False),
         }
@@ -177,9 +187,17 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
 
     def create_request(self) -> PlanCartesianPath.Request:
         """Create the planning service request."""
+        target = self.get_input("target_poses")
+        if isinstance(target, PoseStamped):
+            target = [target]
+        elif not isinstance(target, list):
+            raise RuntimeError(
+                f"target_poses must be a PoseStamped or a list of PoseStamped, "
+                f"got {type(target).__name__}"
+            )
         return PlanCartesianPath.Request(
             group_name=self.get_input("group_name", ""),
-            target_pose=self.get_input("target_pose"),
+            target_poses=target,
             max_linear_speed=self.get_input("max_linear_speed", 0.0),
             max_angular_speed=self.get_input("max_angular_speed", 0.0),
         )
@@ -228,4 +246,49 @@ class ExecuteJointTrajectory(RosActionClientBase):
             error_code_str = FOLLOW_JOINT_TRAJECTORY_ERROR_DICT.get(error_code, "UNKNOWN")
             self.node.get_logger().error(f"Trajectory execution failed with error code: {error_code_str}")
             self.node.get_logger().error(f"Message: {result.error_string}")
+            return Status.FAILURE
+
+
+class SetAllowedCollisions(RosServiceClientBase):
+    """
+    Toggle collision checking for one or more body pairs via the RoboPlan
+    planning server's ~/set_collisions service.
+
+    Ports
+    -----
+    Inputs:
+        body1   (list[str]) – first body in each pair
+        body2   (list[str]) – second body in each pair
+        allowed (bool)      – True to allow collisions (disable checking),
+                              False to disallow (enable checking)
+    """
+
+    def __init__(self, name: str, **kwargs):
+        super().__init__(name, service_type=SetCollisions, **kwargs)
+
+    @classmethod
+    def input_ports(cls) -> dict:
+        return {
+            "body1": PortInformation(data_type=list, required=True),
+            "body2": PortInformation(data_type=list, required=True),
+            "allowed": PortInformation(data_type=bool, required=True),
+        }
+
+    @classmethod
+    def output_ports(cls) -> dict:
+        return {}
+
+    def create_request(self) -> SetCollisions.Request:
+        return SetCollisions.Request(
+            body1=self.get_input("body1"),
+            body2=self.get_input("body2"),
+            enable=not self.get_input("allowed"),
+        )
+
+    def process_response(self, response: SetCollisions.Response) -> Status:
+        if response.success:
+            self.node.get_logger().info(response.message)
+            return Status.SUCCESS
+        else:
+            self.node.get_logger().error(response.message)
             return Status.FAILURE

@@ -12,6 +12,7 @@ imports:
   - imetro_behavior.decorators
   - imetro_behavior.geometry_behaviors
   - imetro_behavior.ros_behaviors
+  - clr_behavior_demos.clr_behaviors
   - clr_behavior_demos.roboplan_behaviors
 
 # Paths for which to search for behavior tree XML files.

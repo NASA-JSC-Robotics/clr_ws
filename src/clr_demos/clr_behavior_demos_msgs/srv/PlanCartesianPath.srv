@@ -1,13 +1,15 @@
-# Plans a straight-line Cartesian motion from the current end effector pose to
-# the target pose, interpolating a single path segment and solving IK along it.
+# Plans a straight-line Cartesian motion through one or more target poses,
+# interpolating between consecutive poses and solving IK along the path.
+# A single target pose (the common case) produces a straight line from the
+# current end effector pose to the target.
 #
 # The joint group to plan for. An empty string uses the server's default group.
 string group_name
 
-# The pose is interpreted in the frame given by its header.frame_id, which must
-# be a frame known to the planning scene. An empty frame_id means the planning
-# group's base link.
-geometry_msgs/PoseStamped target_pose
+# One or more target poses, visited in order. Each pose is interpreted in the
+# frame given by its header.frame_id, which must be a frame known to the
+# planning scene. An empty frame_id means the planning group's base link.
+geometry_msgs/PoseStamped[] target_poses
 
 # Optional tool speed limits along the path. Values <= 0 use the server's
 # defaults. Only applies when the server's Cartesian speed mode is "bounded";

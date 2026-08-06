@@ -60,7 +60,12 @@ from visualization_msgs.msg import Marker, MarkerArray
 from interactive_markers import InteractiveMarkerServer, MenuHandler
 from std_srvs.srv import Trigger
 
-from clr_behavior_demos_msgs.srv import PlanCartesianPath, PlanToJointState, PlanToPose
+from clr_behavior_demos_msgs.srv import (
+    PlanCartesianPath,
+    PlanToJointState,
+    PlanToPose,
+    SetCollisions,
+)
 
 from roboplan.core import (
     CartesianConfiguration,
@@ -361,6 +366,7 @@ class RoboplanPlanningServer(Node):
         self.create_service(PlanToJointState, "~/plan_to_joint_state", self._on_plan_to_joint_state)
         self.create_service(PlanToPose, "~/plan_to_pose", self._on_plan_to_pose)
         self.create_service(PlanCartesianPath, "~/plan_cartesian_path", self._on_plan_cartesian_path)
+        self.create_service(SetCollisions, "~/set_collisions", self._on_set_collisions)
 
         # Setup Trigger services. The plan services target the interactive
         # marker pose; preview/execute act on the last planned trajectory
@@ -785,27 +791,35 @@ class RoboplanPlanningServer(Node):
                 ctx, q_target_full, velocity_scaling, acceleration_scaling, constrain_gripper_top_down
             )
 
-    def _plan_cartesian(self, group_name, pose_stamped, max_linear_speed=0.0, max_angular_speed=0.0):
-        """Plans a straight-line Cartesian motion from the current pose to a target pose."""
+    def _plan_cartesian(self, group_name, target_poses, max_linear_speed=0.0, max_angular_speed=0.0):
+        """Plans a straight-line Cartesian motion through one or more target poses."""
         ctx, error = self._get_group_context(group_name)
         if ctx is None:
             return False, error
 
+        # Either a list or a single pose stamped.
+        if isinstance(target_poses, PoseStamped):
+            target_poses = [target_poses]
+
+        if len(target_poses) < 1:
+            return False, "At least one target pose is required."
+
         with self._planning_lock:
             q_start_full = self._nudge_within_limits(ctx, self._sync_to_hardware())
-            try:
-                base_T_target = self._pose_stamped_to_base_frame(pose_stamped, q_start_full)
-            except RuntimeError as e:
-                return False, f"Could not resolve target pose frame '{pose_stamped.header.frame_id}': {e}"
 
             base_T_start = self._scene.forwardKinematics(q_start_full, self._tip_link, self._base_link)
+            poses = [base_T_start]
 
-            # A single straight segment; the planner interpolates along it and
-            # solves IK at the trajectory sample time.
+            for i, pose_stamped in enumerate(target_poses):
+                try:
+                    poses.append(self._pose_stamped_to_base_frame(pose_stamped, q_start_full))
+                except RuntimeError as e:
+                    return False, f"Could not resolve frame for target pose {i}: {e}"
+
             path = CartesianPath(
                 [self._base_link],
                 [self._tip_link],
-                [[base_T_start, base_T_target]],
+                [poses],
             )
 
             speed_mode_name = self.get_parameter("cartesian_speed_mode").value
@@ -815,7 +829,6 @@ class RoboplanPlanningServer(Node):
                 CartesianSpeedMode.TimeOptimal if speed_mode_name == "time_optimal" else CartesianSpeedMode.Bounded
             )
 
-            # The tool speed/acceleration caps only apply in bounded mode.
             options = CartesianPlannerOptions(
                 group_name=ctx.name,
                 dt=self._traj_dt,
@@ -830,23 +843,28 @@ class RoboplanPlanningServer(Node):
                 max_angular_acceleration=self.get_parameter("max_angular_acceleration").value,
                 max_position_error=self.get_parameter("max_position_error").value,
                 max_orientation_error=self.get_parameter("max_orientation_error").value,
-                orientation_cost=0.1,  # helps better track position
+                orientation_cost=0.1,
             )
             planner = CartesianPathPlanner(self._scene, options)
 
             q_start = JointConfiguration()
             q_start.positions = q_start_full
 
-            self.get_logger().info(f"Planning Cartesian path for group '{ctx.name}'...")
+            self.get_logger().info(
+                f"Planning Cartesian path through {len(target_poses)} pose(s) for group '{ctx.name}'..."
+            )
             start_time = time.time()
             try:
                 traj = planner.plan(path, q_start)
             except RuntimeError as e:
                 return False, f"Cartesian planning failed: {e}"
-            self.get_logger().info(f"  Finished Cartesian planning in {time.time() - start_time} seconds.")
+            self.get_logger().info(f"  Finished Cartesian planning in {time.time() - start_time:.3f} seconds.")
 
             self._set_planned_trajectory(ctx, traj)
-            return True, f"Planned Cartesian trajectory with {len(traj.positions)} points"
+            return True, (
+                f"Planned Cartesian trajectory through {len(target_poses)} pose(s) "
+                f"({len(traj.positions)} points)"
+            )
 
     def _preview(self):
         if self._planned_traj is None:
@@ -935,7 +953,7 @@ class RoboplanPlanningServer(Node):
         """Cartesian plan to the current interactive marker pose."""
         if self._target_marker_pose is None:
             return False, "No target set. Move the interactive marker first."
-        return self._plan_cartesian(self._joint_group, self._target_marker_pose)
+        return self._plan_cartesian(self._joint_group, [self._target_marker_pose])
 
     # Menu callbacks
     def _on_plan_menu(self, feedback):
@@ -995,7 +1013,7 @@ class RoboplanPlanningServer(Node):
         with self._planning_lock:
             response.success, response.message = self._plan_cartesian(
                 request.group_name,
-                request.target_pose,
+                list(request.target_poses),
                 request.max_linear_speed,
                 request.max_angular_speed,
             )
@@ -1003,6 +1021,49 @@ class RoboplanPlanningServer(Node):
                 response.trajectory = self._to_ros_trajectory(self._planned_traj)
             else:
                 self.get_logger().error(response.message)
+        return response
+
+    def _on_set_collisions(self, request, response):
+        """Toggle collision checking for a list of body pairs."""
+        if len(request.body1) != len(request.body2):
+            response.success = False
+            response.message = (
+                f"body1 and body2 must have the same length "
+                f"(got {len(request.body1)} and {len(request.body2)})."
+            )
+            self.get_logger().error(response.message)
+            return response
+
+        if len(request.body1) == 0:
+            response.success = False
+            response.message = "No body pairs specified."
+            self.get_logger().error(response.message)
+            return response
+
+        action = "Enabling" if request.enable else "Disabling"
+        with self._planning_lock:
+            failed = []
+            for b1, b2 in zip(request.body1, request.body2):
+                try:
+                    self._scene.setCollisions(b1, b2, request.enable)
+                    self.get_logger().info(f"{action} collision checking: '{b1}' <-> '{b2}'")
+                except Exception as e:
+                    failed.append(f"'{b1}' <-> '{b2}': {e}")
+
+            if failed:
+                response.success = False
+                response.message = (
+                    f"Failed to set collisions for {len(failed)}/{len(request.body1)} "
+                    f"pair(s): {'; '.join(failed)}"
+                )
+                self.get_logger().error(response.message)
+            else:
+                action_past = "Enabled" if request.enable else "Disabled"
+                pairs = ", ".join(f"'{b1}'<->'{b2}'" for b1, b2 in zip(request.body1, request.body2))
+                response.success = True
+                response.message = f"{action_past} collision checking for {len(request.body1)} pair(s): {pairs}"
+                self.get_logger().info(response.message)
+
         return response
 
     # Trigger service callbacks

@@ -1,0 +1,11 @@
+# SetCollisions.srv
+# Toggle collision checking for one or more body pairs in the planning scene.
+# Body names can be frame names or collision geometry names.
+# The two arrays must have the same length; each (body1[i], body2[i]) is one pair.
+
+string[] body1
+string[] body2
+bool     enable    # true = enable collision checking; false = disable (allow collisions)
+---
+bool     success
+string   message
