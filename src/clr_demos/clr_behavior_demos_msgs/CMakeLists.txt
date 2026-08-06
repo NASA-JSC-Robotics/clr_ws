@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   srv/PlanCartesianPath.srv
   srv/PlanToJointState.srv
   srv/PlanToPose.srv
+  srv/SetCollisions.srv
   DEPENDENCIES geometry_msgs trajectory_msgs
 )
 

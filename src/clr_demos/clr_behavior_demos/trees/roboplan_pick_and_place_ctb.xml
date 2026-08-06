@@ -85,7 +85,7 @@
       <SubTree ID="MoveToPoseCartesian"
         name="LiftBag"
         group_name="clr"
-        target_pose="{ctb_lift_pose}"
+        target_poses="{ctb_lift_pose}"
       />
       <CreatePoseStamped
         name="set_drop_pose"
@@ -97,7 +97,7 @@
       <SubTree ID="MoveToPoseCartesian"
         name="MoveToDropPose"
         group_name="clr"
-        target_pose="{drop_pose}"
+        target_poses="{drop_pose}"
       />
       <SubTree ID="OpenGripper" name="open_gripper_end" />
     </Sequence>
@@ -132,14 +132,14 @@
     </Sequence>
   </BehaviorTree>
 
-  <!-- Straight-line Cartesian plan, ghost preview, and execute -->
+  <!-- Straight-line Cartesian plan through one or more poses, preview, execute -->
   <BehaviorTree ID="MoveToPoseCartesian">
     <Sequence name="Sequence">
       <RoboplanPlanCartesianPath
         name="plan_cartesian_path"
         service_name="/roboplan_planning_server/plan_cartesian_path"
         group_name="{group_name}"
-        target_pose="{target_pose}"
+        target_poses="{target_poses}"
         trajectory="{trajectory}"
       />
       <CallTriggerService
