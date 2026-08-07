@@ -4,14 +4,17 @@
 
     Sequence:
       1. Enable controllers.
-      2. Free-space move to the bench seat approach joint config.
+      2. Home the arm, position rail/lift, approach bench seat.
       3. Allow gripper/lid collisions, compute the lid-opening arc,
-         execute as a multi-waypoint Cartesian path, then restore collisions.
+         execute as a multi-waypoint Cartesian path.
+      4. Be sure to reset the collisions regardless of success or
+         failure.
       4. Back out with a relative Cartesian move.
-
-    Requires the RoboPlan planning server, e.g.:
-      ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
   -->
+
+  <include file="roboplan/gripper_trees.xml" />
+  <include file="roboplan/roboplan_trees.xml" />
+
   <BehaviorTree ID="MainTree">
     <Sequence name="Sequence">
 
@@ -29,7 +32,7 @@
         activate_controllers="clr_joint_trajectory_controller"
       />
 
-      <!-- Home the arm first (matches C++ demo_home) -->
+      <!-- Home the arm -->
       <SubTree ID="MoveToJointState"
         name="MoveToHome"
         group_name="ur_manipulator"
@@ -39,7 +42,7 @@
         acceleration_scaling="1.0"
       />
 
-      <!-- Position rail and lift, then move arm to init config (matches C++ init) -->
+      <!-- Position rail and lift in front of the bench -->
       <SubTree ID="MoveToJointState"
         name="MoveToInit"
         group_name="clr"
@@ -49,7 +52,7 @@
         acceleration_scaling="1.0"
       />
 
-      <!-- Now approach bench seat (rail=0.0, lift=0.0 from init) -->
+      <!-- Move to underneath the bench -->
       <SubTree ID="MoveToJointState"
         name="MoveToApproachBenchSeat"
         group_name="ur_manipulator"
@@ -59,10 +62,21 @@
         acceleration_scaling="1.0"
       />
 
-      <!-- Open bench seat -->
-      <SubTree ID="OpenBenchSeat" name="OpenBenchSeat" />
+      <!-- Open bench seat, continue no matter what -->
+      <FailureIsSuccess name="open_bench_with_cleanup">
+        <SubTree ID="OpenBenchSeat" name="OpenBenchSeat" />
+      </FailureIsSuccess>
 
-      <!-- Back out -->
+      <!-- Reset collision scene -->
+      <SetAllowedCollisions
+        name="cleanup_lid_collisions"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="bench_lid;bench_lid;bench_lid"
+        body2="finger_1_link;finger_2_link;gripper_base_link"
+        allowed="false"
+      />
+
+      <!-- Back out the arm -->
       <LookupTransform
         name="lookup_tool_pose"
         source_frame="tool0"
@@ -90,11 +104,10 @@
     </Sequence>
   </BehaviorTree>
 
-  <!-- Open bench seat: allow collisions, compute arc, execute, restore -->
+  <!-- Bench-specific subtree to open the bench seat lid -->
   <BehaviorTree ID="OpenBenchSeat">
     <Sequence name="Sequence">
 
-      <!-- Allow gripper-lid collisions during the arc motion -->
       <SetAllowedCollisions
         name="allow_lid_collisions"
         service_name="/roboplan_planning_server/set_collisions"
@@ -103,7 +116,6 @@
         allowed="true"
       />
 
-      <!-- Compute 8 arc waypoints around the bench_lid hinge -->
       <ComputeBenchArcWaypoints
         name="compute_arc"
         hinge_frame="bench_lid"
@@ -115,100 +127,12 @@
         waypoints="{arc_waypoints}"
       />
 
-      <!-- Plan and execute the arc as a multi-waypoint Cartesian path -->
       <SubTree ID="MoveToPoseCartesian"
         name="ExecuteArc"
         group_name="ur_manipulator"
         target_poses="{arc_waypoints}"
       />
 
-      <!-- Restore collision checking -->
-      <SetAllowedCollisions
-        name="restore_lid_collisions"
-        service_name="/roboplan_planning_server/set_collisions"
-        body1="bench_lid;bench_lid;bench_lid"
-        body2="finger_1_link;finger_2_link;gripper_base_link"
-        allowed="false"
-      />
-
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Free-space plan to a joint configuration, preview, execute -->
-  <BehaviorTree ID="MoveToJointState">
-    <Sequence name="Sequence">
-      <Retry name="retry" num_failures="3">
-        <RoboplanPlanToJointState
-          name="plan_to_joint_state"
-          service_name="/roboplan_planning_server/plan_to_joint_state"
-          group_name="{group_name}"
-          joint_names="{joint_names}"
-          joint_positions="{joint_positions}"
-          velocity_scaling="{velocity_scaling}"
-          acceleration_scaling="{acceleration_scaling}"
-          trajectory="{trajectory}"
-        />
-      </Retry>
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Free-space (RRT) plan to a pose, preview, execute -->
-  <BehaviorTree ID="MoveToPose">
-    <Sequence name="Sequence">
-      <Retry name="retry" num_failures="3">
-        <RoboplanPlanToPose
-          name="plan_to_pose"
-          service_name="/roboplan_planning_server/plan_to_pose"
-          group_name="{group_name}"
-          target_pose="{target_pose}"
-          velocity_scaling="1.0"
-          acceleration_scaling="1.0"
-          constrain_gripper_top_down="{constrain_gripper_top_down}"
-          trajectory="{trajectory}"
-        />
-      </Retry>
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Straight-line Cartesian plan through one or more poses, preview, execute -->
-  <BehaviorTree ID="MoveToPoseCartesian">
-    <Sequence name="Sequence">
-      <RoboplanPlanCartesianPath
-        name="plan_cartesian_path"
-        service_name="/roboplan_planning_server/plan_cartesian_path"
-        group_name="{group_name}"
-        target_poses="{target_poses}"
-        trajectory="{trajectory}"
-      />
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
     </Sequence>
   </BehaviorTree>
 

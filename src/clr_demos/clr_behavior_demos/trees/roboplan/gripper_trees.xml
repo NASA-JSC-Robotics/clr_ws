@@ -1,0 +1,20 @@
+<root>
+
+  <!-- Gripper commands -->
+  <BehaviorTree ID="OpenGripper">
+    <CommandGripper
+      name="OpenGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.023"
+    />
+  </BehaviorTree>
+
+  <BehaviorTree ID="CloseGripper">
+    <CommandGripper
+      name="CloseGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.0005"
+    />
+  </BehaviorTree>
+
+</root>
