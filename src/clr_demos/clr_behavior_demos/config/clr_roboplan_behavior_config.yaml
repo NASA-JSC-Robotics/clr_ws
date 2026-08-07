@@ -9,6 +9,7 @@ imports:
   - imetro_behavior.basic_behaviors
   - imetro_behavior.color_behaviors
   - imetro_behavior.control_behaviors
+  - imetro_behavior.mujoco_behaviors
   - imetro_behavior.decorators
   - imetro_behavior.geometry_behaviors
   - imetro_behavior.ros_behaviors
