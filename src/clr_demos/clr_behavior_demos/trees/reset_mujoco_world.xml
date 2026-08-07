@@ -1,0 +1,37 @@
+<root main_tree_to_execute="MainTree">
+  <!--
+    Reset the MuJoCo simulation world.
+
+    1. Deactivate all active controllers so the sim can reset cleanly.
+    2. Call the reset_world service to restore initial state.
+  -->
+
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+
+      <SwitchRosControllers
+        name="deactivate_all"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers=""
+        deactivate_controllers="clr_joint_trajectory_controller"
+      />
+
+      <!-- Reset the world to the start state. -->
+      <ResetMujocoWorld
+        name="reset_world"
+        service_name="/mujoco_ros2_control_node/reset_world"
+        keyframe=""
+      />
+
+    </Sequence>
+  </BehaviorTree>
+
+</root>

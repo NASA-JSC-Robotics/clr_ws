@@ -192,8 +192,7 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
             target = [target]
         elif not isinstance(target, list):
             raise RuntimeError(
-                f"target_poses must be a PoseStamped or a list of PoseStamped, "
-                f"got {type(target).__name__}"
+                f"target_poses must be a PoseStamped or a list of PoseStamped, " f"got {type(target).__name__}"
             )
         return PlanCartesianPath.Request(
             group_name=self.get_input("group_name", ""),

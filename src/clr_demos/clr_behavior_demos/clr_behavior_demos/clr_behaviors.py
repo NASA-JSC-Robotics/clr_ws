@@ -177,9 +177,7 @@ class ComputeBenchArcWaypoints(BehaviourWithPorts):
         for i in range(1, num_steps + 1):
             angle = i * rotation_per_step
 
-            T_world_rotated = rotate_about_frame(
-                T_world_hinge, T_world_grasp, angle, axis, keep_orientation
-            )
+            T_world_rotated = rotate_about_frame(T_world_hinge, T_world_grasp, angle, axis, keep_orientation)
 
             waypoints.append(_matrix_to_pose_stamped(T_world_rotated, "world"))
 

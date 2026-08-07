@@ -190,7 +190,7 @@ class RoboplanPlanningServer(Node):
         # Joint groups to serve. Planning requests for other groups are
         # rejected. The first entry that matches the robot config's group is
         # used for the interactive marker workflow.
-        self.declare_parameter("planning_groups", ["clr", "ur_manipulator"])
+        self.declare_parameter("planning_groups", ["clr", "ur_manipulator", "chonkur_grasp", "rail", "lift"])
 
         # Scene loading parameters.
         self.declare_parameter("robot_description_topic", "/robot_description")
@@ -862,8 +862,7 @@ class RoboplanPlanningServer(Node):
 
             self._set_planned_trajectory(ctx, traj)
             return True, (
-                f"Planned Cartesian trajectory through {len(target_poses)} pose(s) "
-                f"({len(traj.positions)} points)"
+                f"Planned Cartesian trajectory through {len(target_poses)} pose(s) " f"({len(traj.positions)} points)"
             )
 
     def _preview(self):
@@ -1028,8 +1027,7 @@ class RoboplanPlanningServer(Node):
         if len(request.body1) != len(request.body2):
             response.success = False
             response.message = (
-                f"body1 and body2 must have the same length "
-                f"(got {len(request.body1)} and {len(request.body2)})."
+                f"body1 and body2 must have the same length " f"(got {len(request.body1)} and {len(request.body2)})."
             )
             self.get_logger().error(response.message)
             return response
@@ -1053,8 +1051,7 @@ class RoboplanPlanningServer(Node):
             if failed:
                 response.success = False
                 response.message = (
-                    f"Failed to set collisions for {len(failed)}/{len(request.body1)} "
-                    f"pair(s): {'; '.join(failed)}"
+                    f"Failed to set collisions for {len(failed)}/{len(request.body1)} " f"pair(s): {'; '.join(failed)}"
                 )
                 self.get_logger().error(response.message)
             else:
