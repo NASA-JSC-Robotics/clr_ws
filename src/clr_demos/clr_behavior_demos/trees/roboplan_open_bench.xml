@@ -10,6 +10,9 @@
       4. Be sure to reset the collisions regardless of success or
          failure.
       4. Back out with a relative Cartesian move.
+
+    Requires the RoboPlan planning server, e.g.:
+      ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
   -->
 
   <include file="roboplan/gripper_trees.xml" />

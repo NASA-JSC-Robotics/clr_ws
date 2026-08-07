@@ -11,6 +11,11 @@
     Requires the RoboPlan planning server, e.g.:
       ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
   -->
+
+  <include file="roboplan/gripper_trees.xml" />
+  <include file="roboplan/perception_trees.xml" />
+  <include file="roboplan/roboplan_trees.xml" />
+
   <BehaviorTree ID="MainTree">
     <Sequence name="Sequence">
       <GetRosControllerInfo
@@ -37,6 +42,8 @@
         name="MoveToPerceptionPose"
         group_name="clr"
         target_pose="{perception_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
         constrain_gripper_top_down="false"
       />
       <SubTree ID="DetectBlobs"
@@ -68,12 +75,16 @@
         name="MoveToApproach"
         group_name="clr"
         target_pose="{ctb_approach_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
         constrain_gripper_top_down="true"
       />
       <SubTree ID="MoveToPose"
         name="MoveToGrasp"
         group_name="clr"
         target_pose="{ctb_grasp_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
         constrain_gripper_top_down="true"
       />
       <SubTree ID="CloseGripper" name="close_gripper" />
@@ -100,103 +111,6 @@
         target_poses="{drop_pose}"
       />
       <SubTree ID="OpenGripper" name="open_gripper_end" />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Free-space (RRT) plan, ghost preview, and execute. Setting
-       constrain_gripper_top_down switches to constrained (RRT*) planning
-       that keeps the gripper facing straight down along the whole path. -->
-  <BehaviorTree ID="MoveToPose">
-    <Sequence name="Sequence">
-      <Retry name="retry" num_failures="3">
-        <RoboplanPlanToPose
-          name="plan_to_pose"
-          service_name="/roboplan_planning_server/plan_to_pose"
-          group_name="{group_name}"
-          target_pose="{target_pose}"
-          velocity_scaling="1.0"
-          acceleration_scaling="1.0"
-          constrain_gripper_top_down="{constrain_gripper_top_down}"
-          trajectory="{trajectory}"
-        />
-      </Retry>
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Straight-line Cartesian plan through one or more poses, preview, execute -->
-  <BehaviorTree ID="MoveToPoseCartesian">
-    <Sequence name="Sequence">
-      <RoboplanPlanCartesianPath
-        name="plan_cartesian_path"
-        service_name="/roboplan_planning_server/plan_cartesian_path"
-        group_name="{group_name}"
-        target_poses="{target_poses}"
-        trajectory="{trajectory}"
-      />
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <BehaviorTree ID="OpenGripper">
-    <CommandGripper
-      name="OpenGripper"
-      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
-      position="0.023"
-    />
-  </BehaviorTree>
-
-  <BehaviorTree ID="CloseGripper">
-    <CommandGripper
-      name="CloseGripper"
-      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
-      position="0.0005"
-    />
-  </BehaviorTree>
-
-  <!-- Perception behavior -->
-  <BehaviorTree ID="DetectBlobs">
-    <Sequence name="Sequence">
-      <GetSyncedImagePointCloudDepth
-        name="get_synced_images_pointcloud"
-        camera_info_topic="/wrist_mounted_camera/color/camera_info"
-        rgb_image_topic="/wrist_mounted_camera/color/image_raw"
-        depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
-        point_cloud_topic="/wrist_mounted_camera/depth/color/points"
-        time_slop="0.1"
-        sync_timeout="3.0"
-        camera_info="{camera_info}"
-        rgb_image="{rgb_image}"
-        depth_image="{depth_image}"
-        point_cloud="{point_cloud}"
-      />
-      <DetectColorBlobs
-        name="detect_color_blobs"
-        camera_info="{camera_info}"
-        rgb_image="{rgb_image}"
-        depth_image="{depth_image}"
-        target_color="{target_color}"
-        min_blob_size="10"
-        debug_viz="{debug_viz}"
-        masked_image="{masked_image}"
-        blob_pose="{blob_pose}"
-      />
     </Sequence>
   </BehaviorTree>
 
