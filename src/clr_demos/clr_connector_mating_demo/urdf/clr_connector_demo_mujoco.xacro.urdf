@@ -26,7 +26,7 @@
 
   <link name="world" />
 
-  <xacro:if value="${model_env}">
+  <!-- <xacro:if value="${model_env}">
     <xacro:imetro_env
       tf_prefix="$(arg tf_prefix)"
       use_fake_hardware="false"
@@ -43,8 +43,26 @@
       hatch_4060="true"
       second_trainer="false"
     />
-  </xacro:if>
-  <xacro:if value="${not model_env}">
+  </xacro:if> -->
+
+  <xacro:imetro_env
+      tf_prefix="$(arg tf_prefix)"
+      use_fake_hardware="false"
+      headless_mode="$(arg headless_mode)"
+      add_grasp_push_frames="$(arg add_grasp_push_frames)"
+      finger_xacro="$(arg finger_xacro)"
+      use_camera_mesh="false"
+      generate_ros2_control_tag="false"
+      clr="true"
+      shelf="false"
+      ceiling_prop="false"
+      hatch_4040="false"
+      express_rack="true"
+      hatch_4060="true"
+      second_trainer="false"
+    />
+
+  <!-- <xacro:if value="${not model_env}">
     <xacro:clr
       tf_prefix="$(arg tf_prefix)"
       use_fake_hardware="false"
@@ -62,7 +80,14 @@
     <xacro:receptacle prefix="" parent="world">
       <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
     </xacro:receptacle>
-  </xacro:if>
+  </xacro:if> -->
+
+  <xacro:receptacle prefix="" parent="world">
+      <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
+  </xacro:receptacle>
+  <!-- <xacro:ctb prefix="" parent="world">
+      <origin xyz="$(arg ctb_position_x) $(arg ctb_position_y) 0.25" rpy="0 0 ${radians($(arg ctb_orientation_deg))}"/>
+  </xacro:ctb> -->
 
   <!-- special inputs for mujoco processing-->
   <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_raw_inputs.xacro"/>
@@ -76,11 +101,12 @@
     </raw_inputs>
     <processed_inputs>
       <xacro:clr_mujoco_processed_inputs
-        include_scene_objects="$(arg include_scene_objects)"
+        include_scene_objects="false"
         tf_prefix="${tf_prefix}"
         finger_xacro="$(arg finger_xacro)"
-        model_env="${model_env}"
+        model_env="true"
       />
+      <decompose_mesh mesh_name="receptacle" threshold="0.01"/>
     </processed_inputs>
     <xacro:clr_mujoco_scene/>
   </mujoco_inputs>

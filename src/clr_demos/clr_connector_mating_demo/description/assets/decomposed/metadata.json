@@ -7,5 +7,6 @@
     "ivr_hatch_frame_no_left": 0.05,
     "hatch_4060_frame": 0.05,
     "bench_lid": 0.05,
-    "ctb_handle": 0.01
+    "ctb_handle": 0.01,
+    "receptacle": 0.01
 }
