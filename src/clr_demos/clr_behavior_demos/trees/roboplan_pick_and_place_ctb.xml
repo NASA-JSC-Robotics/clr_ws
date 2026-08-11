@@ -18,20 +18,17 @@
 
   <BehaviorTree ID="MainTree">
     <Sequence name="Sequence">
-      <GetRosControllerInfo
-        name="get_controller_info"
+      <GetRosControllerInfo name="get_controller_info"
         service_name="/controller_manager/list_controllers"
         controller_info="{controller_info}"
       />
-      <SwitchRosControllers
-        name="enable_clr_combined_controller"
+      <SwitchRosControllers name="enable_clr_combined_controller"
         service_name="/controller_manager/switch_controller"
         service_timeout="3.0"
         controller_info="{controller_info}"
         activate_controllers="clr_joint_trajectory_controller"
       />
-      <CreatePoseStamped
-        name="set_perception_pose"
+      <CreatePoseStamped name="set_perception_pose"
         position_xyz="0.45, 0.75, 1.29"
         orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         frame="world"
@@ -51,12 +48,12 @@
         blob_pose="{ctb_handle_pose}"
         debug_viz="false"
       />
-      <TransformPose name="TransformToBase"
+      <TransformPose name="transform_to_base"
         input_pose="{ctb_handle_pose}"
         source_frame="world"
         output_pose="{ctb_handle_pose_base}"
       />
-      <AlignPoseToNearestAxis name="AlignHandlePose"
+      <AlignPoseToNearestAxis name="align_handle_pose"
         input_pose="{ctb_handle_pose_base}"
         output_pose="{ctb_handle_pose_aligned}"
       />
@@ -64,7 +61,7 @@
       <!-- Approach and grasp (chonkur_grasp for precision) -->
       <!-- TODO: CTB pick in it's own tree? -->
       <SubTree ID="OpenGripper" name="open_gripper_start" />
-      <OffsetPoseStamped name="CalculateApproachPose"
+      <OffsetPoseStamped name="calculate_approach_pose"
         input_pose="{ctb_handle_pose_aligned}"
         translation_xyz="0.0, 0.0, 0.1"
         output_pose="{ctb_approach_pose}"
@@ -75,9 +72,9 @@
         target_pose="{ctb_approach_pose}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
-        constrain_gripper_top_down="true"
+        constrain_gripper_top_down="false"
       />
-      <OffsetPoseStamped name="CalculateGraspPose"
+      <OffsetPoseStamped name="calculate_grasp_pose"
         input_pose="{ctb_handle_pose_aligned}"
         translation_xyz="0.0, 0.0, -0.03"
         output_pose="{ctb_grasp_pose}"
@@ -102,21 +99,19 @@
       />
 
       <!-- Tuck in (chonkur_grasp, small Y shift to clear mockups) -->
-      <!-- TODO: Make this better? This could not vibe with the place -->
-      <LookupTransform
-        name="lookup_post_lift"
+      <!-- TODO: Make this better? This could not vibe with the place depending -->
+      <!-- on the joint angles that the RRT ends up with -->
+      <LookupTransform name="lookup_post_lift"
         source_frame="grasp_frame"
         target_frame="world"
         target_T_source="{post_lift_tf}"
       />
-      <TransformStampedToPoseStamped
-        name="post_lift_to_pose"
+      <TransformStampedToPoseStamped name="post_lift_to_pose"
         transform_stamped="{post_lift_tf}"
         pose_stamped="{post_lift_pose}"
         child_frame_id="{_unused_1}"
       />
-      <OffsetPoseStamped name="CalculateTuckPose"
-        input_pose="{post_lift_pose}"
+      <OffsetPoseStamped name="CalculateTuckPose" input_pose="{post_lift_pose}"
         translation_xyz="0.0, -0.1, 0.0"
         output_pose="{tuck_pose}"
       />
@@ -146,30 +141,33 @@
         acceleration_scaling="1.0"
       />
 
-      <!-- Shift left and down into the bench, then release -->
-      <LookupTransform
-        name="lookup_drop"
-        source_frame="grasp_frame"
-        target_frame="world"
-        target_T_source="{drop_tf}"
+      <!-- We compute the drop pose relative the center of the bench frame -->
+      <!-- 50cm above the center of the bench, gripper pointing down -->
+      <CreatePoseStamped name="create_above_bench_pose"
+        position_xyz="-1.65, 0.78, 1.35"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
+        frame="world"
+        msg="{above_bench_pose_world}"
       />
-      <TransformStampedToPoseStamped
-        name="drop_to_pose"
-        transform_stamped="{drop_tf}"
-        pose_stamped="{current_drop_pose}"
-        child_frame_id="{_unused_2}"
+
+      <!-- Transform to chonkur_grasp's base frame because that's what the server expects -->
+      <TransformPose name="transform_to_base_again"
+        input_pose="{above_bench_pose_world}"
+        source_frame="vention_rail_base_link"
+        output_pose="{above_bench_pose}"
       />
-      <!-- TODO: This is weak, use a world pose? -->
-      <OffsetPoseStamped name="CalculateDropPose"
-        input_pose="{current_drop_pose}"
-        translation_xyz="-0.3, 0.0, 0.0"
-        output_pose="{pre_drop_pose}"
-      />
-      <SubTree ID="MoveToPoseCartesian"
-        name="PlaceInBench"
+
+      <!-- Attempt to RRT to above the bench -->
+      <SubTree ID="MoveToPose"
+        name="MoveAboveBench"
         group_name="chonkur_grasp"
-        target_poses="{pre_drop_pose}"
+        target_pose="{above_bench_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+        constrain_gripper_top_down="false"
       />
+
+      <!-- Lower lift to bring CTB down to bench height -->
       <SubTree ID="MoveToJointState"
         name="LowerLift"
         group_name="lift"
@@ -178,24 +176,35 @@
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
       />
+
+      <!-- Short Cartesian down into the bench -->
+      <LookupTransform name="lookup_pre_drop"
+        source_frame="grasp_frame"
+        target_frame="world"
+        target_T_source="{pre_drop_tf}"
+      />
+      <TransformStampedToPoseStamped name="pre_drop_to_pose"
+        transform_stamped="{pre_drop_tf}"
+        pose_stamped="{pre_drop_pose}"
+        child_frame_id="{_unused_2}"
+      />
+      <OffsetPoseStamped name="calculate_drop_pose"
+        input_pose="{pre_drop_pose}"
+        translation_xyz="0.0, 0.0, -0.05"
+        output_pose="{drop_pose}"
+      />
+      <SubTree ID="MoveToPoseCartesian"
+        name="LowerIntoBench"
+        group_name="chonkur_grasp"
+        target_poses="{drop_pose}"
+      />
+
       <SubTree ID="OpenGripper" name="open_gripper_end" />
 
       <!-- Back off -->
-      <LookupTransform
-        name="lookup_backoff"
-        source_frame="grasp_frame"
-        target_frame="world"
-        target_T_source="{backoff_tf}"
-      />
-      <TransformStampedToPoseStamped
-        name="backoff_to_pose"
-        transform_stamped="{backoff_tf}"
-        pose_stamped="{backoff_pose}"
-        child_frame_id="{_unused_3}"
-      />
       <OffsetPoseStamped name="CalculateBackoffPose"
-        input_pose="{backoff_pose}"
-        translation_xyz="0.0, 0.0, -0.15"
+        input_pose="{drop_pose}"
+        translation_xyz="0.0, 0.0, 0.15"
         output_pose="{backed_off_pose}"
       />
       <SubTree ID="MoveToPoseCartesian"
