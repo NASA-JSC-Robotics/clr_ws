@@ -13,7 +13,7 @@ imports:
   - imetro_behavior.geometry_behaviors
   - imetro_behavior.moveit_behaviors
   - imetro_behavior.ros_behaviors
-  - imetro_behavior.apriltag_detection_behavior
+  # - imetro_behavior.apriltag_detection_behavior
 
 # Paths for which to search for behavior tree XML files.
 tree_search_paths:
