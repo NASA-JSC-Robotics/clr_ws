@@ -102,7 +102,6 @@ class CartesianServoNode(Node):
         self.declare_parameter("position_cost", 1.0)
         self.declare_parameter("orientation_cost", 0.1)
         self.declare_parameter("control_freq", 25.0)
-        self.declare_parameter("command_duration_ms", 0)
 
         # Collision related parameters.
         self.declare_parameter("avoid_collisions", False)
@@ -123,7 +122,6 @@ class CartesianServoNode(Node):
         self._regularization = self.get_parameter("regularization").value
         position_cost = self.get_parameter("position_cost").value
         orientation_cost = self.get_parameter("orientation_cost").value
-        self._command_duration_ms = self.get_parameter("command_duration_ms").value
         self._linear_velocity = self.get_parameter("linear_velocity").value
         self._angular_velocity = self.get_parameter("angular_velocity").value
         self._max_tracking_error = self.get_parameter("max_tracking_error").value
@@ -276,22 +274,21 @@ class CartesianServoNode(Node):
 
         Will update commands based on the physical pose of the robot.
         """
+        # Initialize to current joint states.
+        # This should already be set from startup time.
+        joint_config = fromJointState(
+            self._js_subscriber.last_joint_state,
+            self._scene,
+            self._conversion_map,
+        )
+        q_current = joint_config.positions
+
         while self._running:
             loop_start = time.time()
 
             if not self._paused:
                 with self._lock:
-                    # Update control step from the last known joint position
-                    if self._js_subscriber.last_joint_state is not None:
-                        joint_config = fromJointState(
-                            self._js_subscriber.last_joint_state,
-                            self._scene,
-                            self._conversion_map,
-                        )
-                        q_current = joint_config.positions
-                    else:
-                        q_current = np.array(self._scene.getCurrentJointPositions())
-
+                    # Update control step from the latest reference position.
                     self._scene.setJointPositions(q_current)
                     self._scene.forwardKinematics(q_current, self._config.tip_link)
 
@@ -318,7 +315,7 @@ class CartesianServoNode(Node):
                         self._oink.enforceBarriers(
                             self._scene,
                             self._barriers,
-                            self._delta_q_full,
+                            self._delta_q,
                             tolerance=0.0,
                         )
                     q_commanded = self._scene.integrate(q_current, self._delta_q_full)
@@ -326,9 +323,9 @@ class CartesianServoNode(Node):
                     # Update scene to commanded state for FK consistency
                     self._scene.setJointPositions(q_commanded)
                     self._scene.forwardKinematics(q_commanded, self._config.tip_link)
-                    self._latest_joint_positions = q_current  # seed marker from hw
 
-                self._publish_joint_command(q_commanded)
+                self._publish_joint_command(q_current, q_commanded)
+                q_current = q_commanded
 
             elapsed = time.time() - loop_start
             time.sleep(max(0, self._dt - elapsed))
@@ -368,14 +365,19 @@ class CartesianServoNode(Node):
             slerp = Slerp([0.0, 1.0], Rotation.concatenate([r_curr, r_targ]))
             self._reference_pose[:3, :3] = slerp(alpha).as_matrix()
 
-    def _publish_joint_command(self, q):
+    def _publish_joint_command(self, q_cur, q_cmd):
         """Publish a single-point JointTrajectory to command the robot."""
         msg = JointTrajectory()
         msg.joint_names = list(self._joint_names)
-        point = JointTrajectoryPoint()
-        point.positions = q[self._q_indices].tolist()
-        point.time_from_start = rclpy.duration.Duration(nanoseconds=self._command_duration_ms * 1e6).to_msg()
-        msg.points = [point]
+        point1 = JointTrajectoryPoint(
+            positions=q_cur[self._q_indices].tolist(),
+            time_from_start=rclpy.duration.Duration(seconds=0.0).to_msg(),
+        )
+        point2 = JointTrajectoryPoint(
+            positions=q_cmd[self._q_indices].tolist(),
+            time_from_start=rclpy.duration.Duration(seconds=self._dt).to_msg(),
+        )
+        msg.points = [point1, point2]
         self._cmd_pub.publish(msg)
 
     def _safety_loop(self):
@@ -391,8 +393,10 @@ class CartesianServoNode(Node):
                         self._scene,
                         self._conversion_map,
                     )
-                    q_hw = joint_config.positions
-                    actual_pose = self._scene.forwardKinematics(q_hw, self._config.tip_link, self._config.base_link)
+                    with self._lock:
+                        actual_pose = self._scene.forwardKinematics(
+                            joint_config.positions, self._config.tip_link, self._config.base_link
+                        )
                     tracking_error = np.linalg.norm(actual_pose[:3, 3] - self._reference_pose[:3, 3])
                     if tracking_error > self._max_tracking_error:
                         self._paused = True
