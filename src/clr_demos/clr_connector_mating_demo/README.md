@@ -30,3 +30,4 @@ Then, send an action goal with the desired behavior name.
 
 ```bash
 ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehavior '{tree_file_name: connector_mate}'
+```

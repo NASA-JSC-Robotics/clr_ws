@@ -65,7 +65,7 @@ def generate_launch_description():
     headless = LaunchConfiguration("headless")
     model_env = LaunchConfiguration("model_env")
 
-    clr_mujoco_package_name = "clr_connector_mating_demo"
+    clr_mujoco_package_for_config = "clr_mujoco_config"
 
     generate_mjcf = include_launch_file(
         package_name="clr_connector_mating_demo",
@@ -89,7 +89,7 @@ def generate_launch_description():
     ]
 
     extra_controller_params_file = PathJoinSubstitution(
-        [FindPackageShare(clr_mujoco_package_name), "config", "mujoco_plugins.yaml"]
+        [FindPackageShare(clr_mujoco_package_for_config), "config", "mujoco_plugins.yaml"]
     )
 
     clr_launch = include_launch_file(
