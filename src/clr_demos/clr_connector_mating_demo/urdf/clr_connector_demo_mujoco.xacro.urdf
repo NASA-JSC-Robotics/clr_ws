@@ -11,10 +11,6 @@
   <xacro:arg name="include_scene_objects" default="false"/>
   <xacro:arg name="sim_speed" default="1.0"/>
   <xacro:arg name="headless" default="false" />
-  <xacro:arg name="ctb_orientation_deg" default="45"/>
-  <xacro:arg name="ctb_position_x" default="0.8"/>
-  <xacro:arg name="ctb_position_y" default="0.8"/>
-
 
   <xacro:property name="model_env" value="$(arg model_env)"/>
   <xacro:property name="tf_prefix" value="$(arg tf_prefix)"/>
@@ -22,28 +18,8 @@
   <xacro:include filename="$(find clr_imetro_environments)/urdf/clr_trainer_multi_hatch_macro.xacro"/>
   <xacro:include filename="$(find clr_description)/urdf/clr_macro.xacro"/>
   <xacro:include filename="$(find clr_connector_mating_demo)/urdf/receptacle_macro.xacro"/>
-  <xacro:include filename="$(find ctb)/urdf/ctb_macro.xacro"/>
 
   <link name="world" />
-
-  <!-- <xacro:if value="${model_env}">
-    <xacro:imetro_env
-      tf_prefix="$(arg tf_prefix)"
-      use_fake_hardware="false"
-      headless_mode="$(arg headless_mode)"
-      add_grasp_push_frames="$(arg add_grasp_push_frames)"
-      finger_xacro="$(arg finger_xacro)"
-      use_camera_mesh="false"
-      generate_ros2_control_tag="false"
-      clr="true"
-      shelf="false"
-      ceiling_prop="false"
-      hatch_4040="false"
-      express_rack="true"
-      hatch_4060="true"
-      second_trainer="false"
-    />
-  </xacro:if> -->
 
   <xacro:imetro_env
       tf_prefix="$(arg tf_prefix)"
@@ -62,32 +38,9 @@
       second_trainer="false"
     />
 
-  <!-- <xacro:if value="${not model_env}">
-    <xacro:clr
-      tf_prefix="$(arg tf_prefix)"
-      use_fake_hardware="false"
-      headless_mode="$(arg headless_mode)"
-      finger_xacro="$(arg finger_xacro)"
-      add_grasp_push_frames="$(arg add_grasp_push_frames)"
-      use_camera_mesh="false"
-      generate_ros2_control_tag="false"/>
-  </xacro:if>
-
-  <xacro:if value="$(arg include_scene_objects)">
-    <xacro:ctb prefix="" parent="world">
-      <origin xyz="$(arg ctb_position_x) $(arg ctb_position_y) 0.25" rpy="0 0 ${radians($(arg ctb_orientation_deg))}"/>
-    </xacro:ctb>
-    <xacro:receptacle prefix="" parent="world">
-      <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
-    </xacro:receptacle>
-  </xacro:if> -->
-
   <xacro:receptacle prefix="" parent="world">
       <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
   </xacro:receptacle>
-  <!-- <xacro:ctb prefix="" parent="world">
-      <origin xyz="$(arg ctb_position_x) $(arg ctb_position_y) 0.25" rpy="0 0 ${radians($(arg ctb_orientation_deg))}"/>
-  </xacro:ctb> -->
 
   <!-- special inputs for mujoco processing-->
   <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_raw_inputs.xacro"/>
@@ -103,7 +56,7 @@
       <xacro:clr_mujoco_processed_inputs
         include_scene_objects="false"
         tf_prefix="${tf_prefix}"
-        finger_xacro="$(arg finger_xacro)"
+        finger_xacro="fngr_v6"
         model_env="true"
       />
       <decompose_mesh mesh_name="receptacle" threshold="0.01"/>
@@ -129,10 +82,8 @@
     <xacro:clr_mujoco_ros2_control_sensors tf_prefix="${tf_prefix}"/>
     <xacro:clr_mujoco_ros2_control_joints tf_prefix="${tf_prefix}"/>
 
-    <xacro:if value="${model_env}">
-      <xacro:clr_mujoco_ros2_control_env/>
-      <xacro:clr_mujoco_ros2_control_sensors/>
-    </xacro:if>
+    <xacro:clr_mujoco_ros2_control_env/>
+    <xacro:clr_mujoco_ros2_control_sensors/>
 
   </ros2_control>
 </robot>
