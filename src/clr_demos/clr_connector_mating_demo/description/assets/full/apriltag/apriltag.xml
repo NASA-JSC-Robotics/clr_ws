@@ -1,0 +1,21 @@
+<mujoco model="apriltag">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <texture type="2d" name="material_apriltag_0" file="material_apriltag_0.png"/>
+    <material name="material_apriltag_0" texture="material_apriltag_0" specular="0.4000000000000001" shininess="0.001"/>
+    <mesh file="apriltag.obj"/>
+  </asset>
+  <worldbody>
+    <body name="apriltag">
+      <geom material="material_apriltag_0" mesh="apriltag" class="visual"/>
+      <geom mesh="apriltag" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

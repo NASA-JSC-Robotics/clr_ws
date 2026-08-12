@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<mujoco model="scene">
+    <include file="mujoco_description_formatted.xml"/>
+    <statistic center="-0.5 1.0 1.0" extent="3.5"/>
+    <visual>
+
+
+        <headlight ambient="0.1 0.1 0.1" diffuse="0.6 0.6 0.6" specular="0 0 0"/>
+
+
+        <rgba haze="0.15 0.25 0.35 1"/>
+
+
+        <global azimuth="25" elevation="-10"/>
+
+
+    </visual>
+    <asset>
+
+
+        <texture builtin="gradient" height="3072" rgb1="0.3 0.5 0.7" rgb2="0 0 0" type="skybox" width="512"/>
+
+
+        <texture builtin="checker" height="300" mark="edge" markrgb="0.5 0.5 0.5" name="groundplane" rgb1="0.8 0.8 0.8" rgb2="0.8 0.8 0.8" type="2d" width="300"/>
+
+
+        <material name="groundplane" reflectance="0.0" texrepeat="3.0 3.0" texture="groundplane" texuniform="true"/>
+
+
+    </asset>
+    <worldbody>
+
+
+        <light dir="0 0 -1" directional="true" pos="0 0 1.5"/>
+
+
+        <geom material="groundplane" name="floor" pos="0 0 0.001" size="0 0 0.05" type="plane"/>
+
+
+    </worldbody>
+</mujoco>

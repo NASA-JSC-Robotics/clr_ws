@@ -1,0 +1,97 @@
+<mujoco model="receptacle">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_receptacle" specular="0.20000000000000004" shininess="1.0" rgba="0.10196078 0.10196078 0.10196078 1.0"/>
+    <mesh file="receptacle.obj"/>
+    <mesh file="receptacle_collision_0.obj"/>
+    <mesh file="receptacle_collision_1.obj"/>
+    <mesh file="receptacle_collision_2.obj"/>
+    <mesh file="receptacle_collision_3.obj"/>
+    <mesh file="receptacle_collision_4.obj"/>
+    <mesh file="receptacle_collision_5.obj"/>
+    <mesh file="receptacle_collision_6.obj"/>
+    <mesh file="receptacle_collision_7.obj"/>
+    <mesh file="receptacle_collision_8.obj"/>
+    <mesh file="receptacle_collision_9.obj"/>
+    <mesh file="receptacle_collision_10.obj"/>
+    <mesh file="receptacle_collision_11.obj"/>
+    <mesh file="receptacle_collision_12.obj"/>
+    <mesh file="receptacle_collision_13.obj"/>
+    <mesh file="receptacle_collision_14.obj"/>
+    <mesh file="receptacle_collision_15.obj"/>
+    <mesh file="receptacle_collision_16.obj"/>
+    <mesh file="receptacle_collision_17.obj"/>
+    <mesh file="receptacle_collision_18.obj"/>
+    <mesh file="receptacle_collision_19.obj"/>
+    <mesh file="receptacle_collision_20.obj"/>
+    <mesh file="receptacle_collision_21.obj"/>
+    <mesh file="receptacle_collision_22.obj"/>
+    <mesh file="receptacle_collision_23.obj"/>
+    <mesh file="receptacle_collision_24.obj"/>
+    <mesh file="receptacle_collision_25.obj"/>
+    <mesh file="receptacle_collision_26.obj"/>
+    <mesh file="receptacle_collision_27.obj"/>
+    <mesh file="receptacle_collision_28.obj"/>
+    <mesh file="receptacle_collision_29.obj"/>
+    <mesh file="receptacle_collision_30.obj"/>
+    <mesh file="receptacle_collision_31.obj"/>
+    <mesh file="receptacle_collision_32.obj"/>
+    <mesh file="receptacle_collision_33.obj"/>
+    <mesh file="receptacle_collision_34.obj"/>
+    <mesh file="receptacle_collision_35.obj"/>
+    <mesh file="receptacle_collision_36.obj"/>
+    <mesh file="receptacle_collision_37.obj"/>
+    <mesh file="receptacle_collision_38.obj"/>
+  </asset>
+  <worldbody>
+    <body name="receptacle">
+      <geom material="mtl_receptacle" mesh="receptacle" class="visual"/>
+      <geom mesh="receptacle_collision_0" rgba="0.7126433425299251 0.8103875039745914 0.20728504190243546 1" class="collision"/>
+      <geom mesh="receptacle_collision_1" rgba="0.5447145765896751 0.7127533379386324 0.36709345686196937 1" class="collision"/>
+      <geom mesh="receptacle_collision_2" rgba="0.27149888294885194 0.08153187818360697 0.9802366498200998 1" class="collision"/>
+      <geom mesh="receptacle_collision_3" rgba="0.7214255845290061 0.6980078965779867 0.06855905417493435 1" class="collision"/>
+      <geom mesh="receptacle_collision_4" rgba="0.057452348652234586 0.43471851690813057 0.6978322271384013 1" class="collision"/>
+      <geom mesh="receptacle_collision_5" rgba="0.16263998305687177 0.1668835407786674 0.48601914982955907 1" class="collision"/>
+      <geom mesh="receptacle_collision_6" rgba="0.5222590931706146 0.16613085725174803 0.4903715879118956 1" class="collision"/>
+      <geom mesh="receptacle_collision_7" rgba="0.817935784697221 0.8371713270094086 0.02709186638509742 1" class="collision"/>
+      <geom mesh="receptacle_collision_8" rgba="0.7588837334322599 0.6889193890024621 0.941252020490863 1" class="collision"/>
+      <geom mesh="receptacle_collision_9" rgba="0.5164904436591156 0.35274757903682563 0.1619255788071995 1" class="collision"/>
+      <geom mesh="receptacle_collision_10" rgba="0.8439612149510451 0.3771233657619961 0.7580580898765227 1" class="collision"/>
+      <geom mesh="receptacle_collision_11" rgba="0.5264774310782491 0.9454242307314268 0.46589931070228097 1" class="collision"/>
+      <geom mesh="receptacle_collision_12" rgba="0.8360114882954797 0.1618422366167015 0.6151436388373532 1" class="collision"/>
+      <geom mesh="receptacle_collision_13" rgba="0.29397072598188445 0.2546068950462408 0.4799458678166696 1" class="collision"/>
+      <geom mesh="receptacle_collision_14" rgba="0.8810897025518686 0.5013164577503512 0.41924412691864976 1" class="collision"/>
+      <geom mesh="receptacle_collision_15" rgba="0.22393204135243427 0.2644265820654633 0.6430934097486922 1" class="collision"/>
+      <geom mesh="receptacle_collision_16" rgba="0.1922237592175613 0.6461554733727933 0.24707719685191154 1" class="collision"/>
+      <geom mesh="receptacle_collision_17" rgba="0.629400857465486 0.330150304190002 0.09475380825446544 1" class="collision"/>
+      <geom mesh="receptacle_collision_18" rgba="0.9407821731575545 0.3584048748163391 0.9063696248818006 1" class="collision"/>
+      <geom mesh="receptacle_collision_19" rgba="0.04706700831949706 0.9334871866200739 0.0072564063666936685 1" class="collision"/>
+      <geom mesh="receptacle_collision_20" rgba="0.3054167386911407 0.8122973808374933 0.604167780512027 1" class="collision"/>
+      <geom mesh="receptacle_collision_21" rgba="0.7966177525576658 0.11101064142751427 0.27188529525990446 1" class="collision"/>
+      <geom mesh="receptacle_collision_22" rgba="0.2943915774929764 0.35022381180155615 0.5822210935319148 1" class="collision"/>
+      <geom mesh="receptacle_collision_23" rgba="0.749018378173546 0.8550153110212647 0.09712948991344561 1" class="collision"/>
+      <geom mesh="receptacle_collision_24" rgba="0.1538384622993535 0.6060984554604627 0.7302263187758643 1" class="collision"/>
+      <geom mesh="receptacle_collision_25" rgba="0.9063847395724021 0.273928249528544 0.4133105923133015 1" class="collision"/>
+      <geom mesh="receptacle_collision_26" rgba="0.8350381977957841 0.12131015260838207 0.6291239933741143 1" class="collision"/>
+      <geom mesh="receptacle_collision_27" rgba="0.4730192408653717 0.5357985310535911 0.3005533765106646 1" class="collision"/>
+      <geom mesh="receptacle_collision_28" rgba="0.7013603059153694 0.509974757026605 0.4167488748009568 1" class="collision"/>
+      <geom mesh="receptacle_collision_29" rgba="0.7061240550536864 0.1972181118200249 0.31746629638589263 1" class="collision"/>
+      <geom mesh="receptacle_collision_30" rgba="0.35948841219963124 0.9319728488902524 0.3851687870007702 1" class="collision"/>
+      <geom mesh="receptacle_collision_31" rgba="0.26220095818376343 0.2606015418822629 0.6651632762626061 1" class="collision"/>
+      <geom mesh="receptacle_collision_32" rgba="0.3809310972918897 0.6124978403816426 0.7188272804388992 1" class="collision"/>
+      <geom mesh="receptacle_collision_33" rgba="0.71523455223558 0.9696291493480783 0.8499797034815264 1" class="collision"/>
+      <geom mesh="receptacle_collision_34" rgba="0.09412085330349262 0.8817443261758197 0.3090140644565227 1" class="collision"/>
+      <geom mesh="receptacle_collision_35" rgba="0.49470648844889165 0.3121563948868763 0.3391381057378984 1" class="collision"/>
+      <geom mesh="receptacle_collision_36" rgba="0.48665338613198894 0.8246647956907638 0.35537129197859496 1" class="collision"/>
+      <geom mesh="receptacle_collision_37" rgba="0.9278071556859601 0.58287325590363 0.5588468988191188 1" class="collision"/>
+      <geom mesh="receptacle_collision_38" rgba="0.4554245010910567 0.16505348441164014 0.42372971796018855 1" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

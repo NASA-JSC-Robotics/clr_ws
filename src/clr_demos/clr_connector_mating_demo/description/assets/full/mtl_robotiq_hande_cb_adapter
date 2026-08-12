@@ -1,0 +1,7 @@
+# https://github.com/mikedh/trimesh
+
+newmtl material_robotiq_hande_cb_adapter_0
+Ka 0.40000000 0.40000000 0.40000000
+Kd 0.80000000 0.80000000 0.80000000
+Ks 0.20000000 0.20000000 0.20000000
+Ns 1000.00000000

@@ -1,0 +1,20 @@
+<mujoco model="aso_locker_cavity_only">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_aso_locker_cavity_only" specular="0.20000000000000004" shininess="1.0" rgba="0.50196078 0.50196078 0.50196078 1.0"/>
+    <mesh file="aso_locker_cavity_only.obj"/>
+  </asset>
+  <worldbody>
+    <body name="aso_locker_cavity_only">
+      <geom material="mtl_aso_locker_cavity_only" mesh="aso_locker_cavity_only" class="visual"/>
+      <geom mesh="aso_locker_cavity_only" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

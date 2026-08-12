@@ -1,0 +1,15 @@
+<launch>
+  <!-- Launch arguments -->
+  <arg name="gui" default="true" description="Boolean flag to conditionally launch the behavior GUI for trajectory previews." />
+
+  <!-- The main behavior tree executor -->
+  <node pkg="imetro_behavior" exec="run_behavior.py" name="behavior_node" output="screen">
+    <param name="behavior_config" value="$(find-pkg-share clr_connector_mating_demo)/config/clr_connector_mating_config.yaml" />
+  </node>
+
+  <!-- The trajectory preview GUI -->
+  <group if="$(var gui)">
+    <node pkg="imetro_behavior" exec="behavior_gui.py" name="behavior_gui" output="screen" />
+  </group>
+
+</launch>

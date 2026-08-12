@@ -1,0 +1,20 @@
+<mujoco model="side_bottom_face">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_side_bottom_face" specular="0.20000000000000004" shininess="1.0" rgba="0.85098039 0.85098039 0.85098039 1.0"/>
+    <mesh file="side_bottom_face.obj"/>
+  </asset>
+  <worldbody>
+    <body name="side_bottom_face">
+      <geom material="mtl_side_bottom_face" mesh="side_bottom_face" class="visual"/>
+      <geom mesh="side_bottom_face" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,20 @@
+<mujoco model="express_rack_mesh">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_express_rack_mesh" specular="0.20000000000000004" shininess="1.0" rgba="0.85098039 0.85098039 0.85098039 1.0"/>
+    <mesh file="express_rack_mesh.obj"/>
+  </asset>
+  <worldbody>
+    <body name="express_rack_mesh">
+      <geom material="mtl_express_rack_mesh" mesh="express_rack_mesh" class="visual"/>
+      <geom mesh="express_rack_mesh" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

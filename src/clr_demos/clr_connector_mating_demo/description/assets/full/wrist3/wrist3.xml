@@ -1,0 +1,20 @@
+<mujoco model="wrist3">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="material_wrist3_0" specular="0.20000000000000004" shininess="1.0" rgba="0.81960784 0.81960784 0.81960784 1.0"/>
+    <mesh file="wrist3.obj"/>
+  </asset>
+  <worldbody>
+    <body name="wrist3">
+      <geom material="material_wrist3_0" mesh="wrist3" class="visual"/>
+      <geom mesh="wrist3" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

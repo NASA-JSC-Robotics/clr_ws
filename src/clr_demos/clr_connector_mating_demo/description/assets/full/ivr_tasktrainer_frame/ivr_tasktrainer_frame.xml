@@ -1,0 +1,20 @@
+<mujoco model="ivr_tasktrainer_frame">
+  <default>
+    <default class="visual">
+      <geom group="2" type="mesh" contype="0" conaffinity="0"/>
+    </default>
+    <default class="collision">
+      <geom group="3" type="mesh"/>
+    </default>
+  </default>
+  <asset>
+    <material name="mtl_ivr_tasktrainer_frame" specular="0.20000000000000004" shininess="1.0" rgba="0.85098039 0.85098039 0.85098039 1.0"/>
+    <mesh file="ivr_tasktrainer_frame.obj"/>
+  </asset>
+  <worldbody>
+    <body name="ivr_tasktrainer_frame">
+      <geom material="mtl_ivr_tasktrainer_frame" mesh="ivr_tasktrainer_frame" class="visual"/>
+      <geom mesh="ivr_tasktrainer_frame" class="collision"/>
+    </body>
+  </worldbody>
+</mujoco>

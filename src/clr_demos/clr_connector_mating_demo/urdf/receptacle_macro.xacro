@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="imetro_mobile_environment">
+
+  <xacro:macro name="receptacle" params="
+    prefix:=''
+    parent:=''
+    *origin">
+
+  <joint name="receptacle_joint" type="fixed">
+    <parent link="${parent}"/>
+    <child link="${prefix}receptacle"/>
+    <xacro:insert_block name="origin" />
+  </joint>
+
+<!-- ===================== RECEPTACLE ===================== -->
+
+  <link name="receptacle">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="receptacle_black">
+            <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://clr_connector_mating_demo/meshes/visual/receptacle.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+<!-- ===================== APRIL TAG ===================== -->
+
+    <link name="apriltag_0">
+     <visual>
+      <geometry>
+        <mesh filename="package://clr_connector_mating_demo/meshes/visual/AprilTag_0000.dae"/>
+      </geometry>
+      <material name="tag36h11-4">
+        <texture filename="package://clr_connector_mating_demo/meshes/visual/tag36_11_00000.png"/>
+      </material>
+     </visual>
+    </link>
+
+   <joint name="apriltag_0_joint" type="fixed">
+     <parent link="receptacle"/>
+     <child link="apriltag_0"/>
+     <origin xyz="0 -0.105 0.0127" rpy="0 1.57 1.57"/>
+   </joint>
+
+  </xacro:macro>
+
+</robot>
