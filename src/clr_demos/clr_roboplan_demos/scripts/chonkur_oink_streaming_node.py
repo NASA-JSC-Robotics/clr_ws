@@ -315,7 +315,7 @@ class CartesianServoNode(Node):
                         self._oink.enforceBarriers(
                             self._scene,
                             self._barriers,
-                            self._delta_q,
+                            self._delta_q_full,
                             tolerance=0.0,
                         )
                     q_commanded = self._scene.integrate(q_current, self._delta_q_full)
