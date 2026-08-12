@@ -26,11 +26,11 @@
         preview="true"
       />
 
-      <!-- <SubTree ID="DetectAprilTag"
+      <SubTree ID="DetectAprilTag"
         name="FindAprilTag"
         tag_id="0"
         tag_pose="{apriltag_pose}"
-      /> -->
+      />
 
       <!-- WIP! : Making an offset from the april tag  -->
       <!-- <TransformPose name="TransformTagToBase"
@@ -63,7 +63,7 @@
   </BehaviorTree>
 
 <!-- AprilTag Detection Subtree -->
-  <!-- <BehaviorTree ID="DetectAprilTag">
+  <BehaviorTree ID="DetectAprilTag">
     <Sequence name="Sequence">
       <GetSyncedImagePointCloudDepth
         name="get_synced_images_pointcloud"
@@ -87,7 +87,7 @@
         tag_pose="{tag_pose}"
       />
     </Sequence>
-  </BehaviorTree> -->
+  </BehaviorTree>
 
   <!-- Motion planning behaviors -->
   <BehaviorTree ID="MoveToJoint">
