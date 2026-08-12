@@ -72,6 +72,7 @@ scipy = ">=1.18.0,<2"
 libopencv = { version = ">=4.12.0,<5", build = "qt6*" }  # Ensure we aren't installing opencv headless
 py-opencv = { version = ">=4.12.0,<5", build = "qt6*" }
 setuptools = "<80"  # Newer versions break colcon symlink installs
+librealsense = ">=2.57.7,<3"
 
 # ROS dependencies
 ros-jazzy-ros-base = "*"
@@ -101,9 +102,12 @@ ros-jazzy-mujoco-vendor = "*"
 ros-jazzy-nav2-msgs = "*"
 ros-jazzy-pilz-industrial-motion-planner = "*"
 ros-jazzy-pinocchio = "*"
+ros-jazzy-plotjuggler = "*"
+ros-jazzy-plotjuggler-ros = "*"
 ros-jazzy-position-controllers = "*"
 ros-jazzy-python-qt-binding = "*"
 ros-jazzy-realsense2-description = "*"
+ros-jazzy-realsense2-camera = "*"
 ros-jazzy-ros2-control = "*"
 ros-jazzy-ros2-control-cmake = "*"
 ros-jazzy-trac-ik-kinematics-plugin = "*"
