@@ -36,31 +36,52 @@
       />
 
       <!-- Home the arm -->
+      <JointNamesAndPositionsFromYaml name="load_clr_demo_home"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_demo_home"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
+      />
       <SubTree ID="MoveToJointState"
-        name="MoveToHome"
-        group_name="ur_manipulator"
-        joint_names="shoulder_pan_joint;shoulder_lift_joint;elbow_joint;wrist_1_joint;wrist_2_joint;wrist_3_joint"
-        joint_positions="3.1927;-2.3913;-1.7760;-0.4700;-1.6177;-1.6134"
+        name="MoveToDemoHome"
+        group_name="clr"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
       />
 
       <!-- Position rail and lift in front of the bench -->
+      <JointNamesAndPositionsFromYaml name="load_clr_near_bench"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_near_bench"
+        joint_names="{clr_near_bench_joint_names}"
+        joint_positions="{clr_near_bench_joint_positions}"
+      />
       <SubTree ID="MoveToJointState"
-        name="MoveToInit"
+        name="MoveToNearBench"
         group_name="clr"
-        joint_names="vention_rail_base_to_carriage;ewellix_lift_lower_to_higher;shoulder_pan_joint;shoulder_lift_joint;elbow_joint;wrist_1_joint;wrist_2_joint;wrist_3_joint"
-        joint_positions="0.0;0.0;2.5656;-3.0020;-0.9599;-0.6982;-1.5184;-1.0297"
+        joint_names="{clr_near_bench_joint_names}"
+        joint_positions="{clr_near_bench_joint_positions}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
       />
 
       <!-- Move to underneath the bench -->
+      <JointNamesAndPositionsFromYaml name="load_approach_bench_seat"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_approach_bench_seat"
+        joint_names="{clr_approach_bench_seat_joint_names}"
+        joint_positions="{clr_approach_bench_seat_joint_positions}"
+      />
       <SubTree ID="MoveToJointState"
         name="MoveToApproachBenchSeat"
-        group_name="ur_manipulator"
-        joint_names="shoulder_pan_joint;shoulder_lift_joint;elbow_joint;wrist_1_joint;wrist_2_joint;wrist_3_joint"
-        joint_positions="2.443;-2.670;-1.571;-0.419;-1.500;-0.925"
+        group_name="clr"
+        joint_names="{clr_approach_bench_seat_joint_names}"
+        joint_positions="{clr_approach_bench_seat_joint_positions}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
       />
@@ -79,29 +100,14 @@
         allowed="false"
       />
 
-      <!-- Back out the arm -->
-      <LookupTransform
-        name="lookup_tool_pose"
-        source_frame="tool0"
-        target_frame="world"
-        target_T_source="{tool_in_world}"
-      />
-      <TransformStampedToPoseStamped
-        name="tool_to_pose"
-        transform_stamped="{tool_in_world}"
-        pose_stamped="{current_pose}"
-        child_frame_id="{_unused}"
-      />
-      <OffsetPoseStamped
-        name="CalculateBackOutPose"
-        input_pose="{current_pose}"
-        translation_xyz="0.0, 0.0, -0.4"
-        output_pose="{back_out_pose}"
-      />
-      <SubTree ID="MoveToPoseCartesian"
-        name="BackOut"
-        group_name="ur_manipulator"
-        target_poses="{back_out_pose}"
+      <!-- Home the arm again -->
+      <SubTree ID="MoveToJointState"
+        name="MoveToDemoHomeFinish"
+        group_name="clr"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
       />
 
     </Sequence>
@@ -119,7 +125,7 @@
         allowed="true"
       />
 
-      <ComputeBenchArcWaypoints
+      <ComputeCartesianArcWaypoints
         name="compute_arc"
         hinge_frame="bench_lid"
         grasp_frame="grasp_frame"
