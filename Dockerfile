@@ -85,7 +85,7 @@ RUN groupadd -g ${USER_GID} ${USERNAME} \
 ENV PIP_BREAK_SYSTEM_PACKAGES=1
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    pip3 install nanobind mujoco==3.4.0 obj2mjcf trimesh pycollada viser
+    pip3 install 'numpy<2' nanobind mujoco==3.4.0 obj2mjcf trimesh pycollada viser scipy
 
 # Setup the install directory and copy the workspace to it.
 # We could alternatively copy package manifests to preserve the layer cache if the build duration becomes too onerous.
