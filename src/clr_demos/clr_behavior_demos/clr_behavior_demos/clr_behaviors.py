@@ -101,13 +101,10 @@ def rotate_about_frame(
     return T_world_hinge @ T_rotated_local
 
 
-class ComputeBenchArcWaypoints(BehaviourWithPorts):
-    """ComputeBenchArcWaypoints behavior.
+class ComputeCartesianArcWaypoints(BehaviourWithPorts):
+    """ComputeCartesianArcWaypoints behavior.
 
-    Computes end-effector poses tracing an arc around a hinge frame, used to
-    open a bench seat lid. Ports the rotate_about_frame() algorithm from
-    demo_exec.cpp into a py_trees behavior that writes PoseStamped waypoints
-    to the blackboard.
+    Computes end-effector poses tracing an arc around a hinge frame.
 
     Ports
     -----
@@ -171,8 +168,7 @@ class ComputeBenchArcWaypoints(BehaviourWithPorts):
         T_world_grasp = _transform_stamped_to_matrix(grasp_tf)
 
         # Compute each arc waypoint. Step indices start at 1 so the first
-        # waypoint is already rotated away from the starting contact pose,
-        # matching the C++ loop: for (int i = 1; i <= 8; i++).
+        # waypoint is already rotated away from the starting contact pose.
         waypoints: list[PoseStamped] = []
         for i in range(1, num_steps + 1):
             angle = i * rotation_per_step
