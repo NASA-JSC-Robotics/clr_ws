@@ -175,7 +175,7 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
         """Return the input port declarations."""
         return {
             "group_name": PortInformation(data_type=str, required=False),
-            "target_poses": PortInformation(data_type=object, required=True),
+            "target_poses": PortInformation(data_type=PoseStamped | list[PoseStamped], required=True),
             "max_linear_speed": PortInformation(data_type=float, required=False),
             "max_angular_speed": PortInformation(data_type=float, required=False),
         }
@@ -190,10 +190,6 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
         target = self.get_input("target_poses")
         if isinstance(target, PoseStamped):
             target = [target]
-        elif not isinstance(target, list):
-            raise RuntimeError(
-                f"target_poses must be a PoseStamped or a list of PoseStamped, " f"got {type(target).__name__}"
-            )
         return PlanCartesianPath.Request(
             group_name=self.get_input("group_name", ""),
             target_poses=target,
