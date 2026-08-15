@@ -100,7 +100,7 @@ class CartesianServoNode(Node):
         self.declare_parameter("lm_damping", 0.01)
         self.declare_parameter("regularization", 1e-3)
         self.declare_parameter("position_cost", 1.0)
-        self.declare_parameter("orientation_cost", 0.1)
+        self.declare_parameter("orientation_cost", 0.01)
         self.declare_parameter("control_freq", 25.0)
 
         # Collision related parameters.
