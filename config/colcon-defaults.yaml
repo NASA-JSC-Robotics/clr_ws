@@ -10,5 +10,3 @@ build:
 test:
   event-handlers:
     - console_direct+
-  packages-ignore:
-    - btcpp_ros2_samples
