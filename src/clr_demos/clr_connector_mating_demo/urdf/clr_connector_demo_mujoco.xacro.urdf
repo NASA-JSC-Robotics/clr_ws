@@ -35,6 +35,7 @@
       hatch_4040="false"
       express_rack="true"
       hatch_4060="true"
+      hatch_4060_latch="true"
       second_trainer="false"
     />
 
