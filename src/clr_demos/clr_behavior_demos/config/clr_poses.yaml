@@ -59,3 +59,23 @@ clr_approach_bench_seat:
     - -0.419
     - -1.500
     - -0.925
+
+clr_ctb_demo_perception:
+  joint_names:
+    - vention_rail_base_to_carriage
+    - ewellix_lift_lower_to_higher
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  positions:
+    - 1.947
+    - 0.0
+    - 3.842
+    -  -1.774
+    - -1.786
+    - 0.406
+    - -0.699
+    - -0.097

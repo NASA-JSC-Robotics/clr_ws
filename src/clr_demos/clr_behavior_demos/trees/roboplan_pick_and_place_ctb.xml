@@ -28,19 +28,22 @@
         controller_info="{controller_info}"
         activate_controllers="clr_joint_trajectory_controller"
       />
-      <CreatePoseStamped name="set_perception_pose"
-        position_xyz="0.45, 0.75, 1.29"
-        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
-        frame="world"
-        msg="{perception_pose}"
+
+      <!-- Move to hardcoded perception pose and detect blobs -->
+      <JointNamesAndPositionsFromYaml name="load_clr_ctb_demo_perception"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_ctb_demo_perception"
+        joint_names="{clr_ctb_demo_perception_joint_names}"
+        joint_positions="{clr_ctb_demo_perception_joint_positions}"
       />
-      <SubTree ID="MoveToPose"
-        name="MoveToPerceptionPose"
+      <SubTree ID="MoveToJointState"
+        name="MoveToDemoHome"
         group_name="clr"
-        target_pose="{perception_pose}"
+        joint_names="{clr_ctb_demo_perception_joint_names}"
+        joint_positions="{clr_ctb_demo_perception_joint_positions}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
-        constrain_gripper_top_down="false"
       />
       <SubTree ID="DetectBlobs"
         name="DetectHandle"
@@ -68,7 +71,7 @@
       />
       <SubTree ID="MoveToPose"
         name="MoveToApproach"
-        group_name="clr"
+        group_name="chonkur_grasp"
         target_pose="{ctb_approach_pose}"
         velocity_scaling="1.0"
         acceleration_scaling="1.0"
