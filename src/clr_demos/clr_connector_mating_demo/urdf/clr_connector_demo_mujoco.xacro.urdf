@@ -1,90 +1,191 @@
-<?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="clr">
-  <xacro:arg name="tf_prefix" default="" />
-  <xacro:arg name="headless_mode" default="false" />
-  <xacro:arg name="finger_xacro" default="fngr_v6"/>
-  <xacro:arg name="add_grasp_push_frames" default="true"/>
-  <xacro:arg name="use_pregenerated_mjcf" default="false"/>
-  <!-- Legacy argument to leave out the environment mockups, though for now we generally -->
-  <!-- always want this to be true. -->
-  <xacro:arg name="model_env" default="true"/>
-  <xacro:arg name="include_scene_objects" default="false"/>
-  <xacro:arg name="sim_speed" default="1.0"/>
-  <xacro:arg name="headless" default="false" />
-
-  <xacro:property name="model_env" value="$(arg model_env)"/>
-  <xacro:property name="tf_prefix" value="$(arg tf_prefix)"/>
-
-  <xacro:include filename="$(find clr_imetro_environments)/urdf/clr_trainer_multi_hatch_macro.xacro"/>
-  <xacro:include filename="$(find clr_description)/urdf/clr_macro.xacro"/>
-  <xacro:include filename="$(find clr_connector_mating_demo)/urdf/receptacle_macro.xacro"/>
-
-  <link name="world" />
-
-  <xacro:imetro_env
-      tf_prefix="$(arg tf_prefix)"
-      use_fake_hardware="false"
-      headless_mode="$(arg headless_mode)"
-      add_grasp_push_frames="$(arg add_grasp_push_frames)"
-      finger_xacro="$(arg finger_xacro)"
-      use_camera_mesh="false"
-      generate_ros2_control_tag="false"
-      clr="true"
-      shelf="false"
-      ceiling_prop="false"
-      hatch_4040="false"
-      express_rack="true"
-      hatch_4060="true"
-      hatch_4060_latch="true"
-      second_trainer="false"
-    />
-
-  <xacro:receptacle prefix="" parent="world">
-      <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
-  </xacro:receptacle>
-
-  <!-- special inputs for mujoco processing-->
-  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_raw_inputs.xacro"/>
-  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_processed_inputs.xacro"/>
-  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_scene.xacro"/>
-  <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_ros2_control_macros.xacro"/>
-
-  <mujoco_inputs>
-    <raw_inputs>
-      <xacro:clr_mujoco_raw_inputs tf_prefix="${tf_prefix}" model_env="${model_env}"/>
-    </raw_inputs>
-    <processed_inputs>
-      <xacro:clr_mujoco_processed_inputs
-        include_scene_objects="false"
-        tf_prefix="${tf_prefix}"
-        finger_xacro="fngr_v6"
-        model_env="true"
+<root main_tree_to_execute="MainTree">
+  <!-- Top-level behavior tree -->
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
       />
-      <decompose_mesh mesh_name="receptacle" threshold="0.01"/>
-    </processed_inputs>
-    <xacro:clr_mujoco_scene/>
-  </mujoco_inputs>
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
+      <SubTree ID="CloseGripper" name="close_gripper_start" />
 
+      <SubTree ID="MoveToJoint"
+        name="MoveToReadAprilTag"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        joint_names="vention_rail_base_to_carriage, ewellix_lift_lower_to_higher, shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="1.89, 0.00, 3.037, -2.356, -1.920, -0.384, -1.606, -1.484"
+        preview="true"
+      />
 
-  <ros2_control name="${tf_prefix}MujocoSystem" type="system">
-    <hardware>
-      <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
-      <xacro:if value="$(arg use_pregenerated_mjcf)">
-        <param name="mujoco_model">$(find clr_mujoco_config)/description/scene.xml</param>
-      </xacro:if>
+      <SubTree ID="DetectAprilTag"
+        name="FindAprilTag"
+        tag_id="0"
+        tag_size="0.073"
+        tag_family="tag36h11"
+        tag_pose="{apriltag_pose}"
+        preview="true"
+      />
 
-      <!-- Optionally run headless -->
-      <param name="headless">$(arg headless)</param>
+      <SubTree ID="MoveToJoint"
+        name="ApproachReceptacle"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="ur_manipulator"
+        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="3.159, -2.077, -2.077, -0.559, -1.623, -1.571"
+        preview="true"
+      /> 
 
-      <!-- Increase this parameter to run the sim faster than realtime. -->
-      <param name="sim_speed_factor">$(arg sim_speed)</param>
-    </hardware>
+      <SubTree ID="MoveToJoint"
+        name="MoveToConnect"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="ur_manipulator"
+        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="3.176, -1.763, -1.937, -1.012, -1.623, -1.588"
+        preview="true"
+      /> 
 
-    <xacro:clr_mujoco_ros2_control_sensors tf_prefix="${tf_prefix}"/>
-    <xacro:clr_mujoco_ros2_control_joints tf_prefix="${tf_prefix}"/>
+      <!-- WIP! : Making an offset from the april tag  -->
+      <!-- <TransformPose name="TransformTagToBase"
+        input_pose="{apriltag_pose}"
+        source_frame="wrist_mounted_camera_color_optical_frame"
+        output_pose="{apriltag_pose_base}"
+      />
+      <AlignPoseToNearestAxis name="SnapOrientationToAxis"
+        input_pose="{apriltag_pose_base}"
+        output_pose="{apriltag_aligned_pose}"
+      />
+      <OffsetPoseStamped name="CalculateStandoffPose"
+        input_pose="{apriltag_aligned_pose}"
+        translation_xyz="0.0, 0.0, -0.15"
+        output_pose="{apriltag_offset_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToTagOffset"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{apriltag_offset_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      /> -->
 
-    <xacro:clr_mujoco_ros2_control_env/>
-    <xacro:clr_mujoco_ros2_control_sensors/>
+      <SubTree ID="OpenGripper" name="open_gripper_end" />
 
-  </ros2_control>
-</robot>
+    </Sequence>
+  </BehaviorTree>
+
+<!-- AprilTag Detection Subtree -->
+  <BehaviorTree ID="DetectAprilTag">
+    <Sequence name="Sequence">
+      <GetSyncedImagePointCloudDepth
+        name="get_synced_images_pointcloud"
+        camera_info_topic="/wrist_mounted_camera/color/camera_info"
+        rgb_image_topic="/wrist_mounted_camera/color/image_raw"
+        depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
+        point_cloud_topic="/wrist_mounted_camera/depth/color/points"
+        time_slop="0.1"
+        sync_timeout="3.0"
+        camera_info="{camera_info}"
+        rgb_image="{rgb_image}"
+        depth_image="{depth_image}"
+        point_cloud="{point_cloud}"
+      />
+      <DetectAprilTag
+        name="detect_apriltag"
+        rgb_image="{rgb_image}"
+        camera_info="{camera_info}"
+        tag_id="{tag_id}"
+        tag_size="{tag_size}"
+        tag_family="{tag_family}"
+        tag_pose="{tag_pose}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Motion planning behaviors -->
+  <BehaviorTree ID="MoveToJoint">
+    <Sequence name="Sequence">
+      <PlanToJointState
+        name="plan_to_joint"
+        service_name="/plan_kinematic_path"
+        pipeline="{pipeline}"
+        planner="{planner}"
+        group_name="{group_name}"
+        joint_names="{joint_names}"
+        joint_positions="{joint_positions}"
+        tolerance="0.005"
+        trajectory="{trajectory}"
+      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
+      <ExecuteTrajectoryBehavior
+        name="execute_trajectory"
+        action_name="/execute_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="MoveToPose">
+    <Sequence name="Sequence">
+      <PlanToPose
+        name="plan_to_pose"
+        service_name="/plan_kinematic_path"
+        pipeline="{pipeline}"
+        planner="{planner}"
+        group_name="{group_name}"
+        target_frame="{target_frame}"
+        target_pose="{target_pose}"
+        position_tolerance="0.005"
+        orientation_tolerance="0.005, 0.005, 0.005"
+        trajectory="{trajectory}"
+      />
+      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
+        <RequestTrajectoryApproval
+          name="preview_trajectory"
+          action_name="/preview_trajectory"
+          trajectory="{trajectory}"
+        />
+      </SuccessIfVariableIsFalse>
+      <ExecuteTrajectoryBehavior
+        name="execute_trajectory"
+        action_name="/execute_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="OpenGripper">
+    <CommandGripper
+      name="OpenGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.023"
+    />
+  </BehaviorTree>
+
+  <BehaviorTree ID="CloseGripper">
+    <CommandGripper
+      name="CloseGripper"
+      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+      position="0.0005"
+    />
+  </BehaviorTree>
+
+</root>
+ 
