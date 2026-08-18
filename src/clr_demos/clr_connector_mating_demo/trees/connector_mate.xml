@@ -26,11 +26,34 @@
         preview="true"
       />
 
-      <!-- <SubTree ID="DetectAprilTag"
+      <SubTree ID="DetectAprilTag"
         name="FindAprilTag"
         tag_id="0"
+        tag_size="0.073"
+        tag_family="tag36h11"
         tag_pose="{apriltag_pose}"
-      /> -->
+        preview="true"
+      />
+
+      <SubTree ID="MoveToJoint"
+        name="ApproachReceptacle"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="ur_manipulator"
+        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="3.159, -2.077, -2.077, -0.559, -1.623, -1.571"
+        preview="true"
+      />
+
+      <SubTree ID="MoveToJoint"
+        name="MoveToConnect"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="ur_manipulator"
+        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="3.176, -1.763, -1.937, -1.012, -1.623, -1.588"
+        preview="true"
+      />
 
       <!-- WIP! : Making an offset from the april tag  -->
       <!-- <TransformPose name="TransformTagToBase"
@@ -63,7 +86,7 @@
   </BehaviorTree>
 
 <!-- AprilTag Detection Subtree -->
-  <!-- <BehaviorTree ID="DetectAprilTag">
+  <BehaviorTree ID="DetectAprilTag">
     <Sequence name="Sequence">
       <GetSyncedImagePointCloudDepth
         name="get_synced_images_pointcloud"
@@ -78,16 +101,17 @@
         depth_image="{depth_image}"
         point_cloud="{point_cloud}"
       />
-      <DetectAprilTagLocal
-        name="detect_apriltag_locally"
+      <DetectAprilTag
+        name="detect_apriltag"
         rgb_image="{rgb_image}"
         camera_info="{camera_info}"
         tag_id="{tag_id}"
-        tag_size="0.073"
+        tag_size="{tag_size}"
+        tag_family="{tag_family}"
         tag_pose="{tag_pose}"
       />
     </Sequence>
-  </BehaviorTree> -->
+  </BehaviorTree>
 
   <!-- Motion planning behaviors -->
   <BehaviorTree ID="MoveToJoint">
@@ -164,3 +188,4 @@
   </BehaviorTree>
 
 </root>
+
