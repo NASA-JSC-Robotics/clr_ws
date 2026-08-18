@@ -8,6 +8,9 @@
     Requires the RoboPlan planning server, e.g.:
       ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
   -->
+
+  <include file="roboplan/roboplan_trees.xml" />
+
   <BehaviorTree ID="MainTree">
     <Sequence name="Sequence">
       <GetRosControllerInfo
@@ -33,6 +36,9 @@
         name="MoveToTargetPose"
         group_name="clr"
         target_pose="{target_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="0.5"
+        constrain_gripper_top_down="false"
       />
       <OffsetPoseStamped name="CalculateOffsetPose"
         input_pose="{target_pose}"
@@ -42,59 +48,12 @@
       <SubTree ID="MoveToPoseCartesian"
         name="CartesianMoveToOffsetPose"
         group_name="clr"
-        target_pose="{offset_pose}"
+        target_poses="{offset_pose}"
       />
       <SubTree ID="MoveToPoseCartesian"
         name="CartesianMoveBack"
         group_name="clr"
-        target_pose="{target_pose}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Free-space (RRT) plan, preview, and execute -->
-  <BehaviorTree ID="MoveToPose">
-    <Sequence name="Sequence">
-      <RoboplanPlanToPose
-        name="plan_to_pose"
-        service_name="/roboplan_planning_server/plan_to_pose"
-        group_name="{group_name}"
-        target_pose="{target_pose}"
-        acceleration_scaling="0.5"
-        trajectory="{trajectory}"
-      />
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <!-- Straight-line Cartesian plan, preview, and execute -->
-  <BehaviorTree ID="MoveToPoseCartesian">
-    <Sequence name="Sequence">
-      <RoboplanPlanCartesianPath
-        name="plan_cartesian_path"
-        service_name="/roboplan_planning_server/plan_cartesian_path"
-        group_name="{group_name}"
-        target_pose="{target_pose}"
-        trajectory="{trajectory}"
-      />
-      <CallTriggerService
-        name="preview_trajectory"
-        service_name="/roboplan_planning_server/preview"
-      />
-      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
-      <ExecuteJointTrajectory
-        name="execute_trajectory"
-        action_name="/clr_joint_trajectory_controller/follow_joint_trajectory"
-        trajectory="{trajectory}"
+        target_poses="{target_pose}"
       />
     </Sequence>
   </BehaviorTree>

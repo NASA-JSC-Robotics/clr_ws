@@ -1,0 +1,148 @@
+<root main_tree_to_execute="MainTree">
+  <!--
+    Bench seat opening demo using the RoboPlan planning server.
+
+    Sequence:
+      1. Enable controllers.
+      2. Home the arm, position rail/lift, approach bench seat.
+      3. Allow gripper/lid collisions, compute the lid-opening arc,
+         execute as a multi-waypoint Cartesian path.
+      4. Be sure to reset the collisions regardless of success or
+         failure.
+      4. Back out with a relative Cartesian move.
+
+    Requires the RoboPlan planning server, e.g.:
+      ros2 launch clr_behavior_demos run_roboplan_behavior.launch.xml
+  -->
+
+  <include file="roboplan/gripper_trees.xml" />
+  <include file="roboplan/roboplan_trees.xml" />
+
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+
+      <!-- Controller setup -->
+      <GetRosControllerInfo
+        name="get_controller_info"
+        service_name="/controller_manager/list_controllers"
+        controller_info="{controller_info}"
+      />
+      <SwitchRosControllers
+        name="enable_clr_combined_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        controller_info="{controller_info}"
+        activate_controllers="clr_joint_trajectory_controller"
+      />
+
+      <!-- Home the arm -->
+      <JointNamesAndPositionsFromYaml name="load_clr_demo_home"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_demo_home"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
+      />
+      <SubTree ID="MoveToJointState"
+        name="MoveToDemoHome"
+        group_name="clr"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+      />
+
+      <!-- Position rail and lift in front of the bench -->
+      <JointNamesAndPositionsFromYaml name="load_clr_near_bench"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_near_bench"
+        joint_names="{clr_near_bench_joint_names}"
+        joint_positions="{clr_near_bench_joint_positions}"
+      />
+      <SubTree ID="MoveToJointState"
+        name="MoveToNearBench"
+        group_name="clr"
+        joint_names="{clr_near_bench_joint_names}"
+        joint_positions="{clr_near_bench_joint_positions}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+      />
+
+      <!-- Move to underneath the bench -->
+      <JointNamesAndPositionsFromYaml name="load_approach_bench_seat"
+        package_name="clr_behavior_demos"
+        yaml_file="config/clr_poses.yaml"
+        state_name="clr_approach_bench_seat"
+        joint_names="{clr_approach_bench_seat_joint_names}"
+        joint_positions="{clr_approach_bench_seat_joint_positions}"
+      />
+      <SubTree ID="MoveToJointState"
+        name="MoveToApproachBenchSeat"
+        group_name="clr"
+        joint_names="{clr_approach_bench_seat_joint_names}"
+        joint_positions="{clr_approach_bench_seat_joint_positions}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+      />
+
+      <!-- Open bench seat, continue no matter what -->
+      <FailureIsSuccess name="open_bench_with_cleanup">
+        <SubTree ID="OpenBenchSeat" name="OpenBenchSeat" />
+      </FailureIsSuccess>
+
+      <!-- Reset collision scene -->
+      <SetAllowedCollisions
+        name="cleanup_lid_collisions"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="bench_lid;bench_lid;bench_lid"
+        body2="finger_1_link;finger_2_link;gripper_base_link"
+        allowed="false"
+      />
+
+      <!-- Home the arm again -->
+      <SubTree ID="MoveToJointState"
+        name="MoveToDemoHomeFinish"
+        group_name="clr"
+        joint_names="{clr_demo_home_joint_names}"
+        joint_positions="{clr_demo_home_joint_positions}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+      />
+
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Bench-specific subtree to open the bench seat lid -->
+  <BehaviorTree ID="OpenBenchSeat">
+    <Sequence name="Sequence">
+
+      <SetAllowedCollisions
+        name="allow_lid_collisions"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="bench_lid;bench_lid;bench_lid"
+        body2="finger_1_link;finger_2_link;gripper_base_link"
+        allowed="true"
+      />
+
+      <ComputeCartesianArcWaypoints
+        name="compute_arc"
+        hinge_frame="bench_lid"
+        grasp_frame="grasp_frame"
+        num_steps="8"
+        rotation_per_step="-0.2014"
+        rotation_axis_xyz="0.0, 1.0, 0.0"
+        keep_start_orientation="true"
+        waypoints="{arc_waypoints}"
+      />
+
+      <SubTree ID="MoveToPoseCartesian"
+        name="ExecuteArc"
+        group_name="ur_manipulator"
+        target_poses="{arc_waypoints}"
+      />
+
+    </Sequence>
+  </BehaviorTree>
+
+</root>

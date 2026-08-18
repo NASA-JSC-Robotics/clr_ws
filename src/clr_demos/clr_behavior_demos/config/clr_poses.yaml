@@ -1,0 +1,81 @@
+# Saved waypoints for CLR
+
+clr_demo_home:
+  joint_names:
+    - vention_rail_base_to_carriage
+    - ewellix_lift_lower_to_higher
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  positions:
+    - 0.0
+    - 0.0
+    - 3.1927
+    - -2.3913
+    - -1.7760
+    - -0.4700
+    - -1.6177
+    - -1.6134
+
+clr_near_bench:
+  joint_names:
+    - vention_rail_base_to_carriage
+    - ewellix_lift_lower_to_higher
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  positions:
+    - 0.0
+    - 0.0
+    - 2.5656
+    - -3.0020
+    - -0.9599
+    - -0.6982
+    - -1.5184
+    - -1.0297
+
+clr_approach_bench_seat:
+  joint_names:
+    - vention_rail_base_to_carriage
+    - ewellix_lift_lower_to_higher
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  positions:
+    - 0.0
+    - 0.0
+    - 2.443
+    - -2.670
+    - -1.571
+    - -0.419
+    - -1.500
+    - -0.925
+
+clr_ctb_demo_perception:
+  joint_names:
+    - vention_rail_base_to_carriage
+    - ewellix_lift_lower_to_higher
+    - shoulder_pan_joint
+    - shoulder_lift_joint
+    - elbow_joint
+    - wrist_1_joint
+    - wrist_2_joint
+    - wrist_3_joint
+  positions:
+    - 1.947
+    - 0.0
+    - 3.842
+    -  -1.774
+    - -1.786
+    - 0.406
+    - -0.699
+    - -0.097

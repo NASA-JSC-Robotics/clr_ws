@@ -79,5 +79,9 @@ ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehav
 Or, run the full demo:
 
 ```bash
+# Open the bench seat
+ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehavior '{tree_file_name: roboplan_open_bench}'
+
+# Pick and place the CTB
 ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehavior '{tree_file_name: roboplan_pick_and_place_ctb}'
 ```
