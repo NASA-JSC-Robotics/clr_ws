@@ -73,6 +73,8 @@
         <param name="mujoco_model">$(find clr_mujoco_config)/description/scene.xml</param>
       </xacro:if>
 
+      <param name="pids_config_file">$(find clr_mujoco_config)/config/mujoco_pid.yaml</param>
+
       <!-- Optionally run headless -->
       <param name="headless">$(arg headless)</param>
 
@@ -83,8 +85,10 @@
     <xacro:clr_mujoco_ros2_control_sensors tf_prefix="${tf_prefix}"/>
     <xacro:clr_mujoco_ros2_control_joints tf_prefix="${tf_prefix}"/>
 
-    <xacro:clr_mujoco_ros2_control_env/>
-    <xacro:clr_mujoco_ros2_control_sensors/>
+    <xacro:if value="${model_env}">
+      <xacro:clr_mujoco_ros2_control_env/>
+      <xacro:clr_mujoco_ros2_control_sensors/>
+    </xacro:if>
 
   </ros2_control>
 </robot>
