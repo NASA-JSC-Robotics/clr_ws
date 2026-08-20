@@ -71,7 +71,7 @@
         target_frame="grasp_frame"
         preview="true"
       />
-      <OffsetPoseStamped name="CalculateConnectPose"
+      <OffsetPoseStamped name="CalculateMatePose"
         input_pose="{apriltag_offset_pose}"
         translation_xyz="0.0, 0.12, 0.0"
         output_pose="{apriltag_mate_pose}"
@@ -85,15 +85,6 @@
         target_frame="grasp_frame"
         preview="true"
       />
-      <!-- <SubTree ID="MoveToJoint"
-        name="MoveToConnect"
-        pipeline="ompl"
-        planner="RRTConnect"
-        group_name="ur_manipulator"
-        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
-        joint_positions="3.089233, -1.780236, -1.902409, -1.029744, -1.570796, -1.518436"
-        preview="true"
-      /> -->
 
       <SubTree ID="OpenGripper" name="open_gripper_end" />
 
