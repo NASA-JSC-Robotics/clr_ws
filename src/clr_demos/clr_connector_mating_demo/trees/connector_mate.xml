@@ -35,40 +35,32 @@
         preview="true"
       />
 
-      <SubTree ID="MoveToJoint"
-        name="ApproachReceptacle"
-        pipeline="ompl"
-        planner="RRTConnect"
-        group_name="ur_manipulator"
-        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
-        joint_positions="3.159, -2.077, -2.077, -0.559, -1.623, -1.571"
-        preview="true"
-      />
-
-      <SubTree ID="MoveToJoint"
-        name="MoveToConnect"
-        pipeline="ompl"
-        planner="RRTConnect"
-        group_name="ur_manipulator"
-        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
-        joint_positions="3.176, -1.763, -1.937, -1.012, -1.623, -1.588"
-        preview="true"
-      />
-
-      <!-- WIP! : Making an offset from the april tag  -->
-      <!-- <TransformPose name="TransformTagToBase"
+      <TransformPose name="TransformTagToBase"
         input_pose="{apriltag_pose}"
-        source_frame="wrist_mounted_camera_color_optical_frame"
+        source_frame="world"
         output_pose="{apriltag_pose_base}"
       />
+
       <AlignPoseToNearestAxis name="SnapOrientationToAxis"
         input_pose="{apriltag_pose_base}"
         output_pose="{apriltag_aligned_pose}"
       />
+
       <OffsetPoseStamped name="CalculateStandoffPose"
         input_pose="{apriltag_aligned_pose}"
-        translation_xyz="0.0, 0.0, -0.15"
+        translation_xyz="-0.015, -0.4, 0.12"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         output_pose="{apriltag_offset_pose}"
+      />
+
+      <PoseStampedToTransformStamped name="ConvertPoseToTF"
+      pose_stamped="{apriltag_offset_pose}"
+      child_frame_id="apriltag_target_standoff_frame"
+      transform_stamped="{apriltag_transform_stamped}"
+      />
+
+      <PublishTransform name="PublishStandoffTF"
+          transform_stamped="{apriltag_transform_stamped}"
       />
       <SubTree ID="MoveToPose"
         name="MoveToTagOffset"
@@ -78,7 +70,16 @@
         target_pose="{apriltag_offset_pose}"
         target_frame="grasp_frame"
         preview="true"
-      /> -->
+      />
+      <SubTree ID="MoveToJoint"
+        name="MoveToConnect"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="ur_manipulator"
+        joint_names="shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
+        joint_positions="3.089233, -1.780236, -1.902409, -1.029744, -1.570796, -1.518436"
+        preview="true"
+      />
 
       <SubTree ID="OpenGripper" name="open_gripper_end" />
 
@@ -188,4 +189,3 @@
   </BehaviorTree>
 
 </root>
-
