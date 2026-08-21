@@ -26,26 +26,41 @@
         preview="true"
       />
 
-      <!-- <SubTree ID="DetectAprilTag"
+      <SubTree ID="DetectAprilTag"
         name="FindAprilTag"
         tag_id="0"
+        tag_size="0.073"
+        tag_family="tag36h11"
         tag_pose="{apriltag_pose}"
-      /> -->
+        preview="true"
+      />
 
-      <!-- WIP! : Making an offset from the april tag  -->
-      <!-- <TransformPose name="TransformTagToBase"
+      <TransformPose name="TransformTagToBase"
         input_pose="{apriltag_pose}"
-        source_frame="wrist_mounted_camera_color_optical_frame"
+        source_frame="world"
         output_pose="{apriltag_pose_base}"
       />
+
       <AlignPoseToNearestAxis name="SnapOrientationToAxis"
         input_pose="{apriltag_pose_base}"
         output_pose="{apriltag_aligned_pose}"
       />
+
       <OffsetPoseStamped name="CalculateStandoffPose"
         input_pose="{apriltag_aligned_pose}"
-        translation_xyz="0.0, 0.0, -0.15"
+        translation_xyz="-0.015, -0.4, 0.12"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         output_pose="{apriltag_offset_pose}"
+      />
+
+      <PoseStampedToTransformStamped name="ConvertPoseToTF"
+      pose_stamped="{apriltag_offset_pose}"
+      child_frame_id="apriltag_target_standoff_frame"
+      transform_stamped="{apriltag_transform_stamped}"
+      />
+
+      <PublishTransform name="PublishStandoffTF"
+          transform_stamped="{apriltag_transform_stamped}"
       />
       <SubTree ID="MoveToPose"
         name="MoveToTagOffset"
@@ -55,7 +70,21 @@
         target_pose="{apriltag_offset_pose}"
         target_frame="grasp_frame"
         preview="true"
-      /> -->
+      />
+      <OffsetPoseStamped name="CalculateMatePose"
+        input_pose="{apriltag_offset_pose}"
+        translation_xyz="0.0, 0.12, 0.0"
+        output_pose="{apriltag_mate_pose}"
+      />
+      <SubTree ID="MoveToPose"
+        name="MoveToMate"
+        pipeline="ompl"
+        planner="RRTConnect"
+        group_name="clr"
+        target_pose="{apriltag_mate_pose}"
+        target_frame="grasp_frame"
+        preview="true"
+      />
 
       <SubTree ID="OpenGripper" name="open_gripper_end" />
 
@@ -63,7 +92,7 @@
   </BehaviorTree>
 
 <!-- AprilTag Detection Subtree -->
-  <!-- <BehaviorTree ID="DetectAprilTag">
+  <BehaviorTree ID="DetectAprilTag">
     <Sequence name="Sequence">
       <GetSyncedImagePointCloudDepth
         name="get_synced_images_pointcloud"
@@ -78,16 +107,17 @@
         depth_image="{depth_image}"
         point_cloud="{point_cloud}"
       />
-      <DetectAprilTagLocal
-        name="detect_apriltag_locally"
+      <DetectAprilTag
+        name="detect_apriltag"
         rgb_image="{rgb_image}"
         camera_info="{camera_info}"
         tag_id="{tag_id}"
-        tag_size="0.073"
+        tag_size="{tag_size}"
+        tag_family="{tag_family}"
         tag_pose="{tag_pose}"
       />
     </Sequence>
-  </BehaviorTree> -->
+  </BehaviorTree>
 
   <!-- Motion planning behaviors -->
   <BehaviorTree ID="MoveToJoint">
