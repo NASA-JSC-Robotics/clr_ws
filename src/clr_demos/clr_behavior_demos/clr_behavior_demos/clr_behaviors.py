@@ -121,20 +121,16 @@ class ComputeCartesianArcWaypoints(BehaviourWithPorts):
         waypoints (list[PoseStamped]) – arc poses in the world frame
     """
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        return {
-            "hinge_frame": PortInformation(data_type=str, required=True),
-            "grasp_frame": PortInformation(data_type=str, required=True),
-            "num_steps": PortInformation(data_type=int, required=False),
-            "rotation_per_step": PortInformation(data_type=float, required=True),
-            "rotation_axis_xyz": PortInformation(data_type=str, required=False),
-            "keep_start_orientation": PortInformation(data_type=bool, required=False),
-        }
+    INPUT_PORTS = {
+        "hinge_frame": PortInformation(data_type=str, required=True),
+        "grasp_frame": PortInformation(data_type=str, required=True),
+        "num_steps": PortInformation(data_type=int, required=False),
+        "rotation_per_step": PortInformation(data_type=float, required=True),
+        "rotation_axis_xyz": PortInformation(data_type=str, required=False),
+        "keep_start_orientation": PortInformation(data_type=bool, required=False),
+    }
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        return {"waypoints": PortInformation(data_type=list)}
+    OUTPUT_PORTS = {"waypoints": PortInformation(data_type=list)}
 
     def setup(self, **kwargs) -> None:
         """Get access to the ROS node and the shared TF buffer."""
