@@ -86,7 +86,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES=1
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     pip3 install \
-        mujoco==3.8.0 \
+        mujoco==3.12.0 \
         nanobind \
         'numpy<2' \
         obj2mjcf \

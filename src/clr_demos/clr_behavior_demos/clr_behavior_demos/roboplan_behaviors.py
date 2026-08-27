@@ -69,21 +69,15 @@ class RoboplanPlanToJointState(RosServiceClientBase):
     def __init__(self, name: str, **kwargs: Any):
         super().__init__(name, service_type=PlanToJointState, **kwargs)
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        """Return the input port declarations."""
-        return {
-            "group_name": PortInformation(data_type=str, required=False),
-            "joint_names": PortInformation(data_type=list[str], required=True),
-            "joint_positions": PortInformation(data_type=list[float], required=True),
-            "velocity_scaling": PortInformation(data_type=float, required=False),
-            "acceleration_scaling": PortInformation(data_type=float, required=False),
-        }
+    INPUT_PORTS = {
+        "group_name": PortInformation(data_type=str, required=False),
+        "joint_names": PortInformation(data_type=list[str], required=True),
+        "joint_positions": PortInformation(data_type=list[float], required=True),
+        "velocity_scaling": PortInformation(data_type=float, required=False),
+        "acceleration_scaling": PortInformation(data_type=float, required=False),
+    }
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        """Return the output port declarations."""
-        return {"trajectory": PortInformation(data_type=JointTrajectory)}
+    OUTPUT_PORTS = {"trajectory": PortInformation(data_type=JointTrajectory)}
 
     def create_request(self) -> PlanToJointState.Request:
         """Create the planning service request."""
@@ -120,21 +114,15 @@ class RoboplanPlanToPose(RosServiceClientBase):
     def __init__(self, name: str, **kwargs: Any):
         super().__init__(name, service_type=PlanToPose, **kwargs)
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        """Return the input port declarations."""
-        return {
-            "group_name": PortInformation(data_type=str, required=False),
-            "target_pose": PortInformation(data_type=PoseStamped, required=True),
-            "velocity_scaling": PortInformation(data_type=float, required=False),
-            "acceleration_scaling": PortInformation(data_type=float, required=False),
-            "constrain_gripper_top_down": PortInformation(data_type=bool, required=False),
-        }
+    INPUT_PORTS = {
+        "group_name": PortInformation(data_type=str, required=False),
+        "target_pose": PortInformation(data_type=PoseStamped, required=True),
+        "velocity_scaling": PortInformation(data_type=float, required=False),
+        "acceleration_scaling": PortInformation(data_type=float, required=False),
+        "constrain_gripper_top_down": PortInformation(data_type=bool, required=False),
+    }
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        """Return the output port declarations."""
-        return {"trajectory": PortInformation(data_type=JointTrajectory)}
+    OUTPUT_PORTS = {"trajectory": PortInformation(data_type=JointTrajectory)}
 
     def create_request(self) -> PlanToPose.Request:
         """Create the planning service request."""
@@ -170,20 +158,14 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
     def __init__(self, name: str, **kwargs: Any):
         super().__init__(name, service_type=PlanCartesianPath, **kwargs)
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        """Return the input port declarations."""
-        return {
-            "group_name": PortInformation(data_type=str, required=False),
-            "target_poses": PortInformation(data_type=PoseStamped | list[PoseStamped], required=True),
-            "max_linear_speed": PortInformation(data_type=float, required=False),
-            "max_angular_speed": PortInformation(data_type=float, required=False),
-        }
+    INPUT_PORTS = {
+        "group_name": PortInformation(data_type=str, required=False),
+        "target_poses": PortInformation(data_type=PoseStamped | list[PoseStamped], required=True),
+        "max_linear_speed": PortInformation(data_type=float, required=False),
+        "max_angular_speed": PortInformation(data_type=float, required=False),
+    }
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        """Return the output port declarations."""
-        return {"trajectory": PortInformation(data_type=JointTrajectory)}
+    OUTPUT_PORTS = {"trajectory": PortInformation(data_type=JointTrajectory)}
 
     def create_request(self) -> PlanCartesianPath.Request:
         """Create the planning service request."""
@@ -217,15 +199,9 @@ class ExecuteJointTrajectory(RosActionClientBase):
     def __init__(self, name: str, **kwargs: Any):
         super().__init__(name, action_type=FollowJointTrajectory, **kwargs)
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        """Return the input port declarations."""
-        return {"trajectory": PortInformation(data_type=JointTrajectory, required=True)}
+    INPUT_PORTS = {"trajectory": PortInformation(data_type=JointTrajectory, required=True)}
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        """Return the output port declarations."""
-        return {}
+    OUTPUT_PORTS = {}
 
     def create_goal(self) -> FollowJointTrajectory.Goal:
         """Create a trajectory execution goal."""
@@ -261,17 +237,13 @@ class SetAllowedCollisions(RosServiceClientBase):
     def __init__(self, name: str, **kwargs):
         super().__init__(name, service_type=SetCollisions, **kwargs)
 
-    @classmethod
-    def input_ports(cls) -> dict:
-        return {
-            "body1": PortInformation(data_type=list, required=True),
-            "body2": PortInformation(data_type=list, required=True),
-            "allowed": PortInformation(data_type=bool, required=True),
-        }
+    INPUT_PORTS = {
+        "body1": PortInformation(data_type=list, required=True),
+        "body2": PortInformation(data_type=list, required=True),
+        "allowed": PortInformation(data_type=bool, required=True),
+    }
 
-    @classmethod
-    def output_ports(cls) -> dict:
-        return {}
+    OUTPUT_PORTS = {}
 
     def create_request(self) -> SetCollisions.Request:
         return SetCollisions.Request(
