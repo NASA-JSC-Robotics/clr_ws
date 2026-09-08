@@ -6,6 +6,7 @@ params:
 
 # Behavior tree node import locations.
 imports:
+  - imetro_behavior.apriltag_behaviors
   - imetro_behavior.basic_behaviors
   - imetro_behavior.color_behaviors
   - imetro_behavior.control_behaviors
@@ -13,7 +14,6 @@ imports:
   - imetro_behavior.geometry_behaviors
   - imetro_behavior.moveit_behaviors
   - imetro_behavior.ros_behaviors
-  - imetro_behavior.apriltag_detection_behavior
 
 # Paths for which to search for behavior tree XML files.
 tree_search_paths:
