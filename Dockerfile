@@ -37,8 +37,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 # As of 24.04, many Ubuntu modules will check for FIPS kernels and adjust packages accordingly. This
 # can break in the container, which shares a kernel but does not have FIPS packages installed. So
 # in the running image we ensure that SSL at does not cause problems when downloading or making
-# secure connections during the build.
+# secure connections during the build. Also different applications (rosdep) may strip environment
+# variables when running, so we set this globally to ensure it is persisted everywhere.
 ENV OPENSSL_FORCE_FIPS_MODE=0
+RUN echo 'Defaults env_keep += "OPENSSL_FORCE_FIPS_MODE"' | sudo tee /etc/sudoers.d/keep-openssl-fips
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -63,6 +65,21 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     vim \
     xterm \
     wget
+
+# Added to support headless accelerated rendering in the container. For more information see
+# https://bender.jsc.nasa.gov/confluence/spaces/~eholum/pages/325397633/Graphics+Acceleration+with+FastX
+# Add additional logic to make sure we clone the correct version for our CPU.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sudo apt-get -y update && \
+    sudo apt-get install -q -y --no-install-recommends \
+        libxv1 \
+        libglu1-mesa \
+        libegl1
+RUN ARCH=$(dpkg --print-architecture); \
+    wget https://github.com/VirtualGL/virtualgl/releases/download/3.1.3/virtualgl_3.1.3_${ARCH}.deb && \
+    sudo dpkg -i virtualgl_3.1.3_${ARCH}.deb && \
+    rm virtualgl_3.1.3_${ARCH}.deb
 
 # Add a non-root user with provided user details. Some images have a default `ubuntu` user, so we remove it before adding the
 # new one.
@@ -134,11 +151,6 @@ RUN colcon mixin add default \
 RUN colcon metadata add default  \
     https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml && \
     colcon metadata update || true
-
-# Configure pyassimp, which has some unique problems on aarch machines.
-# To address this, we have adjusted the $LD_LIBRARY_PATH in the entrypoint to ensure
-# the required path is available to the python module to load the library.
-RUN pip3 install pyassimp==4.1.3
 
 # copy in configs for different features
 COPY --chown=${USERNAME}:${USERNAME} config/colcon-defaults.yaml /home/${USERNAME}/.colcon/defaults.yaml
