@@ -54,7 +54,11 @@ It also serves an interactive marker workflow for testing.
 To run, bring up the simulation:
 
 ```bash
+# Start the simulation
 ros2 launch clr_mujoco_config clr_mujoco.launch.py
+
+# Add mockups managers for joint state publishing
+ros2 launch clr_imetro_environments mockups_managers.launch.py
 ```
 
 Then launch the planning server and behavior executor:
