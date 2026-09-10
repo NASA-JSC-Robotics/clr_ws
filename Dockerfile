@@ -37,8 +37,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 # As of 24.04, many Ubuntu modules will check for FIPS kernels and adjust packages accordingly. This
 # can break in the container, which shares a kernel but does not have FIPS packages installed. So
 # in the running image we ensure that SSL at does not cause problems when downloading or making
-# secure connections during the build.
+# secure connections during the build. Also different applications (rosdep) may strip environment
+# variables when running, so we set this globally to ensure it is persisted everywhere.
 ENV OPENSSL_FORCE_FIPS_MODE=0
+RUN echo 'Defaults env_keep += "OPENSSL_FORCE_FIPS_MODE"' | sudo tee /etc/sudoers.d/keep-openssl-fips
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
