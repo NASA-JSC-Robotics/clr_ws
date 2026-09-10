@@ -66,6 +66,21 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     xterm \
     wget
 
+# Added to support headless accelerated rendering in the container. For more information see
+# https://bender.jsc.nasa.gov/confluence/spaces/~eholum/pages/325397633/Graphics+Acceleration+with+FastX
+# Add additional logic to make sure we clone the correct version for our CPU.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    sudo apt-get -y update && \
+    sudo apt-get install -q -y --no-install-recommends \
+        libxv1 \
+        libglu1-mesa \
+        libegl1
+RUN ARCH=$(dpkg --print-architecture); \
+    wget https://github.com/VirtualGL/virtualgl/releases/download/3.1.3/virtualgl_3.1.3_${ARCH}.deb && \
+    sudo dpkg -i virtualgl_3.1.3_${ARCH}.deb && \
+    rm virtualgl_3.1.3_${ARCH}.deb
+
 # Add a non-root user with provided user details. Some images have a default `ubuntu` user, so we remove it before adding the
 # new one.
 RUN userdel -r ubuntu 2>/dev/null || true
@@ -136,11 +151,6 @@ RUN colcon mixin add default \
 RUN colcon metadata add default  \
     https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml && \
     colcon metadata update || true
-
-# Configure pyassimp, which has some unique problems on aarch machines.
-# To address this, we have adjusted the $LD_LIBRARY_PATH in the entrypoint to ensure
-# the required path is available to the python module to load the library.
-RUN pip3 install pyassimp==4.1.3
 
 # copy in configs for different features
 COPY --chown=${USERNAME}:${USERNAME} config/colcon-defaults.yaml /home/${USERNAME}/.colcon/defaults.yaml
