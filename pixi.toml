@@ -56,7 +56,10 @@ mold = ">=2.40.4,<3"
 colcon-common-extensions = ">=0.3.0,<0.4"
 colcon-mixin = ">=0.2.3,<0.3"
 pip = "*"
-nanobind = ">=2.8.0,<3"
+nanobind = ">=2.12.0,<3"
+# This is dark but if we don't match the exact version of what was used in
+# core roboplan objects will not be able to be shared in the bindings.
+nanobind-abi = "==20"
 trimesh = ">=4.11.4,<5"
 pycollada = ">=0.9.3,<0.10"
 viser = ">=1.0.29,<2"

@@ -498,7 +498,8 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/mccabe-0.7.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
-      - conda: https://prefix.dev/conda-forge/noarch/nanobind-2.15.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/nanobind-2.14.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/nanobind-abi-20-hd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/packaging-26.3-pyhc364b38_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pip-26.2.1-pyh8b19718_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
@@ -1579,7 +1580,8 @@ environments:
       - conda: https://prefix.dev/conda-forge/noarch/mccabe-0.7.0-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/mdurl-0.1.2-pyhd8ed1ab_1.conda
       - conda: https://prefix.dev/conda-forge/noarch/munkres-1.1.4-pyhd8ed1ab_1.conda
-      - conda: https://prefix.dev/conda-forge/noarch/nanobind-2.15.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/nanobind-2.14.0-pyhd8ed1ab_0.conda
+      - conda: https://prefix.dev/conda-forge/noarch/nanobind-abi-20-hd8ed1ab_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/packaging-26.3-pyhc364b38_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pip-26.2.1-pyh8b19718_0.conda
       - conda: https://prefix.dev/conda-forge/noarch/pluggy-1.6.0-pyhf9edf01_1.conda
@@ -17161,20 +17163,33 @@ packages:
   run_exports: {}
   size: 15851
   timestamp: 1749895533014
-- conda: https://prefix.dev/conda-forge/noarch/nanobind-2.15.0-pyhd8ed1ab_0.conda
-  sha256: dbdf4064834c437ae93d4167e4a75af778dd190a38ff27c9e7d50f1ed049da31
-  md5: c7e124d3d8467cfb19b56a4c29debadb
+- conda: https://prefix.dev/conda-forge/noarch/nanobind-2.14.0-pyhd8ed1ab_0.conda
+  sha256: baa8b844ee6e79ac7441b9c46a63f076adb42d5796f9b87a307192cc9ce99b1b
+  md5: f9e7bd76204794df436a2629c2b79654
   depends:
   - python >=3.10
   constrains:
-  - nanobind-abi ==21
+  - nanobind-abi ==20
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/nanobind?source=compressed-mapping
+  - pkg:pypi/nanobind?source=hash-mapping
   run_exports: {}
-  size: 201639
-  timestamp: 1787688134918
+  size: 200503
+  timestamp: 1786188341808
+- conda: https://prefix.dev/conda-forge/noarch/nanobind-abi-20-hd8ed1ab_0.conda
+  sha256: cc6cd51cc2e70700080b02e886389d8c9b4bd0bd239d8fc0e39032b3206f67dd
+  md5: a46f0816bfaadf91b9fe95912c070a30
+  constrains:
+  - nanobind >=2.4
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  run_exports:
+    weak:
+    - nanobind-abi ==20
+  size: 9245
+  timestamp: 1781788360883
 - conda: https://prefix.dev/conda-forge/noarch/packaging-26.3-pyhc364b38_0.conda
   sha256: c432626b16768b8dab228bfb706f7060c2d462a21c516d240f68f2f902b5a044
   md5: 936687ed80f295a1f5dbcf8bd34c252c
