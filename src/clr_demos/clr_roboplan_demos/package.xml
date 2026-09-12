@@ -11,10 +11,14 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>roboplan</depend>
+  <depend>roboplan_cartesian_planning</depend>
   <depend>roboplan_simple_ik</depend>
   <depend>roboplan_oink</depend>
   <depend>roboplan_rrt</depend>
   <depend>roboplan_toppra</depend>
+  <depend>roboplan_ros_py</depend>
+  <depend>roboplan_ros_cpp</depend>
+  <depend>roboplan_ros_visualization</depend>
   <depend>xacro</depend>
 
   <export>

@@ -32,15 +32,12 @@
 [submodule "src/external/mujoco_ros2_control"]
 	path = src/external/mujoco_ros2_control
 	url = https://github.com/ros-controls/mujoco_ros2_control.git
-[submodule "external/roboplan-ros"]
-	path = src/external/roboplan-ros
-	url = https://github.com/open-planning/roboplan-ros.git
 [submodule "src/external/imetro_behavior"]
 	path = src/external/imetro_behavior
 	url = https://github.com/NASA-JSC-Robotics/imetro_behavior.git
 [submodule "src/external/color_tools"]
 	path = src/external/color_tools
 	url = https://github.com/NASA-JSC-Robotics/color_tools.git
-[submodule "src/external/roboplan"]
-	path = src/external/roboplan
-	url = https://github.com/open-planning/roboplan.git
+[submodule "src/external/roboplan-ros"]
+	path = src/external/roboplan-ros
+	url = https://github.com/open-planning/roboplan-ros.git
