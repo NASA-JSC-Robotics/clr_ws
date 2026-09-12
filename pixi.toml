@@ -119,6 +119,17 @@ ros-jazzy-ur-robot-driver = "*"
 ros-jazzy-velocity-controllers = "*"
 ros-jazzy-xacro = "*"
 
+# RoboPlan dependencies
+ros-jazzy-roboplan = "*"
+ros-jazzy-roboplan-cartesian-planning = "*"
+ros-jazzy-roboplan-oink = "*"
+ros-jazzy-roboplan-ros-cpp = "*"
+ros-jazzy-roboplan-ros-py = "*"
+ros-jazzy-roboplan-ros-visualization = "*"
+ros-jazzy-roboplan-rrt = "*"
+ros-jazzy-roboplan-simple-ik = "*"
+ros-jazzy-roboplan-toppra = "*"
+
 # Dependencies that not available on conda-forge and must be fetched from PyPi.
 # Try not to use this section unless absolutely necessary.
 [pypi-dependencies]
