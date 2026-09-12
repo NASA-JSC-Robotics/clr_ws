@@ -38,3 +38,6 @@
 [submodule "src/external/color_tools"]
 	path = src/external/color_tools
 	url = https://github.com/NASA-JSC-Robotics/color_tools.git
+[submodule "src/external/roboplan-ros"]
+	path = src/external/roboplan-ros
+	url = https://github.com/open-planning/roboplan-ros.git
