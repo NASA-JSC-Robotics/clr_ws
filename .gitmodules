@@ -44,3 +44,6 @@
 [submodule "src/external/roboplan"]
 	path = src/external/roboplan
 	url = https://github.com/open-planning/roboplan.git
+[submodule "src/external/clr_moveit_config"]
+	path = src/external/clr_moveit_config
+	url = https://github.com/NASA-JSC-Robotics/clr_moveit_config.git
