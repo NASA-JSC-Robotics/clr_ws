@@ -521,6 +521,7 @@ class RoboplanPlanningServer(Node):
                 ctx.visualizer,
                 self._traj_marker_pub,
                 ctx.q_indices,
+                clock=self.get_clock(),
             )
             self._group_contexts[group_name] = ctx
             self.get_logger().info(f"Created planning context for group '{group_name}'.")

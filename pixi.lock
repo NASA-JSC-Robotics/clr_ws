@@ -1,19 +1,7 @@
 version: 7
 platforms:
-- name: linux-64-glibc-2-35
-  subdir: linux-64
-  virtual-packages:
-  - __glibc=2.35
-  - __unix=0=0
-  - __linux=4.18
-  - __archspec=0=x86_64
-- name: linux-aarch64-glibc-2-35
-  subdir: linux-aarch64
-  virtual-packages:
-  - __glibc=2.35
-  - __unix=0=0
-  - __linux=4.18
-  - __archspec=0=aarch64
+- name: linux-64
+- name: linux-aarch64
 environments:
   default:
     channels:
@@ -22,7 +10,7 @@ environments:
     indexes:
     - https://pypi.org/simple
     packages:
-      linux-64-glibc-2-35:
+      linux-64:
       - conda: https://prefix.dev/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://prefix.dev/conda-forge/linux-64/alsa-lib-1.2.16.1-h7cc23a3_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/ampl-asl-1.0.0-h5888daf_2.conda
@@ -1087,7 +1075,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/d4/dd/7c0dc064274a717a8f1306428e6c6bd86d8a285b959fea880351bb0f65db/pupil_apriltags-1.0.4.post11-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/de/e4/1ba6f44e491c4eece978685230dde56b14d51a0365bc1b774ddaa94d14cd/pyopengl-3.1.10-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/fd/3c/6a2bf344106328fd04963664a60b9bb6496fc25df8e962fcdc1367285fb9/fsspec-2026.7.0-py3-none-any.whl
-      linux-aarch64-glibc-2-35:
+      linux-aarch64:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/alsa-lib-1.2.16.1-h5bc82ec_1.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/ampl-asl-1.0.0-h5ad3122_2.conda
