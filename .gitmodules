@@ -47,3 +47,6 @@
 [submodule "src/external/clr_moveit_config"]
 	path = src/external/clr_moveit_config
 	url = https://github.com/NASA-JSC-Robotics/clr_moveit_config.git
+[submodule "src/external/realsense-ros"]
+	path = src/external/realsense-ros
+	url = https://github.com/NASA-JSC-Robotics/realsense-ros.git
