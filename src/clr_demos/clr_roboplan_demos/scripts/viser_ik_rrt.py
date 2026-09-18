@@ -18,6 +18,7 @@ from roboplan.core import (
     PathShortcutter,
     PathShortcuttingOptions,
     Scene,
+    UrdfSceneDescription,
 )
 from roboplan.rrt import RRTOptions, RRT, visualizeTree
 from roboplan.simple_ik import SimpleIkOptions, SimpleIk
@@ -109,8 +110,7 @@ def main(
     ]
     scene = Scene(
         "test_scene",
-        urdf=urdf_xml,
-        srdf=srdf_xml,
+        description=UrdfSceneDescription(urdf_xml, srdf_xml),
         package_paths=package_paths,
         yaml_config_path=yaml_config_path,
     )

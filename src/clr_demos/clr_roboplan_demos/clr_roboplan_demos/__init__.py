@@ -35,7 +35,7 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 
-from roboplan.core import Scene
+from roboplan.core import Scene, UrdfSceneDescription
 
 
 BEST_EFFORT_QOS = QoSProfile(
@@ -148,8 +148,7 @@ def create_scene(urdf_xml=None):
 
     scene = Scene(
         name="clr_scene",
-        urdf=urdf_xml,
-        srdf=srdf_xml,
+        description=UrdfSceneDescription(urdf_xml, srdf_xml),
         package_paths=package_paths,
         yaml_config_path=yaml_config_path,
     )
