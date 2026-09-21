@@ -18,7 +18,8 @@ from roboplan.core import (
     PathShortcutter,
     PathShortcuttingOptions,
     Scene,
-    UrdfSceneDescription,
+    loadJointLimitsConfig,
+    loadUrdfSceneDescriptionFromXml,
 )
 from roboplan.rrt import RRTOptions, RRT, visualizeTree
 from roboplan.simple_ik import SimpleIkOptions, SimpleIk
@@ -110,10 +111,10 @@ def main(
     ]
     scene = Scene(
         "test_scene",
-        description=UrdfSceneDescription(urdf_xml, srdf_xml),
-        package_paths=package_paths,
-        yaml_config_path=yaml_config_path,
+        description=loadUrdfSceneDescriptionFromXml(urdf_xml, package_paths),
     )
+    scene.importJointLimitsFromConfig(loadJointLimitsConfig(yaml_config_path))
+    scene.importSrdf(srdf_xml)
 
     group_name = "clr"
     tip_link = "grasp_frame"
