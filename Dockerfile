@@ -145,6 +145,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY --chown=${USERNAME}:${USERNAME} src/ src/
 
 # Setup colcon default mixins and add default settings
+RUN touch /home/${USERNAME}/.netrc
 RUN colcon mixin add default \
     https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
     colcon mixin update || true

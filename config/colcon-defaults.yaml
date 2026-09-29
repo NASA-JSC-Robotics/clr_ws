@@ -5,8 +5,6 @@ build:
     - build-testing-on
     - ccache
     - compile-commands
-  packages-ignore:
-    - btcpp_ros2_samples
 test:
   event-handlers:
     - console_direct+

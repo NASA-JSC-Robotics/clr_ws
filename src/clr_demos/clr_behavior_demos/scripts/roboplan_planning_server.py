@@ -521,6 +521,7 @@ class RoboplanPlanningServer(Node):
                 ctx.visualizer,
                 self._traj_marker_pub,
                 ctx.q_indices,
+                clock=self.get_clock(),
             )
             self._group_contexts[group_name] = ctx
             self.get_logger().info(f"Created planning context for group '{group_name}'.")
@@ -865,11 +866,21 @@ class RoboplanPlanningServer(Node):
                 f"Planned Cartesian trajectory through {len(target_poses)} pose(s) " f"({len(traj.positions)} points)"
             )
 
+    def _stop_previews(self):
+        """
+        Stops every group's trajectory playback. Each planning context owns its
+        own player, so a preview started for one group would otherwise keep
+        publishing on the shared marker topic underneath the next group's preview.
+        """
+        for ctx in self._group_contexts.values():
+            ctx.player.stop()
+
     def _preview(self):
         if self._planned_traj is None:
             return False, "No trajectory to preview. Plan first."
 
         self.get_logger().info("Previewing trajectory...")
+        self._stop_previews()
         self._planned_ctx.player.play(
             self._planned_traj,
             self._traj_dt,
@@ -936,6 +947,7 @@ class RoboplanPlanningServer(Node):
             self._target_marker_pose = None
             self._planned_traj = None
             self._planned_ctx = None
+            self._stop_previews()
             self._traj_marker_pub.publish(self._default_ctx.visualizer.clear_markers())
             delete_marker = Marker()
             delete_marker.header.frame_id = "world"

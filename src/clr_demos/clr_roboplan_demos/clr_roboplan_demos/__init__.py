@@ -35,7 +35,7 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 
-from roboplan.core import Scene
+from roboplan.core import Scene, loadJointLimitsConfig, loadUrdfSceneDescriptionFromXml
 
 
 BEST_EFFORT_QOS = QoSProfile(
@@ -148,9 +148,8 @@ def create_scene(urdf_xml=None):
 
     scene = Scene(
         name="clr_scene",
-        urdf=urdf_xml,
-        srdf=srdf_xml,
-        package_paths=package_paths,
-        yaml_config_path=yaml_config_path,
+        description=loadUrdfSceneDescriptionFromXml(urdf_xml, package_paths),
     )
+    scene.importJointLimitsFromConfig(loadJointLimitsConfig(yaml_config_path))
+    scene.importSrdf(srdf_xml)
     return scene, urdf_xml, package_paths

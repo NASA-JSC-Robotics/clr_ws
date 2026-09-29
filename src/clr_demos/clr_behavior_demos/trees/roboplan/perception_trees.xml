@@ -8,13 +8,11 @@
         camera_info_topic="/wrist_mounted_camera/color/camera_info"
         rgb_image_topic="/wrist_mounted_camera/color/image_raw"
         depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
-        point_cloud_topic="/wrist_mounted_camera/depth/color/points"
         time_slop="0.1"
         sync_timeout="3.0"
         camera_info="{camera_info}"
         rgb_image="{rgb_image}"
         depth_image="{depth_image}"
-        point_cloud="{point_cloud}"
       />
       <DetectColorBlobs
         name="detect_color_blobs"

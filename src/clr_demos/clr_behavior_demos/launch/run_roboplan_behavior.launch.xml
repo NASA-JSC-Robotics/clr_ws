@@ -1,16 +1,19 @@
 <launch>
   <!-- Launch arguments -->
   <arg name="robot" default="clr" description="Robot configuration for the RoboPlan planning server." />
+  <arg name="use_sim_time" default="false" description="Whether or not to use the simulated clock." />
 
   <!-- The RoboPlan planning server. Note that the node is not renamed here since the process
        spawns several helper nodes; a launch-level name would collide them all. -->
   <node pkg="clr_behavior_demos" exec="roboplan_planning_server.py" output="screen">
     <param name="robot" value="$(var robot)" />
+    <param name="use_sim_time" value="$(var use_sim_time)" />
   </node>
 
   <!-- The main behavior tree executor -->
   <node pkg="imetro_behavior" exec="run_behavior.py" name="behavior_node" output="screen">
     <param name="behavior_config" value="$(find-pkg-share clr_behavior_demos)/config/clr_roboplan_behavior_config.yaml" />
+    <param name="use_sim_time" value="$(var use_sim_time)" />
   </node>
 
 </launch>
