@@ -1,0 +1,11 @@
+<library path="clr_mujoco_plugins">
+  <class name="clr_mujoco_plugins/JointLimitMonitorPlugin"
+         type="clr_mujoco_plugins::JointLimitMonitorPlugin"
+         base_class_type="mujoco_ros2_control_plugins::MuJoCoROS2ControlPluginBase">
+    <description>
+      Monitors a configurable set of joints for position, velocity, and acceleration limit
+      violations sustained over a time horizon, and publishes a latched string report listing
+      every joint and limit that has been violated.
+    </description>
+  </class>
+</library>
