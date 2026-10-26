@@ -1,5 +1,4 @@
 [workspace]
-# Update the workspace name accordingly
 name = "clr_ws"
 authors = ["Erik Holum <erik.holum@nasa.gov>"]
 channels = [
@@ -8,17 +7,17 @@ channels = [
 ]
 # If building robostack packages locally be sure to only target the build you care about.
 # For CI we are only looking at linux-64
-platforms = ["linux-aarch64", "linux-64"]
+platforms = [
+  # Needed for realsense
+  { platform = "linux-aarch64", glibc = "2.35" },
+  { platform = "linux-64", glibc = "2.35" },
+]
 version = "0.1.0"
 preview = ["pixi-build"]
 
 [activation]
 # Sources the workspace install, if present
 scripts = ["scripts/entrypoint_pixi.sh"]
-
-[system-requirements]
-# Needed for realsense
-libc = { family = "glibc", version = "2.35" }
 
 [activation.env]
 LIBRARY_PATH = "${CONDA_PREFIX}/lib:${LIBRARY_PATH}"
@@ -98,7 +97,8 @@ ros-jazzy-moveit-ros-control-interface = "*"
 ros-jazzy-moveit-ros-planning-interface = "*"
 ros-jazzy-moveit-ros-visualization = "*"
 ros-jazzy-moveit-visual-tools = "*"
-ros-jazzy-mujoco-vendor = "*"
+# Temp, building mujoco vendor from source for now
+# ros-jazzy-mujoco-vendor = "*"
 ros-jazzy-nav2-msgs = "*"
 ros-jazzy-pilz-industrial-motion-planner = "*"
 ros-jazzy-pinocchio = "*"

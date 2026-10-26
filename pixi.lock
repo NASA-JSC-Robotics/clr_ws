@@ -208,7 +208,6 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-64/libllvm22-22.1.8-h474f4eb_3.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libllvm23-23.1.2-h474f4eb_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/liblzma-5.8.3-hb03c661_1.conda
-      - conda: https://prefix.dev/conda-forge/linux-64/libmujoco-3.10.0-h70afa4a_0.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libnghttp2-1.68.1-h74cf4be_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libnsl-2.0.1-hb9d3cd8_1.conda
       - conda: https://prefix.dev/conda-forge/linux-64/libntlm-1.8-hb9d3cd8_0.conda
@@ -626,7 +625,6 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-moveit-ros-planning-interface-2.12.4-hb0f4dca_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-moveit-ros-visualization-2.12.4-hb0f4dca_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-moveit-visual-tools-4.2.0-hb0f4dca_21.conda
-      - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-mujoco-vendor-0.0.9-np2py312h5433874_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-nav-msgs-5.3.8-np2py312h2ed9cc7_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-nav2-msgs-1.3.12-np2py312h2ed9cc7_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-object-recognition-msgs-2.0.0-np2py312h2ed9cc7_21.conda
@@ -1267,7 +1265,6 @@ environments:
       - conda: https://prefix.dev/conda-forge/linux-aarch64/libllvm22-22.1.8-h680871c_3.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/libllvm23-23.1.2-h680871c_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/liblzma-5.8.3-he30d5cf_1.conda
-      - conda: https://prefix.dev/conda-forge/linux-aarch64/libmujoco-3.10.0-h6d48cf8_0.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/libnghttp2-1.68.1-ha4b982d_1.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/libnsl-2.0.1-h86ecc28_1.conda
       - conda: https://prefix.dev/conda-forge/linux-aarch64/libntlm-1.4-hf897c2e_1002.tar.bz2
@@ -1680,7 +1677,6 @@ environments:
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-moveit-ros-planning-interface-2.12.4-he8cfe8b_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-moveit-ros-visualization-2.12.4-he8cfe8b_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-moveit-visual-tools-4.2.0-he8cfe8b_21.conda
-      - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-mujoco-vendor-0.0.9-np2py312h0b6b2e6_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-nav-msgs-5.3.8-np2py312h61f2ce4_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-nav2-msgs-1.3.12-np2py312h61f2ce4_21.conda
       - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-object-recognition-msgs-2.0.0-np2py312h61f2ce4_21.conda
@@ -5459,31 +5455,6 @@ packages:
     - liblzma >=5.8.3,<6.0a0
   size: 112995
   timestamp: 1786348617826
-- conda: https://prefix.dev/conda-forge/linux-64/libmujoco-3.10.0-h70afa4a_0.conda
-  sha256: 6431bf092279ccd3fb27c86efe8a5f4b2d898251540b11a7016a699646f3829a
-  md5: fa65c089ed007604ad629460393f7f79
-  depends:
-  - libgl-devel
-  - libstdcxx >=14
-  - libgcc >=14
-  - __glibc >=2.17,<3.0.a0
-  - tinyxml2 >=11.0.0,<11.1.0a0
-  - qhull >=2020.2,<2020.3.0a0
-  - libtinyobjloader ==2.0.0rc13
-  - lodepng >=20220109,<20220110.0a0
-  - libgl >=1.7.0,<2.0a0
-  - glfw >=3.4,<4.0a0
-  - libccd-double >=2.1,<2.2.0a0
-  constrains:
-  - mujoco-cxx <0
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  run_exports:
-    weak:
-    - libmujoco >=3.10.0,<3.10.1.0a0
-  size: 11342631
-  timestamp: 1782162652244
 - conda: https://prefix.dev/conda-forge/linux-64/libnghttp2-1.68.1-h74cf4be_1.conda
   sha256: 11a2f54a6f391e25738bce0023e6ef499600147bbcf21c1fa69d2e251b03cc6a
   md5: 75d211f04ac87506f1f43420712a69fe
@@ -12260,30 +12231,6 @@ packages:
     - liblzma >=5.8.3,<6.0a0
   size: 125578
   timestamp: 1786348561649
-- conda: https://prefix.dev/conda-forge/linux-aarch64/libmujoco-3.10.0-h6d48cf8_0.conda
-  sha256: 3a0118a45947a5879d7c3449774e1ac1123977ea31e4cf18d40f768d1b410c29
-  md5: 640f44dad9f6668f0d2a7a23d304b51a
-  depends:
-  - libgl-devel
-  - libstdcxx >=14
-  - libgcc >=14
-  - libgl >=1.7.0,<2.0a0
-  - libtinyobjloader ==2.0.0rc13
-  - tinyxml2 >=11.0.0,<11.1.0a0
-  - libccd-double >=2.1,<2.2.0a0
-  - qhull >=2020.2,<2020.3.0a0
-  - lodepng >=20220109,<20220110.0a0
-  - glfw >=3.4,<4.0a0
-  constrains:
-  - mujoco-cxx <0
-  license: Apache-2.0
-  license_family: APACHE
-  purls: []
-  run_exports:
-    weak:
-    - libmujoco >=3.10.0,<3.10.1.0a0
-  size: 11281383
-  timestamp: 1782162696995
 - conda: https://prefix.dev/conda-forge/linux-aarch64/libnghttp2-1.68.1-ha4b982d_1.conda
   sha256: 0c28d734512fa2c66a232b2f3968eae7124dbd6ad42c594c752f1d08dfb86195
   md5: ff4b2b7c169c438bf648fb14f369c3b9
@@ -19021,25 +18968,6 @@ packages:
   run_exports: {}
   size: 2063
   timestamp: 1788272588942
-- conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-mujoco-vendor-0.0.9-np2py312h5433874_21.conda
-  sha256: 98d7fe03650c712c064f52fc0557248898c24e236cadb6f7dee91d543cb30712
-  md5: cf5861b6ff2d13a4609d0284b940036a
-  depends:
-  - python
-  - ros-jazzy-ros-workspace
-  - ros2-distro-mutex 0.16.* jazzy_*
-  - libgcc >=14
-  - libstdcxx >=14
-  - __glibc >=2.17,<3.0.a0
-  - glfw >=3.5.1,<4.0a0
-  - ros2-distro-mutex >=0.16.0,<0.17.0a0
-  - numpy >=1.25,<3
-  - python_abi 3.12.* *_cp312
-  - libmujoco >=3.10.0,<3.10.1.0a0
-  license: Apache-2.0
-  run_exports: {}
-  size: 27494
-  timestamp: 1788189336162
 - conda: https://prefix.dev/robostack-jazzy/linux-64/ros-jazzy-nav-msgs-5.3.8-np2py312h2ed9cc7_21.conda
   sha256: 59f8685466978b5e27adc14d556e2a8d12f0cf8ee6440d3ae9da054511343431
   md5: 9a6bad876d3b0c31794677e7afcc2f34
@@ -30412,24 +30340,6 @@ packages:
   run_exports: {}
   size: 2065
   timestamp: 1788274370471
-- conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-mujoco-vendor-0.0.9-np2py312h0b6b2e6_21.conda
-  sha256: 10cfc78308ca52b6dda99e7563829a3cecbec40fa0a0128e768ec65cfb105944
-  md5: 4de4c237c360e478da51ab61b30e051b
-  depends:
-  - python
-  - ros-jazzy-ros-workspace
-  - ros2-distro-mutex 0.16.* jazzy_*
-  - libstdcxx >=14
-  - libgcc >=14
-  - libmujoco >=3.10.0,<3.10.1.0a0
-  - ros2-distro-mutex >=0.16.0,<0.17.0a0
-  - numpy >=1.25,<3
-  - python_abi 3.12.* *_cp312
-  - glfw >=3.5.1,<4.0a0
-  license: Apache-2.0
-  run_exports: {}
-  size: 27418
-  timestamp: 1788189590486
 - conda: https://prefix.dev/robostack-jazzy/linux-aarch64/ros-jazzy-nav-msgs-5.3.8-np2py312h61f2ce4_21.conda
   sha256: 4b5decbd8f10267b8ea9150f46ad3a635eed1a86073f6c8751a91afe3122b9b9
   md5: 537b869203b99b2f49f4dd1b957e80c8
