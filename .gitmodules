@@ -48,6 +48,3 @@
 	path = src/external/clr_moveit_config
 	url = https://github.com/NASA-JSC-Robotics/clr_moveit_config.git
 # TODO: Reset once mujoco_vendor is released (again)
-[submodule "src/external/mujoco_vendor"]
-	path = src/external/mujoco_vendor
-	url = https://github.com/eholum-nasa/mujoco_vendor.git
