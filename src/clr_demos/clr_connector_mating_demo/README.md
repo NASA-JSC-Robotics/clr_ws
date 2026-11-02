@@ -1,32 +1,33 @@
 # CLR Connector Mating Demo
 
-This contains PyTrees based behavior demonstrations.
+A peg-in-hole demo for CLR built on PyTrees behavior trees (`imetro_behavior`), RoboPlan motion planning, and compliant insertion with the stock ros2_controllers admittance controller pair the CLR stack already loads.
 
-To run examples, first set up the simulation:
+The simulated scene adds a connector receptacle with an AprilTag next to the express rack.
+A chamfered cylindrical peg is held in the CLR gripper.
+The `peg_tip` frame at the end of the peg is the planning and control tip link.
+
+## Running
+
+Start the simulation.
 
 ```bash
 ros2 launch clr_connector_mating_demo clr_connector_demo_mujoco.launch.py
-
-ros2 launch clr_moveit_config clr_moveit.launch.py use_sim_time:=true
 ```
 
-(Optional but recommended) Bring up the PyTrees viewer:
-
-```bash
-py-trees-tree-viewer
-```
-
-You can run some examples by specifying trees from the `trees` subfolder of this package.
-For example:
+Launch the RoboPlan planning server (planning for `peg_tip`) and the behavior executor:
 
 ```bash
 ros2 launch clr_connector_mating_demo clr_connector_mating_demo.launch.xml
 ```
 
-By default, `gui:=true`, this will start a GUI for trajectory previewing and stopping.
-Set this to false if you don't need to preview any trajectories.
+(Optional) Visualize with RViz using the `clr_roboplan_demos` config, and bring up the PyTrees viewer:
 
-Then, send an action goal with the desired behavior name.
+```bash
+rviz2 -d $(ros2 pkg prefix --share clr_roboplan_demos)/config/clr_roboplan_config.rviz
+py-trees-tree-viewer
+```
+
+Then run the demo tree:
 
 ```bash
 ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehavior '{tree_file_name: connector_mate}'

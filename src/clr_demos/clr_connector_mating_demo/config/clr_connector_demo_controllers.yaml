@@ -1,0 +1,50 @@
+# Extra controller manager / MuJoCo parameters for the connector mating demo sim.
+#
+# clr_deploy's control.launch.py accepts a single extra parameters file, so this
+# file carries both the MuJoCo plugin configuration (the camera block is copied
+# from clr_mujoco_config/config/mujoco_plugins.yaml) and the demo's overrides
+# for the stock ros2_controllers admittance controller pair that the CLR stack
+# already loads inactive (admittance_controller + admittance_joint_trajectory_controller,
+# see chonkur_deploy/config/ur10e_controllers.yaml).
+/**:
+  ros__parameters:
+    mujoco_plugins:
+      mujoco_camera_plugin:
+        type: "mujoco_ros2_control_plugins/CameraPlugin"
+        camera_publish_rate: 2.0
+        $(var tf_prefix)wrist_mounted_camera:
+          frame_name: $(var tf_prefix)wrist_mounted_camera_color_optical_frame
+          info_topic: /$(var tf_prefix)wrist_mounted_camera/color/camera_info
+          image_topic: /$(var tf_prefix)wrist_mounted_camera/color/image_raw
+          depth_topic: /$(var tf_prefix)wrist_mounted_camera/aligned_depth_to_color/image_raw
+        $(var tf_prefix)lift_camera:
+          frame_name: $(var tf_prefix)lift_camera_color_optical_frame
+          info_topic: /$(var tf_prefix)lift_camera/color/camera_info
+          image_topic: /$(var tf_prefix)lift_camera/color/image_raw
+          depth_topic: /$(var tf_prefix)lift_camera/aligned_depth_to_color/image_raw
+
+      # Removes the weight of everything past the wrist (wrist_3_link, gripper, camera,
+      # peg: 2.66 kg) from the simulated force/torque sensor, like the payload setting on
+      # a real UR. The admittance controller reads the sensor straight from the hardware
+      # interface, so without this it would treat the tool weight as a contact force.
+      # Mass and center of gravity were computed from the URDF inertials (tool0 frame).
+      fts_grav_comp_plugin:
+        type: "mujoco_ros2_control_plugins/FtsGravCompPlugin"
+        $(var tf_prefix)tcp_fts_sensor:
+          frame_id: $(var tf_prefix)tool0
+          CoG:
+            mass: 2.6645
+            pos: [0.0004, 0.0022, 0.0688]
+
+  # Admittance control for the peg. The stock tuning is kept as is.
+  # Only the kinematic chain is extended to the peg tip for admittance controller,
+  # and all axes are enabled, which the stock config leaves off.
+  admittance_controller:
+    ros__parameters:
+      kinematics:
+        tip: $(var tf_prefix)peg_tip
+      control:
+        frame:
+          id: $(var tf_prefix)peg_tip
+      admittance:
+        selected_axes: [true, true, true, true, true, true]

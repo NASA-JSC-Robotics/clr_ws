@@ -65,8 +65,6 @@ def generate_launch_description():
     headless = LaunchConfiguration("headless")
     model_env = LaunchConfiguration("model_env")
 
-    clr_mujoco_package_for_config = "clr_mujoco_config"
-
     generate_mjcf = include_launch_file(
         package_name="clr_connector_mating_demo",
         launch_file="generate_clr_mjcf.launch.py",
@@ -88,8 +86,10 @@ def generate_launch_description():
         model_env,
     ]
 
+    # MuJoCo plugins (cameras, force/torque gravity compensation) plus the demo's
+    # overrides for the stock admittance controller pair the CLR stack loads.
     extra_controller_params_file = PathJoinSubstitution(
-        [FindPackageShare(clr_mujoco_package_for_config), "config", "mujoco_plugins.yaml"]
+        [FindPackageShare("clr_connector_mating_demo"), "config", "clr_connector_demo_controllers.yaml"]
     )
 
     clr_launch = include_launch_file(

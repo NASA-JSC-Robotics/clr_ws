@@ -70,9 +70,12 @@ from clr_behavior_demos_msgs.srv import (
 from roboplan.core import (
     CartesianConfiguration,
     CartesianPath,
+    ConstraintProjector,
+    ConstraintProjectorOptions,
     JointConfiguration,
     PathShortcuttingOptions,
     PathShortcutter,
+    PoseConstraint,
 )
 from roboplan.cartesian_planning import (
     CartesianPathPlanner,
@@ -80,13 +83,7 @@ from roboplan.cartesian_planning import (
     CartesianSpeedMode,
 )
 from roboplan.simple_ik import SimpleIk, SimpleIkOptions
-from roboplan.rrt import (
-    ConstraintProjector,
-    ConstraintProjectorOptions,
-    PoseConstraint,
-    RRT,
-    RRTOptions,
-)
+from roboplan.rrt import RRT, RRTOptions
 from roboplan.toppra import PathParameterizerTOPPRA, SplineFittingMode, TOPPRAOptions
 from roboplan_ros.visualization import RoboplanVisualizer, RoboplanIKMarker, markerFromJointTrajectory
 from roboplan_ros.cpp import (
@@ -192,6 +189,11 @@ class RoboplanPlanningServer(Node):
         # used for the interactive marker workflow.
         self.declare_parameter("planning_groups", ["clr", "ur_manipulator", "chonkur_grasp", "rail", "lift"])
 
+        # Optionally override the robot config's tip link, e.g., to plan for a
+        # tool attached to the gripper. Must be a frame downstream of the
+        # planning groups' chains.
+        self.declare_parameter("tip_link", "")
+
         # Scene loading parameters.
         self.declare_parameter("robot_description_topic", "/robot_description")
         self.declare_parameter("robot_description_timeout", 10.0)
@@ -216,8 +218,9 @@ class RoboplanPlanningServer(Node):
         self.declare_parameter("max_angular_speed", 0.5)
         self.declare_parameter("max_linear_acceleration", 0.5)
         self.declare_parameter("max_angular_acceleration", 2.5)
-        self.declare_parameter("max_position_error", 0.02)
-        self.declare_parameter("max_orientation_error", 0.2)
+        # Tracking tolerances (meters, radians) for the Cartesian path follower.
+        self.declare_parameter("cartesian_position_tolerance", 0.005)
+        self.declare_parameter("cartesian_orientation_tolerance", 0.01)
 
         # Scene setup. Prefer the URDF from the robot description topic so the
         # planning scene always matches what the robot is actually running,
@@ -235,7 +238,8 @@ class RoboplanPlanningServer(Node):
 
         self._joint_group = self._config.joint_group
         self._base_link = self._config.base_link
-        self._tip_link = self._config.tip_link
+        self._tip_link = self.get_parameter("tip_link").value or self._config.tip_link
+        self.get_logger().info(f"Planning for tip link '{self._tip_link}' relative to '{self._base_link}'.")
         self._traj_dt = 0.01
         self._include_shortcutting = True
         self._max_shortcutting_iters = 250
@@ -792,8 +796,21 @@ class RoboplanPlanningServer(Node):
                 ctx, q_target_full, velocity_scaling, acceleration_scaling, constrain_gripper_top_down
             )
 
-    def _plan_cartesian(self, group_name, target_poses, max_linear_speed=0.0, max_angular_speed=0.0):
-        """Plans a straight-line Cartesian motion through one or more target poses."""
+    def _plan_cartesian(
+        self,
+        group_name,
+        target_poses,
+        max_linear_speed=0.0,
+        max_angular_speed=0.0,
+        start_joint_names=(),
+        start_positions=(),
+    ):
+        """
+        Plans a straight-line Cartesian motion through one or more target poses.
+
+        The motion starts from the measured joint states, with any joints in
+        start_joint_names overridden by the matching start_positions.
+        """
         ctx, error = self._get_group_context(group_name)
         if ctx is None:
             return False, error
@@ -806,7 +823,15 @@ class RoboplanPlanningServer(Node):
             return False, "At least one target pose is required."
 
         with self._planning_lock:
-            q_start_full = self._nudge_within_limits(ctx, self._sync_to_hardware())
+            q_start_full = self._sync_to_hardware()
+            if len(start_joint_names) != len(start_positions):
+                return False, "start_joint_names and start_positions must have the same length."
+            if len(start_joint_names) > 0:
+                try:
+                    q_start_full[self._scene.getJointPositionIndices(list(start_joint_names))] = start_positions
+                except (RuntimeError, ValueError) as e:
+                    return False, f"Invalid start configuration: {e}"
+            q_start_full = self._nudge_within_limits(ctx, q_start_full)
 
             base_T_start = self._scene.forwardKinematics(q_start_full, self._tip_link, self._base_link)
             poses = [base_T_start]
@@ -842,8 +867,8 @@ class RoboplanPlanningServer(Node):
                 ),
                 max_linear_acceleration=self.get_parameter("max_linear_acceleration").value,
                 max_angular_acceleration=self.get_parameter("max_angular_acceleration").value,
-                max_position_error=self.get_parameter("max_position_error").value,
-                max_orientation_error=self.get_parameter("max_orientation_error").value,
+                position_tolerance=self.get_parameter("cartesian_position_tolerance").value,
+                orientation_tolerance=self.get_parameter("cartesian_orientation_tolerance").value,
                 orientation_cost=0.1,
             )
             planner = CartesianPathPlanner(self._scene, options)
@@ -1027,6 +1052,8 @@ class RoboplanPlanningServer(Node):
                 list(request.target_poses),
                 request.max_linear_speed,
                 request.max_angular_speed,
+                request.start_joint_names,
+                request.start_positions,
             )
             if response.success:
                 response.trajectory = self._to_ros_trajectory(self._planned_traj)
