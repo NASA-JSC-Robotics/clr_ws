@@ -72,6 +72,7 @@ libopencv = { version = ">=4.12.0,<5", build = "qt6*" }  # Ensure we aren't inst
 py-opencv = { version = ">=4.12.0,<5", build = "qt6*" }
 setuptools = "<80"  # Newer versions break colcon symlink installs
 librealsense = ">=2.57.7,<3"
+libtoppra = ">=0.6.10,<0.7"
 
 # ROS dependencies
 ros-jazzy-ros-base = "*"
