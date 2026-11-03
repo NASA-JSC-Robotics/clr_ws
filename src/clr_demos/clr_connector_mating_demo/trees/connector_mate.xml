@@ -57,6 +57,15 @@
         allowed="true"
       />
 
+      <!-- A run that failed mid-insertion leaves the insertion contact allowed. -->
+      <SetAllowedCollisions
+        name="check_peg_contact"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link;finger_1_link;finger_2_link"
+        body2="receptacle;door;receptacle;receptacle"
+        allowed="false"
+      />
+
       <SubTree ID="MoveToJointState"
         name="MoveToViewAprilTag"
         group_name="clr"
@@ -168,6 +177,17 @@
       />
       <WaitForDuration name="wait_for_controller_to_settle" duration_sec="0.5" />
 
+      <!-- The commanded insertion ends past the bore floor, where the peg collides with the
+           receptacle and the door behind it, and the closed fingers reach the receptacle face.
+           Only allow that contact for this motion, so the free-space moves still avoid it. -->
+      <SetAllowedCollisions
+        name="allow_peg_contact"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link;finger_1_link;finger_2_link"
+        body2="receptacle;door;receptacle;receptacle"
+        allowed="true"
+      />
+
       <SubTree ID="MoveToPoseWithAdmittance"
         name="InsertPeg"
         target_poses="{inserted_pose}"
@@ -198,6 +218,14 @@
         name="RetractPeg"
         target_poses="{retract_pose}"
         start_trajectory="{insertion_trajectory}"
+      />
+
+      <SetAllowedCollisions
+        name="restore_peg_contact_checking"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link;finger_1_link;finger_2_link"
+        body2="receptacle;door;receptacle;receptacle"
+        allowed="false"
       />
 
       <SwitchRosControllers
