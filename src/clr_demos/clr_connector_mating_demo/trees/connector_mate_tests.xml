@@ -71,6 +71,24 @@
        and it goes to the pose without the target offset. A tilted target would rotate a peg that is in the bore. -->
   <BehaviorTree ID="RecoverPeg">
     <Sequence name="Sequence">
+      <!-- Resets the admittance controllers to the measured pose and lets the arm settle before planning.
+           An abort makes the arm move suddenly, so a plan from that moment would start from a stale pose. -->
+      <SwitchRosControllers
+        name="hold_with_clr_joint_trajectory_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="clr_joint_trajectory_controller"
+        deactivate_controllers="admittance_joint_trajectory_controller, admittance_controller"
+      />
+      <WaitForDuration name="wait_for_arm_to_settle" duration_sec="1.0" />
+      <SwitchRosControllers
+        name="enable_admittance_controllers"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="admittance_controller, admittance_joint_trajectory_controller"
+        deactivate_controllers="clr_joint_trajectory_controller"
+      />
+      <WaitForDuration name="wait_for_controller_to_settle" duration_sec="0.5" />
       <SubTree ID="MoveToPoseWithAdmittance"
         name="RetractPeg"
         target_poses="{retract_pose}"
