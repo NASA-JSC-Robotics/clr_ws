@@ -22,7 +22,7 @@
     parent
     *origin
     radius:=0.022
-    length:=0.157
+    length:=0.185
     mass:=0.3">
 
     <material name="${prefix}peg_orange">

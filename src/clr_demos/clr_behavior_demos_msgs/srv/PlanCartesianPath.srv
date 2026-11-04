@@ -17,10 +17,9 @@ geometry_msgs/PoseStamped[] target_poses
 float64 max_linear_speed
 float64 max_angular_speed
 
-# Optional configuration to start from instead of the measured joint states, for
-# continuing from a controller's commanded position when it differs from the
-# measured one (e.g. under compliant control). Joints not listed keep their
-# measured positions. Empty means start from the measured joint states.
+# Optional configuration to start from instead of the measured joint states, for continuing
+# from a controller's commanded position when it differs from the measured one.
+# Joints not listed keep their measured positions. Empty means start from the measured joint states.
 string[] start_joint_names
 float64[] start_positions
 

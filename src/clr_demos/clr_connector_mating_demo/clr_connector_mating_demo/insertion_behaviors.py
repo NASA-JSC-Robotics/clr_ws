@@ -39,17 +39,15 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
     until the timeout elapses, then reports how close the frame got. Useful for
     compliant motions, where the commanded pose is not necessarily reached.
 
-    By default the behavior succeeds either way and simply logs the residual
-    error (and writes it to the output ports); set `fail_on_timeout` to make a
-    missed target a FAILURE instead.
+    By default the behavior succeeds either way and simply outputs the residual
+    error; set `fail_on_timeout` to make a missed target return FAILURE instead.
 
-    Optionally it also watches a force/torque wrench topic and finishes as soon
-    as the measured force exceeds `contact_force_threshold`, which is how a
-    target commanded past a surface (e.g. the bottom of a bore) is detected as
-    reached. The `contact` output port reports whether that happened.
+    Optionally it also watches a force/torque wrench topic and finishes when
+    the measured force exceeds `contact_force_threshold`.
+    The `contact` output port reports whether that happened.
 
     Constructor arguments:
-        frame: The TF frame to track, e.g. the tool tip.
+        frame: The TF frame to track, e.g., the tool tip.
         position_tolerance: Allowed position error, in meters.
         orientation_tolerance: Allowed orientation error, in radians.
         timeout: Seconds to wait for the frame to arrive.
@@ -57,8 +55,8 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         fail_on_timeout: Whether missing the target within the timeout is a failure.
         wrench_topic: WrenchStamped topic to watch for contact (empty disables it).
         contact_force_threshold: Force magnitude, in newtons, that counts as contact.
-        contact_force_axis: Sensor-frame axis ("x", "y" or "z") whose force component is
-            compared against the threshold; empty uses the force norm.
+        contact_force_axis: Sensor-frame direction whose force component is compared against
+            the threshold, e.g., [0.0, 0.0, 1.0]; if not specified, uses the force norm.
     """
 
     def __init__(
@@ -73,7 +71,7 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         fail_on_timeout: bool = False,
         wrench_topic: str = "",
         contact_force_threshold: float = 0.0,
-        contact_force_axis: str = "",
+        contact_force_axis: list[float] | None = None,
         **kwargs: Any,
     ):
         super().__init__(name, **kwargs)
@@ -85,11 +83,14 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         self.fail_on_timeout = fail_on_timeout
         self.wrench_topic = wrench_topic
         self.contact_force_threshold = contact_force_threshold
-        self.contact_force_axis = contact_force_axis
+        self.contact_force_axis = None
+        if contact_force_axis is not None:
+            axis = np.array(contact_force_axis, dtype=float)
+            if axis.shape != (3,) or not np.any(axis):
+                raise ValueError(f"'{name}': contact_force_axis must be a nonzero 3-vector.")
+            self.contact_force_axis = axis / np.linalg.norm(axis)
         if self.contact_force_threshold > 0.0 and not self.wrench_topic:
             raise ValueError(f"'{name}': contact detection requires the 'wrench_topic' argument.")
-        if self.contact_force_axis not in ("", "x", "y", "z"):
-            raise ValueError(f"'{name}': contact_force_axis must be '', 'x', 'y' or 'z'.")
         self.node: Node
 
     INPUT_PORTS = {"target_pose": PortInformation(data_type=PoseStamped, required=True)}
@@ -113,10 +114,11 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
 
     def _on_wrench(self, msg: WrenchStamped) -> None:
         f = msg.wrench.force
-        if self.contact_force_axis:
-            self._latest_force = abs(float(getattr(f, self.contact_force_axis)))
+        force = np.array([f.x, f.y, f.z])
+        if self.contact_force_axis is None:
+            self._latest_force = float(np.linalg.norm(force))
         else:
-            self._latest_force = float(np.linalg.norm([f.x, f.y, f.z]))
+            self._latest_force = abs(float(force @ self.contact_force_axis))
 
     def initialise(self) -> None:
         self._start_time = self.node.get_clock().now()

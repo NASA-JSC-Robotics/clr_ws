@@ -1,15 +1,8 @@
 <root main_tree_to_execute="MainTree">
   <!--
     Connector mating demo: locate the receptacle from its AprilTag, bring the
-    peg in front of the bore with RoboPlan, then hand the UR arm over to the
-    stock ros2_controllers admittance controller for the compliant insertion.
-
-    Geometry (see urdf/receptacle_macro.xacro): the bore opening sits 109 mm in
-    front of the tag face and 105 mm above the tag center, and is 110 mm deep.
-
-    Free-space moves use the shared RoboPlan subtrees, which execute on the combined
-    CLR joint trajectory controller. The insertion and retract use a local subtree
-    that executes on the admittance-chained UR joint trajectory controller.
+    peg in front of the bore with RoboPlan, then hand the UR arm over to an
+    admittance controller for the compliant insertion.
 
     Requires the RoboPlan planning server with `peg_tip` as its tip link:
       ros2 launch clr_connector_mating_demo clr_connector_mating_demo.launch.xml
@@ -17,13 +10,16 @@
 
   <include file="roboplan/roboplan_trees.xml" />
 
-  <BehaviorTree ID="MainTree">
+  <!-- insertion_speed: peg tip speed for the insertion and retract, in m/s.
+       translation_xyz, orientation_xyzw: offset applied to the bore entry pose, in the world frame,
+       which misaligns both the standoff and inserted poses. The insertion direction does not change. -->
+  <BehaviorTree ID="MainTree"
+    insertion_speed="0.02"
+    translation_xyz="0.0, 0.0, 0.0"
+    orientation_xyzw="0.0, 0.0, 0.0, 1.0">
     <Sequence name="Sequence">
 
-      <!-- Start from the combined joint trajectory controller. The controller
-           info lets the switch deactivate whatever else claims those joints,
-           and the admittance pair is deactivated explicitly in case a previous
-           run left it active. -->
+      <!-- Start from the combined joint trajectory controller. -->
       <GetRosControllerInfo
         name="get_controller_info"
         service_name="/controller_manager/list_controllers"
@@ -46,9 +42,8 @@
       />
 
       <!-- The peg is held in the gripper, so the planner must not treat the
-           gripper geometry it sits between as obstacles. The receptacle is
-           mounted touching the rack door, which RoboPlan would otherwise
-           report as a permanent collision. -->
+           gripper geometry as obstacles. The receptacle is mounted touching
+           the rack door, which RoboPlan would report as a permanent collision. -->
       <SetAllowedCollisions
         name="allow_static_collisions"
         service_name="/roboplan_planning_server/set_collisions"
@@ -61,8 +56,8 @@
       <SetAllowedCollisions
         name="check_peg_contact"
         service_name="/roboplan_planning_server/set_collisions"
-        body1="peg_link;peg_link;finger_1_link;finger_2_link"
-        body2="receptacle;door;receptacle;receptacle"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
         allowed="false"
       />
 
@@ -88,6 +83,8 @@
       <SubTree ID="ComputeInsertionPoses"
         name="ComputeInsertionPoses"
         apriltag_pose="{apriltag_pose}"
+        translation_xyz="{translation_xyz}"
+        orientation_xyzw="{orientation_xyzw}"
         bore_entry_pose="{bore_entry_pose}"
         standoff_pose="{standoff_pose}"
         inserted_pose="{inserted_pose}"
@@ -104,12 +101,12 @@
         constrain_gripper_top_down="false"
       />
 
-      <!-- Compliant insertion under admittance control, straight from the
-           standoff pose. -->
+      <!-- Compliant insertion under admittance control. -->
       <SubTree ID="InsertPegWithAdmittance"
         name="InsertPeg"
         inserted_pose="{inserted_pose}"
         retract_pose="{standoff_pose}"
+        insertion_speed="{insertion_speed}"
       />
 
     </Sequence>
@@ -118,8 +115,7 @@
   <!-- Derives the peg tip target poses from the detected AprilTag pose.
        The tag pose is snapped to the world axes so the approach direction is
        exactly along the bore axis, and the tip orientation is flipped to point
-       into the receptacle. The standoff is 15 cm in front of the bore opening
-       and the inserted pose 12.5 cm into it, past the 10.95 cm deep floor. -->
+       into the receptacle. -->
   <BehaviorTree ID="ComputeInsertionPoses">
     <Sequence name="Sequence">
       <TransformPose name="TransformTagToWorld"
@@ -137,15 +133,20 @@
         orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         output_pose="{bore_entry_pose}"
       />
-      <OffsetPoseStamped name="ComputeStandoffPose"
+      <OffsetPoseStamped name="ApplyTargetOffset"
         input_pose="{bore_entry_pose}"
+        translation_xyz="{translation_xyz}"
+        orientation_xyzw="{orientation_xyzw}"
+        output_pose="{offset_bore_entry_pose}"
+      />
+      <OffsetPoseStamped name="ComputeStandoffPose"
+        input_pose="{offset_bore_entry_pose}"
         translation_xyz="0.0, -0.15, 0.0"
         output_pose="{standoff_pose}"
       />
-      <!-- The bore is 109.5 mm deep; commanding 125 mm leaves the admittance loop
-           pressing lightly on the floor. -->
+      <!-- The bore is 109.5 mm deep; commanding 125 mm leaves the admittance loop pressing lightly on the floor. -->
       <OffsetPoseStamped name="ComputeInsertedPose"
-        input_pose="{bore_entry_pose}"
+        input_pose="{offset_bore_entry_pose}"
         translation_xyz="0.0, 0.125, 0.0"
         output_pose="{inserted_pose}"
       />
@@ -160,12 +161,10 @@
     </Sequence>
   </BehaviorTree>
 
-  <!-- Switches the UR arm to the admittance controller pair, plans a straight line
-       from the standoff into the bore, and executes it through the admittance-chained controller.
-       This reports how close the peg tip got and whether it bottomed out, holds, retracts the same
-       way, and hands the arm back to the combined joint trajectory controller.
-       The trajectory is executed open loop; the admittance controller yields to the contact forces,
-       so the commanded 125 mm insertion ends ~20 mm short on the bore floor. -->
+  <!-- Switches the arm to the admittance controller pair and executes a straight line
+       from the standoff into the bore. This reports how close the peg tip got and
+       whether it bottomed out, holds, retracts the same way, and hands the arm back to
+       the combined joint trajectory controller. -->
   <BehaviorTree ID="InsertPegWithAdmittance">
     <Sequence name="Sequence">
       <SwitchRosControllers
@@ -178,23 +177,24 @@
       <WaitForDuration name="wait_for_controller_to_settle" duration_sec="0.5" />
 
       <!-- The commanded insertion ends past the bore floor, where the peg collides with the
-           receptacle and the door behind it, and the closed fingers reach the receptacle face.
+           receptacle and the door behind it.
            Only allow that contact for this motion, so the free-space moves still avoid it. -->
       <SetAllowedCollisions
         name="allow_peg_contact"
         service_name="/roboplan_planning_server/set_collisions"
-        body1="peg_link;peg_link;finger_1_link;finger_2_link"
-        body2="receptacle;door;receptacle;receptacle"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
         allowed="true"
       />
 
       <SubTree ID="MoveToPoseWithAdmittance"
         name="InsertPeg"
         target_poses="{inserted_pose}"
+        max_linear_speed="{insertion_speed}"
         trajectory="{insertion_trajectory}"
       />
       <!-- Reports the residual to the commanded pose and whether the peg is
-           pressing on the bore floor (axial force along the peg, i.e. the
+           pressing on the bore floor (axial force along the peg, i.e., the
            sensor z axis). Not reaching the pose is logged, not a failure. -->
       <WaitForFrameToReachPose name="check_insertion"
         frame="peg_tip"
@@ -205,7 +205,7 @@
         fail_on_timeout="false"
         wrench_topic="/force_torque_sensor_broadcaster/wrench"
         contact_force_threshold="2.0"
-        contact_force_axis="z"
+        contact_force_axis="0.0, 0.0, 1.0"
         target_pose="{inserted_pose}"
         contact="{peg_bottomed_out}"
       />
@@ -217,14 +217,15 @@
       <SubTree ID="MoveToPoseWithAdmittance"
         name="RetractPeg"
         target_poses="{retract_pose}"
+        max_linear_speed="{insertion_speed}"
         start_trajectory="{insertion_trajectory}"
       />
 
       <SetAllowedCollisions
         name="restore_peg_contact_checking"
         service_name="/roboplan_planning_server/set_collisions"
-        body1="peg_link;peg_link;finger_1_link;finger_2_link"
-        body2="receptacle;door;receptacle;receptacle"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
         allowed="false"
       />
 
@@ -238,9 +239,8 @@
     </Sequence>
   </BehaviorTree>
 
-  <!-- Straight-line Cartesian plan, preview, and execute on the admittance-chained
-       controller. Only the UR joints are under admittance control, so the plan uses the
-       arm-only group. 5 cm/s keeps the insertion and retract slow and steady. -->
+  <!-- Straight-line Cartesian plan, preview, and execute on the admittance controller.
+       Only the arm joints are under admittance control, so the use the arm-only group.  -->
   <BehaviorTree ID="MoveToPoseWithAdmittance">
     <Sequence name="Sequence">
       <RoboplanPlanCartesianPath
@@ -248,7 +248,7 @@
         service_name="/roboplan_planning_server/plan_cartesian_path"
         group_name="ur_manipulator"
         target_poses="{target_poses}"
-        max_linear_speed="0.05"
+        max_linear_speed="{max_linear_speed}"
         start_trajectory="{start_trajectory}"
         trajectory="{trajectory}"
       />

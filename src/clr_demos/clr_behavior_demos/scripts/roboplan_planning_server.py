@@ -189,9 +189,8 @@ class RoboplanPlanningServer(Node):
         # used for the interactive marker workflow.
         self.declare_parameter("planning_groups", ["clr", "ur_manipulator", "chonkur_grasp", "rail", "lift"])
 
-        # Optionally override the robot config's tip link, e.g., to plan for a
-        # tool attached to the gripper. Must be a frame downstream of the
-        # planning groups' chains.
+        # Optionally override the robot config's tip link
+        # Must be a frame downstream of the planning groups' chains.
         self.declare_parameter("tip_link", "")
 
         # Scene loading parameters.

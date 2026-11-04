@@ -24,7 +24,7 @@ The peg is a cylinder along +z whose base sits at z = 0, with a 45 degree
 chamfer at the tip so it self-centers in the receptacle bore. Dimensions are
 in meters. Re-run this (and update the macro's properties) to change the peg:
 
-    python3 scripts/generate_peg_mesh.py --radius 0.022 --length 0.157 --chamfer 0.005
+    python3 scripts/generate_peg_mesh.py --radius 0.022 --length 0.185 --chamfer 0.005
 """
 
 import argparse
@@ -37,7 +37,7 @@ import trimesh
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--radius", type=float, default=0.022, help="Peg radius in meters.")
-    parser.add_argument("--length", type=float, default=0.157, help="Total peg length in meters.")
+    parser.add_argument("--length", type=float, default=0.185, help="Total peg length in meters.")
     parser.add_argument("--chamfer", type=float, default=0.005, help="Chamfer size (axial and radial) in meters.")
     parser.add_argument("--segments", type=int, default=64, help="Number of segments around the axis.")
     parser.add_argument(
