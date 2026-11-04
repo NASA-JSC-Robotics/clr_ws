@@ -19,6 +19,7 @@
 
 """Behaviors that load and step through insertion test trials."""
 
+import math
 from datetime import datetime
 from itertools import product
 from pathlib import Path
@@ -119,6 +120,7 @@ class UnpackInsertionTrial(BehaviourWithPorts):
         "orientation_xyzw": PortInformation(data_type=list[float], required=True),
         "insertion_speed": PortInformation(data_type=float, required=True),
         "bag_path": PortInformation(data_type=str, required=True),
+        "insertion_depth": PortInformation(data_type=float, required=True),
     }
 
     def update(self) -> Status:
@@ -128,30 +130,43 @@ class UnpackInsertionTrial(BehaviourWithPorts):
         for key in ("translation_xyz", "orientation_xyzw", "insertion_speed"):
             self._set_output(key, trial[key])
         self._set_output("bag_path", str(Path(trial["trial_dir"]) / "bag"))
+        # A trial that fails before measuring this should not report the depth from the previous trial.
+        self._set_output("insertion_depth", float("nan"))
         return Status.SUCCESS
 
 
 class WriteInsertionTrialResult(BehaviourWithPorts):
     """
-    Saves the parameters of a finished trial and whether it succeeded to `trial.yaml` in the trial's folder.
+    Saves the parameters and result of a finished trial to `trial.yaml` in the trial's folder.
 
+    A trial succeeded if the tree completed and the peg got at least `required_depth` into the bore.
     A trial folder without this file is from a trial that never finished.
     """
 
     INPUT_PORTS = {
         "trial": PortInformation(data_type=dict, required=True),
-        "succeeded": PortInformation(data_type=bool, required=True),
+        "tree_completed": PortInformation(data_type=bool, required=True),
+        "insertion_depth": PortInformation(data_type=float, required=True),
+        "required_depth": PortInformation(data_type=float, required=True),
     }
     OUTPUT_PORTS = {}
 
     def update(self) -> Status:
         """Write the file."""
         trial = self.get_input("trial")
-        succeeded = self.get_input("succeeded")
+        tree_completed = self.get_input("tree_completed")
+        depth = self.get_input("insertion_depth")
+        measured = not math.isnan(depth)
+        succeeded = tree_completed and measured and depth >= self.get_input("required_depth")
         trial_dir = Path(trial["trial_dir"])
         trial_dir.mkdir(parents=True, exist_ok=True)
         with open(trial_dir / "trial.yaml", "w") as file:
-            yaml.safe_dump({**trial, "succeeded": succeeded}, file)
+            result = {
+                "succeeded": succeeded,
+                "tree_completed": tree_completed,
+                "insertion_depth": depth if measured else None,
+            }
+            yaml.safe_dump({**trial, **result}, file)
 
         self.logger.info(f"Trial {trial['name']} {'succeeded' if succeeded else 'failed'}.")
         return Status.SUCCESS

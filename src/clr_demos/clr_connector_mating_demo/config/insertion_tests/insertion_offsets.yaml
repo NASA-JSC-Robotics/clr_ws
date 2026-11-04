@@ -1,7 +1,6 @@
-# Varies one offset of the peg target at a time.
+# Varies one offset of the peg target at a time, out to where the insertion fails.
 # Translations are in meters and rotations in degrees, both in the world frame.
 # The bore axis is along world y, so x and z are the lateral directions.
-# The peg has 3 mm of radial clearance, and its chamfer adds another 5 mm of lead-in.
 defaults:
   insertion_speed: 0.02
   repeats: 3
@@ -9,10 +8,10 @@ defaults:
 sweeps:
   - name: baseline
   - name: lateral_x
-    translation_x: [-0.008, -0.005, -0.003, 0.003, 0.005, 0.008]
+    translation_x: [-0.02, -0.015, -0.01, -0.005, 0.005, 0.01, 0.015, 0.02]
   - name: lateral_z
-    translation_z: [-0.008, -0.005, -0.003, 0.003, 0.005, 0.008]
+    translation_z: [-0.02, -0.015, -0.01, -0.005, 0.005, 0.01, 0.015, 0.02]
   - name: tilt_x
-    rotation_x_deg: [-3.0, -1.0, 1.0, 3.0]
+    rotation_x_deg: [-10.0, -5.0, -3.0, -1.0, 1.0, 3.0, 5.0, 10.0]
   - name: tilt_z
-    rotation_z_deg: [-3.0, -1.0, 1.0, 3.0]
+    rotation_z_deg: [-10.0, -5.0, -3.0, -1.0, 1.0, 3.0, 5.0, 10.0]

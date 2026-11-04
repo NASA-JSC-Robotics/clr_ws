@@ -46,3 +46,16 @@
           id: $(var tf_prefix)peg_tip
       admittance:
         selected_axes: [true, true, true, true, true, true]
+
+  # The trajectory ends with the peg pressed against the bore, so the arm can stay well away from the end of the
+  # trajectory. Accept that, and give up after a while instead of the default of waiting forever.
+  admittance_joint_trajectory_controller:
+    ros__parameters:
+      constraints:
+        goal_time: 5.0
+        $(var tf_prefix)shoulder_pan_joint: { trajectory: 0.2, goal: 0.3 }
+        $(var tf_prefix)shoulder_lift_joint: { trajectory: 0.2, goal: 0.3 }
+        $(var tf_prefix)elbow_joint: { trajectory: 0.2, goal: 0.3 }
+        $(var tf_prefix)wrist_1_joint: { trajectory: 0.2, goal: 0.3 }
+        $(var tf_prefix)wrist_2_joint: { trajectory: 0.2, goal: 0.3 }
+        $(var tf_prefix)wrist_3_joint: { trajectory: 0.2, goal: 0.3 }

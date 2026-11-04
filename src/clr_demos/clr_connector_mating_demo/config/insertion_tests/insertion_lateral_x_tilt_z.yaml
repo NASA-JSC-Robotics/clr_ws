@@ -1,0 +1,10 @@
+# Runs every combination of an x offset and a tilt about z, which both act in the same plane.
+# Translations are in meters and rotations in degrees, both in the world frame.
+defaults:
+  insertion_speed: 0.02
+  repeats: 1
+
+sweeps:
+  - name: grid
+    translation_x: [-0.02, -0.015, -0.01, -0.005, 0.0, 0.005, 0.01, 0.015, 0.02]
+    rotation_z_deg: [-5.0, -3.0, 0.0, 3.0, 5.0]
