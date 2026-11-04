@@ -51,9 +51,23 @@ ros2 action send_goal /execute_behavior imetro_behavior_msgs/action/ExecuteBehav
 ```
 
 Test files are in `config/insertion_tests`, and you can select one with the `test_file` attribute at the top of `trees/connector_mate_tests.xml`.
-The default is a quick two-trial check, and `insertion_offsets.yaml` is the full sweep of 63 trials.
+The default, `insertion_smoke_test.yaml`, is a quick two-trial check.
+`insertion_offsets.yaml` varies one offset at a time, out to where the insertion fails, and `insertion_lateral_x_tilt_z.yaml` runs every combination of an x offset and a tilt about z.
 
 Results go in a new timestamped folder inside `test_results`, relative to the folder you launched from.
-Each trial has a folder with a `bag` folder containing the rosbag, and a `trial.yaml` file containing its parameters and whether it succeeded.
+Each trial has a folder with a `bag` folder containing the rosbag, and a `trial.yaml` file containing its parameters and result.
 The `trial.yaml` file is written at the end of the trial, so a trial folder without one did not finish.
-A trial succeeds if the tree completes, which does not on its own mean that the peg was inserted.
+A trial succeeded if the tree completed and the peg got within 5 mm of the bore floor, and `tree_completed` and `insertion_depth` are also saved.
+
+If an insertion fails, the tree pulls the peg back out before moving on to the next trial.
+If that fails as well, the arm is stuck, so the test run ends instead of recording more failed trials.
+
+To plot the results, pass one or more of the timestamped folders to the plotting script:
+
+```bash
+python3 src/clr_demos/clr_connector_mating_demo/scripts/plot_insertion_tests.py test_results/<timestamp>
+```
+
+This shows how deep the peg got and the peak force for each trial, and saves them in the first folder as `summary.csv` and `summary.png`.
+A sweep over two values, such as `insertion_lateral_x_tilt_z.yaml`, is shown as a heatmap in `summary_grid.png` instead.
+Depth in the plots is relative to the true receptacle pose, while `insertion_depth` in `trial.yaml` is relative to the AprilTag detection, so the two can differ by a few millimeters.

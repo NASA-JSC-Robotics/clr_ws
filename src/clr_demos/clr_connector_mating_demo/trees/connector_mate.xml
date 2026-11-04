@@ -87,6 +87,7 @@
         orientation_xyzw="{orientation_xyzw}"
         bore_entry_pose="{bore_entry_pose}"
         standoff_pose="{standoff_pose}"
+        aligned_standoff_pose="{aligned_standoff_pose}"
         inserted_pose="{inserted_pose}"
       />
 
@@ -107,6 +108,8 @@
         inserted_pose="{inserted_pose}"
         retract_pose="{standoff_pose}"
         insertion_speed="{insertion_speed}"
+        bore_entry_pose="{bore_entry_pose}"
+        insertion_depth="{insertion_depth}"
       />
 
     </Sequence>
@@ -132,6 +135,12 @@
         translation_xyz="0.0, -0.109, 0.105"
         orientation_xyzw="0.0, 1.0, 0.0, 0.0"
         output_pose="{bore_entry_pose}"
+      />
+      <!-- The standoff pose without the target offset, which is where recovering from a failed insertion goes. -->
+      <OffsetPoseStamped name="ComputeAlignedStandoffPose"
+        input_pose="{bore_entry_pose}"
+        translation_xyz="0.0, -0.15, 0.0"
+        output_pose="{aligned_standoff_pose}"
       />
       <OffsetPoseStamped name="ApplyTargetOffset"
         input_pose="{bore_entry_pose}"
@@ -211,6 +220,11 @@
         contact="{peg_bottomed_out}"
       />
       <WaitForDuration name="hold_inserted" duration_sec="2.0" />
+      <MeasureInsertionDepth name="measure_insertion_depth"
+        frame="peg_tip"
+        bore_entry_pose="{bore_entry_pose}"
+        depth="{insertion_depth}"
+      />
 
       <!-- The commanded pose ends past the bore floor, so the retract plans from
            there rather than from the measured pose. The command stays continuous and
