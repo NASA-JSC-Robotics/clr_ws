@@ -36,6 +36,13 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
+            "peg_friction",
+            default_value="1.0",
+            description="Sliding friction coefficient of the peg, which overrides what it contacts.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
             "include_scene_objects",
             default_value="true",
             description="Whether to include scene objects.",
@@ -51,6 +58,7 @@ def generate_launch_description():
 
     include_scene_objects = LaunchConfiguration("include_scene_objects")
     model_env = LaunchConfiguration("model_env")
+    peg_friction = LaunchConfiguration("peg_friction")
 
     clr_mujoco_package_name = "clr_connector_mating_demo"
     clr_mujoco_description_file = "clr_connector_demo_mujoco.xacro.urdf"
@@ -81,6 +89,8 @@ def generate_launch_description():
             model_env,
             " include_scene_objects:=",
             include_scene_objects,
+            " peg_friction:=",
+            peg_friction,
         ]
     )
 
