@@ -2,6 +2,7 @@
   <!-- Launch arguments -->
   <arg name="use_sim_time" default="true" description="Whether or not to use the simulated clock." />
   <arg name="tip_link" default="peg_tip" description="Tip link the RoboPlan planning server plans for." />
+  <arg name="record_rosbags" default="false" description="Whether to start a dormant rosbag recorder, needed by the connector_mate_tests tree." />
 
   <!-- The RoboPlan planning server, planning for the peg tip. Note that the node is not renamed
        here since the process spawns several helper nodes; a launch-level name would collide them all. -->
@@ -18,5 +19,13 @@
     <param name="behavior_config" value="$(find-pkg-share clr_connector_mating_demo)/config/clr_connector_mating_config.yaml" />
     <param name="use_sim_time" value="$(var use_sim_time)" />
   </node>
+
+  <!-- The connector_mate_tests tree starts a new bag for each trial using this recorder's services.
+       The recorder also opens a bag of its own on startup, which stays empty, so it goes in a temporary location. -->
+  <executable
+    if="$(var record_rosbags)"
+    cmd="ros2 bag record --start-paused --disable-keyboard-controls --node-name rosbag_recorder --storage mcap --use-sim-time --output $(command 'mktemp -u -t rosbag_recorder_XXXXXX') --topics /force_torque_sensor_broadcaster/wrench /joint_states /tf /tf_static /admittance_controller/status"
+    output="screen"
+  />
 
 </launch>

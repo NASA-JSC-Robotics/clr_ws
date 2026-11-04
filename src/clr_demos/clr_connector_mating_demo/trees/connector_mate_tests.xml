@@ -1,0 +1,53 @@
+<root main_tree_to_execute="MainTree">
+  <!--
+    Runs the connector mating tree once per trial of a test file, recording a rosbag for each.
+    The test files are in config/insertion_tests, and the results are saved in output_dir.
+
+    Requires the dormant rosbag recorder:
+      ros2 launch clr_connector_mating_demo clr_connector_mating_demo.launch.xml record_rosbags:=true
+  -->
+
+  <include file="connector_mate.xml" />
+
+  <BehaviorTree ID="MainTree"
+    test_file="insertion_smoke_test.yaml"
+    output_dir="test_results">
+    <Sequence name="Sequence">
+      <LoadInsertionTrials
+        name="load_trials"
+        test_file="{test_file}"
+        output_dir="{output_dir}"
+        trials="{trials}"
+      />
+      <ForEachItem name="for_each_trial" items="{trials}" item="{trial}">
+        <Sequence name="RunTrial">
+          <UnpackInsertionTrial
+            name="unpack_trial"
+            trial="{trial}"
+            translation_xyz="{translation_xyz}"
+            orientation_xyzw="{orientation_xyzw}"
+            insertion_speed="{insertion_speed}"
+            bag_path="{bag_path}"
+          />
+          <!-- This always succeeds, so a failed trial is written out and does not end the test run. -->
+          <OutputChildSuccess name="check_trial" succeeded="{trial_succeeded}">
+            <RecordRosbag name="record_trial" output_path="{bag_path}">
+              <SubTree ID="ConnectorMate"
+                name="ConnectorMate"
+                translation_xyz="{translation_xyz}"
+                orientation_xyzw="{orientation_xyzw}"
+                insertion_speed="{insertion_speed}"
+              />
+            </RecordRosbag>
+          </OutputChildSuccess>
+          <WriteInsertionTrialResult
+            name="write_trial_result"
+            trial="{trial}"
+            succeeded="{trial_succeeded}"
+          />
+        </Sequence>
+      </ForEachItem>
+    </Sequence>
+  </BehaviorTree>
+
+</root>

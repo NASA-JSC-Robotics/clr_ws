@@ -1,0 +1,8 @@
+# Two quick trials to check that the insertion test setup works.
+defaults:
+  insertion_speed: 0.02
+
+sweeps:
+  - name: baseline
+  - name: translation
+    translation_z: [0.002]

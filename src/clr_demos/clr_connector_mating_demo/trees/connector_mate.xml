@@ -1,4 +1,4 @@
-<root main_tree_to_execute="MainTree">
+<root main_tree_to_execute="ConnectorMate">
   <!--
     Connector mating demo: locate the receptacle from its AprilTag, bring the
     peg in front of the bore with RoboPlan, then hand the UR arm over to an
@@ -13,7 +13,7 @@
   <!-- insertion_speed: peg tip speed for the insertion and retract, in m/s.
        translation_xyz, orientation_xyzw: offset applied to the bore entry pose, in the world frame,
        which misaligns both the standoff and inserted poses. The insertion direction does not change. -->
-  <BehaviorTree ID="MainTree"
+  <BehaviorTree ID="ConnectorMate"
     insertion_speed="0.02"
     translation_xyz="0.0, 0.0, 0.0"
     orientation_xyzw="0.0, 0.0, 0.0, 1.0">
