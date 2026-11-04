@@ -66,6 +66,7 @@ FORCE_COLORS = ("#fdf0ea", "#f5b190", "#eb6834", "#8a3211")
 OUTCOME_STYLES = {
     "reached floor": {"marker": "o", "facecolor": "#2a78d6", "edgecolor": SURFACE},
     "stopped short": {"marker": "o", "facecolor": "none", "edgecolor": "#eb6834"},
+    "missed bore": {"marker": "s", "facecolor": "none", "edgecolor": "#eb6834"},
     "aborted": {"marker": "X", "facecolor": "#eb6834", "edgecolor": "#eb6834"},
 }
 
@@ -113,6 +114,8 @@ def read_trial(trial_dir: Path) -> dict | None:
         outcome = "aborted"
     elif depth >= BORE_FLOOR_DEPTH - SHORT_OF_FLOOR_TOLERANCE:
         outcome = "reached floor"
+    elif depth <= 0.0:
+        outcome = "missed bore"
     else:
         outcome = "stopped short"
 
@@ -215,8 +218,15 @@ def plot(results: list[dict], output: Path, title: str) -> None:
 
 
 def plot_grid(results: list[dict], output: Path, title: str) -> None:
-    """Plots a sweep over a lateral offset and a tilt, with a heatmap each for depth and peak force."""
-    points = {tuple(float(part) for part in r["value"].split("_")): r for r in results}
+    """Plots a sweep over a lateral offset and a tilt, with a heatmap each for depth and peak force.
+
+    Each cell shows the median over its repeats. Depth cells also show how many repeats reached the floor,
+    or the outcome if there are no repeats.
+    """
+    points = {}
+    for result in results:
+        point = tuple(float(part) for part in result["value"].split("_"))
+        points.setdefault(point, []).append(result)
     offsets = sorted({offset for offset, _ in points})
     tilts = sorted({tilt for _, tilt in points})
 
@@ -233,11 +243,12 @@ def plot_grid(results: list[dict], output: Path, title: str) -> None:
     )
     for ax, key, panel_title, colors in panels:
         cells = np.full((len(tilts), len(offsets)), np.nan)
-        for (offset, tilt), result in points.items():
-            cells[tilts.index(tilt), offsets.index(offset)] = result[key]
+        for (offset, tilt), repeats in points.items():
+            cells[tilts.index(tilt), offsets.index(offset)] = np.median([r[key] for r in repeats])
 
         colormap = LinearSegmentedColormap.from_list(key, colors)
         limits = (0.0, BORE_FLOOR_DEPTH * 1000.0) if key == "depth_mm" else (0.0, np.nanmax(cells))
+        show_outcome = key == "depth_mm" or max(len(repeats) for repeats in points.values()) == 1
         ax.imshow(cells, cmap=colormap, vmin=limits[0], vmax=limits[1], origin="lower", aspect="auto")
         ax.set_facecolor(SURFACE)
         ax.set_title(panel_title, color=TEXT_PRIMARY, fontsize=10, loc="left")
@@ -253,13 +264,18 @@ def plot_grid(results: list[dict], output: Path, title: str) -> None:
         ax.grid(which="minor", color=SURFACE, linewidth=2)
         ax.tick_params(which="minor", length=0)
 
-        for (offset, tilt), result in points.items():
-            fraction = (result[key] - limits[0]) / max(limits[1] - limits[0], 1e-6)
-            marker = {"reached floor": "", "stopped short": "short", "aborted": "aborted"}[result["outcome"]]
+        for (offset, tilt), repeats in points.items():
+            value = float(np.median([r[key] for r in repeats]))
+            fraction = (value - limits[0]) / max(limits[1] - limits[0], 1e-6)
+            reached = sum(r["outcome"] == "reached floor" for r in repeats)
+            if len(repeats) > 1:
+                detail = f"{reached}/{len(repeats)} floor" if key == "depth_mm" else ""
+            else:
+                detail = "" if repeats[0]["outcome"] == "reached floor" else repeats[0]["outcome"]
             ax.text(
                 offsets.index(offset),
                 tilts.index(tilt),
-                f"{result[key]:.0f}" + (f"\n{marker}" if marker else ""),
+                f"{value:.0f}" + (f"\n{detail}" if detail and show_outcome else ""),
                 ha="center",
                 va="center",
                 color=SURFACE if fraction > 0.55 else TEXT_PRIMARY,
