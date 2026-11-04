@@ -13,8 +13,10 @@ imports:
   - imetro_behavior.geometry_behaviors
   - imetro_behavior.joint_behaviors
   - imetro_behavior.ros_behaviors
+  - imetro_behavior.rosbag_behaviors
   - clr_behavior_demos.roboplan_behaviors
   - clr_connector_mating_demo.insertion_behaviors
+  - clr_connector_mating_demo.insertion_trials
 
 # Paths for which to search for behavior tree XML files.
 tree_search_paths:
