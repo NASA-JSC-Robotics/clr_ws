@@ -51,12 +51,14 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         position_tolerance: Allowed position error, in meters.
         orientation_tolerance: Allowed orientation error, in radians.
         timeout: Seconds to wait for the frame to arrive.
-        settle_time: Seconds the frame must continuously stay within tolerance.
+        pose_settle_time: Seconds the frame must continuously stay within tolerance.
         fail_on_timeout: Whether missing the target within the timeout is a failure.
         wrench_topic: WrenchStamped topic to watch for contact (empty disables it).
         contact_force_threshold: Force magnitude, in newtons, that counts as contact.
         contact_force_axis: Sensor-frame direction whose force component is compared against
             the threshold, e.g., [0.0, 0.0, 1.0]; if not specified, uses the force norm.
+        contact_settle_time: Seconds the force must continuously stay at or above the
+            contact threshold before contact is declared.
     """
 
     def __init__(
@@ -67,11 +69,12 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         position_tolerance: float = 0.005,
         orientation_tolerance: float = 0.05,
         timeout: float = 30.0,
-        settle_time: float = 0.0,
+        pose_settle_time: float = 0.0,
         fail_on_timeout: bool = False,
         wrench_topic: str = "",
         contact_force_threshold: float = 0.0,
         contact_force_axis: list[float] | None = None,
+        contact_settle_time: float = 0.0,
         **kwargs: Any,
     ):
         super().__init__(name, **kwargs)
@@ -79,10 +82,11 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         self.position_tolerance = position_tolerance
         self.orientation_tolerance = orientation_tolerance
         self.timeout = timeout
-        self.settle_time = settle_time
+        self.pose_settle_time = pose_settle_time
         self.fail_on_timeout = fail_on_timeout
         self.wrench_topic = wrench_topic
         self.contact_force_threshold = contact_force_threshold
+        self.contact_settle_time = contact_settle_time
         self.contact_force_axis = None
         if contact_force_axis is not None:
             axis = np.array(contact_force_axis, dtype=float)
@@ -108,22 +112,30 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         set_ros_node(self, **kwargs)
         self.blackboard_client.register_key(key="/ros/tf_buffer", access=Access.READ)
         self.tf_buffer = self.blackboard_client.get("/ros/tf_buffer")
-        self._latest_force = None
+        self._latest_wrench = None
         if self.contact_force_threshold > 0.0:
             self.node.create_subscription(WrenchStamped, self.wrench_topic, self._on_wrench, qos_profile_sensor_data)
 
     def _on_wrench(self, msg: WrenchStamped) -> None:
         f = msg.wrench.force
-        force = np.array([f.x, f.y, f.z])
+        t = msg.wrench.torque
+        self._latest_wrench = np.array([f.x, f.y, f.z, t.x, t.y, t.z])
+
+    def _contact_force(self) -> float | None:
+        """Reduces the latest 6-DOF wrench to the scalar force used for contact detection."""
+        if self._latest_wrench is None:
+            return None
+        force = self._latest_wrench[:3]
         if self.contact_force_axis is None:
-            self._latest_force = float(np.linalg.norm(force))
-        else:
-            self._latest_force = abs(float(force @ self.contact_force_axis))
+            return float(np.linalg.norm(force))
+        return abs(float(force @ self.contact_force_axis))
 
     def initialise(self) -> None:
         self._start_time = self.node.get_clock().now()
         self._within_since = None
+        self._contact_since = None
         self._last_log_time = None
+        self._target_pose = self.get_input("target_pose")
         self._set_output("contact", False)
 
     def _seconds_since(self, start) -> float:
@@ -131,7 +143,7 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
 
     def update(self) -> Status:
         """Compares the tracked frame against the target pose."""
-        target_pose = self.get_input("target_pose")
+        target_pose = self._target_pose
         try:
             tform = self.tf_buffer.lookup_transform(target_pose.header.frame_id, self.frame, Time())
         except Exception as e:  # noqa: BLE001 -- TF raises a variety of exceptions
@@ -153,21 +165,27 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
         self._set_output("position_error", position_error)
         self._set_output("orientation_error", orientation_error)
 
-        if self.contact_force_threshold > 0.0 and self._latest_force is not None:
-            if self._latest_force >= self.contact_force_threshold:
-                self.logger.info(
-                    f"'{self.frame}' made contact ({self._latest_force:.1f} N) "
-                    f"{position_error * 1000.0:.1f} mm short of the target pose."
-                )
-                self._set_output("contact", True)
-                return Status.SUCCESS
+        now = self.node.get_clock().now()
+        contact_force = self._contact_force()
+        if self.contact_force_threshold > 0.0 and contact_force is not None:
+            if contact_force >= self.contact_force_threshold:
+                if self._contact_since is None:
+                    self._contact_since = now
+                if self._seconds_since(self._contact_since) >= self.contact_settle_time:
+                    self.logger.info(
+                        f"'{self.frame}' made contact ({contact_force:.1f} N) "
+                        f"{position_error * 1000.0:.1f} mm short of the target pose."
+                    )
+                    self._set_output("contact", True)
+                    return Status.SUCCESS
+            else:
+                self._contact_since = None
 
         within = position_error <= self.position_tolerance and orientation_error <= self.orientation_tolerance
-        now = self.node.get_clock().now()
         if within:
             if self._within_since is None:
                 self._within_since = now
-            if self._seconds_since(self._within_since) >= self.settle_time:
+            if self._seconds_since(self._within_since) >= self.pose_settle_time:
                 self.logger.info(
                     f"'{self.frame}' reached the target pose "
                     f"(position error {position_error * 1000.0:.1f} mm, "
