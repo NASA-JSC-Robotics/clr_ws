@@ -54,6 +54,13 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
+            "peg_friction",
+            default_value="1.0",
+            description="Sliding friction coefficient of the peg, which overrides what it contacts.",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
             "headless",
             default_value="false",
             description="Optionally run headless, primarily for use in CI.",
@@ -63,6 +70,7 @@ def generate_launch_description():
     use_pregenerated_mjcf = LaunchConfiguration("use_pregenerated_mjcf")
     sim_speed = LaunchConfiguration("sim_speed")
     headless = LaunchConfiguration("headless")
+    peg_friction = LaunchConfiguration("peg_friction")
     model_env = LaunchConfiguration("model_env")
 
     generate_mjcf = include_launch_file(
@@ -71,6 +79,7 @@ def generate_launch_description():
         launch_arguments={
             "save_only": "false",
             "use_pregenerated_assets_dir": "true",
+            "peg_friction": peg_friction,
         }.items(),
         condition=UnlessCondition(use_pregenerated_mjcf),
     )
@@ -82,6 +91,8 @@ def generate_launch_description():
         sim_speed,
         " headless:=",
         headless,
+        " peg_friction:=",
+        peg_friction,
         " model_env:=",
         model_env,
     ]

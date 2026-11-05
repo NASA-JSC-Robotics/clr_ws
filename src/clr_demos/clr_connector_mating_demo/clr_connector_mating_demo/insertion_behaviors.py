@@ -214,3 +214,55 @@ class WaitForFrameToReachPose(BehaviourWithPorts):
             self.logger.warning(message)
             return Status.SUCCESS
         return Status.RUNNING
+
+
+class MeasureInsertionDepth(BehaviourWithPorts):
+    """
+    Measures how far a TF frame is past the bore entry, along the axis of the bore.
+
+    Constructor arguments:
+        frame: The TF frame to measure, e.g., the tool tip.
+
+    Input ports:
+        bore_entry_pose: The pose of the bore entry, whose z axis points into the bore.
+
+    Output ports:
+        depth: The distance past the bore entry, in meters.
+    """
+
+    INPUT_PORTS = {"bore_entry_pose": PortInformation(data_type=PoseStamped, required=True)}
+    OUTPUT_PORTS = {"depth": PortInformation(data_type=float, required=True)}
+
+    def __init__(self, name: str, *, frame: str, **kwargs: Any):
+        super().__init__(name, **kwargs)
+        self.frame = frame
+
+    def setup(self, **kwargs):
+        """Gets the TF buffer."""
+        set_ros_node(self, **kwargs)
+        self.blackboard_client.register_key(key="/ros/tf_buffer", access=Access.READ)
+        self.tf_buffer = self.blackboard_client.get("/ros/tf_buffer")
+
+    def update(self) -> Status:
+        """Measures the depth."""
+        entry = self.get_input("bore_entry_pose")
+        try:
+            tform = self.tf_buffer.lookup_transform(entry.header.frame_id, self.frame, Time())
+        except Exception as e:  # noqa: BLE001 -- TF raises a variety of exceptions
+            self.logger.error(f"TF lookup failed: {e}")
+            return Status.FAILURE
+
+        position = tform.transform.translation
+        q = entry.pose.orientation
+        bore_axis = R.from_quat([q.x, q.y, q.z, q.w]).as_matrix()[:, 2]
+        offset = np.array(
+            [
+                position.x - entry.pose.position.x,
+                position.y - entry.pose.position.y,
+                position.z - entry.pose.position.z,
+            ]
+        )
+        depth = float(offset @ bore_axis)
+        self.logger.info(f"'{self.frame}' is {depth * 1000.0:.1f} mm past the bore entry.")
+        self._set_output("depth", depth)
+        return Status.SUCCESS
