@@ -153,6 +153,10 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
     The target_poses port accepts a single PoseStamped or a list of
     PoseStamped. A single pose produces a straight line to one target;
     a list is used for multi-waypoint paths.
+
+    If start_trajectory is set, the motion starts from that trajectory's last
+    point instead of the measured joint states. This keeps the command continuous
+    under compliant control, where the commanded and measured positions differ.
     """
 
     def __init__(self, name: str, **kwargs: Any):
@@ -163,6 +167,7 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
         "target_poses": PortInformation(data_type=PoseStamped | list[PoseStamped], required=True),
         "max_linear_speed": PortInformation(data_type=float, required=False),
         "max_angular_speed": PortInformation(data_type=float, required=False),
+        "start_trajectory": PortInformation(data_type=JointTrajectory, required=False),
     }
 
     OUTPUT_PORTS = {"trajectory": PortInformation(data_type=JointTrajectory)}
@@ -172,12 +177,17 @@ class RoboplanPlanCartesianPath(RosServiceClientBase):
         target = self.get_input("target_poses")
         if isinstance(target, PoseStamped):
             target = [target]
-        return PlanCartesianPath.Request(
+        request = PlanCartesianPath.Request(
             group_name=self.get_input("group_name", ""),
             target_poses=target,
             max_linear_speed=self.get_input("max_linear_speed", 0.0),
             max_angular_speed=self.get_input("max_angular_speed", 0.0),
         )
+        start_trajectory = self.get_input("start_trajectory", JointTrajectory())
+        if start_trajectory.points:
+            request.start_joint_names = list(start_trajectory.joint_names)
+            request.start_positions = list(start_trajectory.points[-1].positions)
+        return request
 
     def process_response(self, response: PlanCartesianPath.Response) -> Status:
         """Process the planning service response."""

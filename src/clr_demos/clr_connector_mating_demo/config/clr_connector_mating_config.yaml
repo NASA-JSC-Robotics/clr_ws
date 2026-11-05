@@ -1,4 +1,4 @@
-# CLR configuration for behavior tree executor.
+# CLR connector mating demo configuration for the behavior tree executor.
 
 # Behavior executor parameters.
 params:
@@ -8,16 +8,19 @@ params:
 imports:
   - imetro_behavior.apriltag_behaviors
   - imetro_behavior.basic_behaviors
-  - imetro_behavior.color_behaviors
   - imetro_behavior.control_behaviors
   - imetro_behavior.decorators
   - imetro_behavior.geometry_behaviors
-  - imetro_behavior.moveit_behaviors
+  - imetro_behavior.joint_behaviors
   - imetro_behavior.ros_behaviors
+  - clr_behavior_demos.roboplan_behaviors
+  - clr_connector_mating_demo.insertion_behaviors
 
 # Paths for which to search for behavior tree XML files.
 tree_search_paths:
   - package: imetro_behavior
+    path: trees
+  - package: clr_behavior_demos
     path: trees
   - package: clr_connector_mating_demo
     path: trees
