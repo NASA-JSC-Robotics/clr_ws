@@ -1,15 +1,22 @@
 <launch>
   <!-- Launch arguments -->
-  <arg name="gui" default="true" description="Boolean flag to conditionally launch the behavior GUI for trajectory previews." />
+  <arg name="use_sim_time" default="true" description="Whether or not to use the simulated clock." />
+  <arg name="tip_link" default="peg_tip" description="Tip link the RoboPlan planning server plans for." />
+
+  <!-- The RoboPlan planning server, planning for the peg tip. Note that the node is not renamed
+       here since the process spawns several helper nodes; a launch-level name would collide them all. -->
+  <node pkg="clr_behavior_demos" exec="roboplan_planning_server.py" output="screen">
+    <param name="robot" value="clr" />
+    <param name="tip_link" value="$(var tip_link)" />
+    <!-- The insertion and retract are straight-line Cartesian moves of the arm-only group at a capped speed. -->
+    <param name="cartesian_speed_mode" value="bounded" />
+    <param name="use_sim_time" value="$(var use_sim_time)" />
+  </node>
 
   <!-- The main behavior tree executor -->
   <node pkg="imetro_behavior" exec="run_behavior.py" name="behavior_node" output="screen">
     <param name="behavior_config" value="$(find-pkg-share clr_connector_mating_demo)/config/clr_connector_mating_config.yaml" />
+    <param name="use_sim_time" value="$(var use_sim_time)" />
   </node>
-
-  <!-- The trajectory preview GUI -->
-  <group if="$(var gui)">
-    <node pkg="imetro_behavior" exec="behavior_gui.py" name="behavior_gui" output="screen" />
-  </group>
 
 </launch>

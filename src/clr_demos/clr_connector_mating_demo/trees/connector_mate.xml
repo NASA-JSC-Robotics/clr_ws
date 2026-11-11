@@ -1,111 +1,284 @@
 <root main_tree_to_execute="MainTree">
-  <!-- Top-level behavior tree -->
-  <BehaviorTree ID="MainTree">
+  <!--
+    Connector mating demo: locate the receptacle from its AprilTag, bring the
+    peg in front of the bore with RoboPlan, then hand the UR arm over to an
+    admittance controller for the compliant insertion.
+
+    Requires the RoboPlan planning server with `peg_tip` as its tip link:
+      ros2 launch clr_connector_mating_demo clr_connector_mating_demo.launch.xml
+  -->
+
+  <include file="roboplan/roboplan_trees.xml" />
+
+  <!-- insertion_speed: peg tip speed for the insertion and retract, in m/s.
+       translation_xyz, orientation_xyzw: offset applied to the bore entry pose, in the world frame,
+       which misaligns both the standoff and inserted poses. The insertion direction does not change. -->
+  <BehaviorTree ID="MainTree"
+    insertion_speed="0.02"
+    translation_xyz="0.0, 0.0, 0.0"
+    orientation_xyzw="0.0, 0.0, 0.0, 1.0">
     <Sequence name="Sequence">
+
+      <!-- Start from the combined joint trajectory controller. -->
       <GetRosControllerInfo
         name="get_controller_info"
         service_name="/controller_manager/list_controllers"
         controller_info="{controller_info}"
       />
       <SwitchRosControllers
-        name="enable_clr_combined_controller"
+        name="enable_clr_joint_trajectory_controller"
         service_name="/controller_manager/switch_controller"
         service_timeout="3.0"
         controller_info="{controller_info}"
         activate_controllers="clr_joint_trajectory_controller"
+        deactivate_controllers="admittance_joint_trajectory_controller, admittance_controller"
       />
-      <SubTree ID="CloseGripper" name="close_gripper_start" />
 
-      <SubTree ID="MoveToJoint"
-        name="MoveToReadAprilTag"
-        pipeline="ompl"
-        planner="RRTConnect"
+      <!-- Close the fingers onto the peg (44 mm diameter) so it looks held. -->
+      <CommandGripper
+        name="grip_peg"
+        action_name="/robotiq_gripper_hande_controller/gripper_cmd"
+        position="0.0215"
+      />
+
+      <!-- The peg is held in the gripper, so the planner must not treat the
+           gripper geometry as obstacles. The receptacle is mounted touching
+           the rack door, which RoboPlan would report as a permanent collision. -->
+      <SetAllowedCollisions
+        name="allow_static_collisions"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link;peg_link;receptacle"
+        body2="finger_1_link;finger_2_link;gripper_base_link;door"
+        allowed="true"
+      />
+
+      <!-- A run that failed mid-insertion leaves the insertion contact allowed. -->
+      <SetAllowedCollisions
+        name="check_peg_contact"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
+        allowed="false"
+      />
+
+      <SubTree ID="MoveToJointState"
+        name="MoveToViewAprilTag"
         group_name="clr"
         joint_names="vention_rail_base_to_carriage, ewellix_lift_lower_to_higher, shoulder_pan_joint, shoulder_lift_joint, elbow_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint"
         joint_positions="1.89, 0.00, 3.037, -2.356, -1.920, -0.384, -1.606, -1.484"
-        preview="true"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
       />
 
+      <!-- tag_size is the black square of the tag (the full printed tag with its
+           white border is 73 mm; the black square is 60 mm). -->
       <SubTree ID="DetectAprilTag"
         name="FindAprilTag"
         tag_id="0"
-        tag_size="0.073"
+        tag_size="0.060"
         tag_family="tag36h11"
         tag_pose="{apriltag_pose}"
-        preview="true"
       />
 
-      <TransformPose name="TransformTagToBase"
-        input_pose="{apriltag_pose}"
-        source_frame="world"
-        output_pose="{apriltag_pose_base}"
+      <SubTree ID="ComputeInsertionPoses"
+        name="ComputeInsertionPoses"
+        apriltag_pose="{apriltag_pose}"
+        translation_xyz="{translation_xyz}"
+        orientation_xyzw="{orientation_xyzw}"
+        bore_entry_pose="{bore_entry_pose}"
+        standoff_pose="{standoff_pose}"
+        inserted_pose="{inserted_pose}"
       />
 
-      <AlignPoseToNearestAxis name="SnapOrientationToAxis"
-        input_pose="{apriltag_pose_base}"
-        output_pose="{apriltag_aligned_pose}"
-      />
-
-      <OffsetPoseStamped name="CalculateStandoffPose"
-        input_pose="{apriltag_aligned_pose}"
-        translation_xyz="-0.015, -0.4, 0.12"
-        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
-        output_pose="{apriltag_offset_pose}"
-      />
-
-      <PoseStampedToTransformStamped name="ConvertPoseToTF"
-      pose_stamped="{apriltag_offset_pose}"
-      child_frame_id="apriltag_target_standoff_frame"
-      transform_stamped="{apriltag_transform_stamped}"
-      />
-
-      <PublishTransform name="PublishStandoffTF"
-          transform_stamped="{apriltag_transform_stamped}"
-      />
+      <!-- Free-space plan to the standoff pose in front of the bore, using the
+           peg tip as the planning tip link. -->
       <SubTree ID="MoveToPose"
-        name="MoveToTagOffset"
-        pipeline="ompl"
-        planner="RRTConnect"
+        name="MoveToStandoff"
         group_name="clr"
-        target_pose="{apriltag_offset_pose}"
-        target_frame="grasp_frame"
-        preview="true"
-      />
-      <OffsetPoseStamped name="CalculateMatePose"
-        input_pose="{apriltag_offset_pose}"
-        translation_xyz="0.0, 0.12, 0.0"
-        output_pose="{apriltag_mate_pose}"
-      />
-      <SubTree ID="MoveToPose"
-        name="MoveToMate"
-        pipeline="ompl"
-        planner="RRTConnect"
-        group_name="clr"
-        target_pose="{apriltag_mate_pose}"
-        target_frame="grasp_frame"
-        preview="true"
+        target_pose="{standoff_pose}"
+        velocity_scaling="1.0"
+        acceleration_scaling="1.0"
+        constrain_gripper_top_down="false"
       />
 
-      <SubTree ID="OpenGripper" name="open_gripper_end" />
+      <!-- Compliant insertion under admittance control. -->
+      <SubTree ID="InsertPegWithAdmittance"
+        name="InsertPeg"
+        inserted_pose="{inserted_pose}"
+        retract_pose="{standoff_pose}"
+        insertion_speed="{insertion_speed}"
+      />
 
     </Sequence>
   </BehaviorTree>
 
-<!-- AprilTag Detection Subtree -->
+  <!-- Derives the peg tip target poses from the detected AprilTag pose.
+       The tag pose is snapped to the world axes so the approach direction is
+       exactly along the bore axis, and the tip orientation is flipped to point
+       into the receptacle. -->
+  <BehaviorTree ID="ComputeInsertionPoses">
+    <Sequence name="Sequence">
+      <TransformPose name="TransformTagToWorld"
+        input_pose="{apriltag_pose}"
+        source_frame="world"
+        output_pose="{apriltag_pose_world}"
+      />
+      <AlignPoseToNearestAxis name="SnapTagToAxis"
+        input_pose="{apriltag_pose_world}"
+        output_pose="{apriltag_aligned_pose}"
+      />
+      <OffsetPoseStamped name="ComputeBoreEntryPose"
+        input_pose="{apriltag_aligned_pose}"
+        translation_xyz="0.0, -0.109, 0.105"
+        orientation_xyzw="0.0, 1.0, 0.0, 0.0"
+        output_pose="{bore_entry_pose}"
+      />
+      <OffsetPoseStamped name="ApplyTargetOffset"
+        input_pose="{bore_entry_pose}"
+        translation_xyz="{translation_xyz}"
+        orientation_xyzw="{orientation_xyzw}"
+        output_pose="{offset_bore_entry_pose}"
+      />
+      <OffsetPoseStamped name="ComputeStandoffPose"
+        input_pose="{offset_bore_entry_pose}"
+        translation_xyz="0.0, -0.15, 0.0"
+        output_pose="{standoff_pose}"
+      />
+      <!-- The bore is 109.5 mm deep; commanding 125 mm leaves the admittance loop pressing lightly on the floor. -->
+      <OffsetPoseStamped name="ComputeInsertedPose"
+        input_pose="{offset_bore_entry_pose}"
+        translation_xyz="0.0, 0.125, 0.0"
+        output_pose="{inserted_pose}"
+      />
+      <PoseStampedToTransformStamped name="BoreEntryToTransform"
+        pose_stamped="{bore_entry_pose}"
+        child_frame_id="receptacle_bore_entry"
+        transform_stamped="{bore_entry_transform}"
+      />
+      <PublishTransform name="PublishBoreEntryFrame"
+        transform_stamped="{bore_entry_transform}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Switches the arm to the admittance controller pair and executes a straight line
+       from the standoff into the bore. This reports how close the peg tip got and
+       whether it bottomed out, holds, retracts the same way, and hands the arm back to
+       the combined joint trajectory controller. -->
+  <BehaviorTree ID="InsertPegWithAdmittance">
+    <Sequence name="Sequence">
+      <SwitchRosControllers
+        name="enable_admittance_controllers"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="admittance_controller, admittance_joint_trajectory_controller"
+        deactivate_controllers="clr_joint_trajectory_controller"
+      />
+      <WaitForDuration name="wait_for_controller_to_settle" duration_sec="0.5" />
+
+      <!-- The commanded insertion ends past the bore floor, where the peg collides with the
+           receptacle and the door behind it.
+           Only allow that contact for this motion, so the free-space moves still avoid it. -->
+      <SetAllowedCollisions
+        name="allow_peg_contact"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
+        allowed="true"
+      />
+
+      <SubTree ID="MoveToPoseWithAdmittance"
+        name="InsertPeg"
+        target_poses="{inserted_pose}"
+        max_linear_speed="{insertion_speed}"
+        trajectory="{insertion_trajectory}"
+      />
+      <!-- Reports the residual to the commanded pose and whether the peg is
+           pressing on the bore floor (axial force along the peg, i.e., the
+           sensor z axis). Not reaching the pose is logged, not a failure. -->
+      <WaitForFrameToReachPose name="check_insertion"
+        frame="peg_tip"
+        position_tolerance="0.01"
+        orientation_tolerance="0.1"
+        timeout="2.0"
+        pose_settle_time="0.5"
+        fail_on_timeout="false"
+        wrench_topic="/force_torque_sensor_broadcaster/wrench"
+        contact_force_threshold="2.0"
+        contact_settle_time="0.5"
+        contact_force_axis="0.0, 0.0, 1.0"
+        target_pose="{inserted_pose}"
+        contact="{peg_bottomed_out}"
+      />
+      <WaitForDuration name="hold_inserted" duration_sec="2.0" />
+
+      <!-- The commanded pose ends past the bore floor, so the retract plans from
+           there rather than from the measured pose. The command stays continuous and
+           the peg unloads gradually instead of the reference jumping to the arm. -->
+      <SubTree ID="MoveToPoseWithAdmittance"
+        name="RetractPeg"
+        target_poses="{retract_pose}"
+        max_linear_speed="{insertion_speed}"
+        start_trajectory="{insertion_trajectory}"
+      />
+
+      <SetAllowedCollisions
+        name="restore_peg_contact_checking"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
+        allowed="false"
+      />
+
+      <SwitchRosControllers
+        name="restore_clr_joint_trajectory_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="clr_joint_trajectory_controller"
+        deactivate_controllers="admittance_joint_trajectory_controller, admittance_controller"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Straight-line Cartesian plan, preview, and execute on the admittance controller.
+       Only the arm joints are under admittance control, so the use the arm-only group.  -->
+  <BehaviorTree ID="MoveToPoseWithAdmittance">
+    <Sequence name="Sequence">
+      <RoboplanPlanCartesianPath
+        name="plan_cartesian_path"
+        service_name="/roboplan_planning_server/plan_cartesian_path"
+        group_name="ur_manipulator"
+        target_poses="{target_poses}"
+        max_linear_speed="{max_linear_speed}"
+        start_trajectory="{start_trajectory}"
+        trajectory="{trajectory}"
+      />
+      <CallTriggerService
+        name="preview_trajectory"
+        service_name="/roboplan_planning_server/preview"
+      />
+      <WaitForDuration name="wait_for_preview" duration_sec="2.0" />
+      <ExecuteJointTrajectory
+        name="execute_trajectory"
+        action_name="/admittance_joint_trajectory_controller/follow_joint_trajectory"
+        trajectory="{trajectory}"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- AprilTag detection from the wrist camera -->
   <BehaviorTree ID="DetectAprilTag">
     <Sequence name="Sequence">
       <GetSyncedImagePointCloudDepth
-        name="get_synced_images_pointcloud"
+        name="get_synced_images"
         camera_info_topic="/wrist_mounted_camera/color/camera_info"
         rgb_image_topic="/wrist_mounted_camera/color/image_raw"
         depth_image_topic="/wrist_mounted_camera/aligned_depth_to_color/image_raw"
-        point_cloud_topic="/wrist_mounted_camera/depth/color/points"
         time_slop="0.1"
         sync_timeout="3.0"
         camera_info="{camera_info}"
         rgb_image="{rgb_image}"
         depth_image="{depth_image}"
-        point_cloud="{point_cloud}"
       />
       <DetectAprilTag
         name="detect_apriltag"
@@ -117,80 +290,6 @@
         tag_pose="{tag_pose}"
       />
     </Sequence>
-  </BehaviorTree>
-
-  <!-- Motion planning behaviors -->
-  <BehaviorTree ID="MoveToJoint">
-    <Sequence name="Sequence">
-      <PlanToJointState
-        name="plan_to_joint"
-        service_name="/plan_kinematic_path"
-        pipeline="{pipeline}"
-        planner="{planner}"
-        group_name="{group_name}"
-        joint_names="{joint_names}"
-        joint_positions="{joint_positions}"
-        tolerance="0.005"
-        trajectory="{trajectory}"
-      />
-      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
-        <RequestTrajectoryApproval
-          name="preview_trajectory"
-          action_name="/preview_trajectory"
-          trajectory="{trajectory}"
-        />
-      </SuccessIfVariableIsFalse>
-      <ExecuteTrajectoryBehavior
-        name="execute_trajectory"
-        action_name="/execute_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <BehaviorTree ID="MoveToPose">
-    <Sequence name="Sequence">
-      <PlanToPose
-        name="plan_to_pose"
-        service_name="/plan_kinematic_path"
-        pipeline="{pipeline}"
-        planner="{planner}"
-        group_name="{group_name}"
-        target_frame="{target_frame}"
-        target_pose="{target_pose}"
-        position_tolerance="0.005"
-        orientation_tolerance="0.005, 0.005, 0.005"
-        trajectory="{trajectory}"
-      />
-      <SuccessIfVariableIsFalse name="skip_if_preview_false" variable="{preview}">
-        <RequestTrajectoryApproval
-          name="preview_trajectory"
-          action_name="/preview_trajectory"
-          trajectory="{trajectory}"
-        />
-      </SuccessIfVariableIsFalse>
-      <ExecuteTrajectoryBehavior
-        name="execute_trajectory"
-        action_name="/execute_trajectory"
-        trajectory="{trajectory}"
-      />
-    </Sequence>
-  </BehaviorTree>
-
-  <BehaviorTree ID="OpenGripper">
-    <CommandGripper
-      name="OpenGripper"
-      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
-      position="0.023"
-    />
-  </BehaviorTree>
-
-  <BehaviorTree ID="CloseGripper">
-    <CommandGripper
-      name="CloseGripper"
-      action_name="/robotiq_gripper_hande_controller/gripper_cmd"
-      position="0.0005"
-    />
   </BehaviorTree>
 
 </root>

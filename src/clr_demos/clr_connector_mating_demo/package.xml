@@ -4,7 +4,8 @@
   <name>clr_connector_mating_demo</name>
   <version>0.1.0</version>
   <description>
-    CLR connector mating behavior test demo using imetro_behavior Python stack.
+    CLR connector (peg-in-hole) mating demo using RoboPlan motion planning, imetro_behavior
+    behavior trees, and admittance control.
   </description>
   <maintainer email="zarrin.t.bashir@nasa.gov">Zarrin Bashir</maintainer>
   <license>Apache-2.0</license>
@@ -13,11 +14,15 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>nav2_msgs</exec_depend>
-  <exec_depend>py_trees_ros</exec_depend>
-  <exec_depend>py_trees_ros_viewer</exec_depend>
-  <exec_depend>python3-pyside6</exec_depend>
+  <exec_depend>admittance_controller</exec_depend>
+  <exec_depend>clr_behavior_demos</exec_depend>
+  <exec_depend>clr_mujoco_config</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>imetro_behavior</exec_depend>
+  <exec_depend>mujoco_ros2_control_plugins</exec_depend>
+  <exec_depend>py_trees_ros</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

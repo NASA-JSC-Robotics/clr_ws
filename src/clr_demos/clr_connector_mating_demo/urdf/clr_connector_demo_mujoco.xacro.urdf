@@ -18,6 +18,7 @@
   <xacro:include filename="$(find clr_imetro_environments)/urdf/clr_trainer_multi_hatch_macro.xacro"/>
   <xacro:include filename="$(find clr_description)/urdf/clr_macro.xacro"/>
   <xacro:include filename="$(find clr_connector_mating_demo)/urdf/receptacle_macro.xacro"/>
+  <xacro:include filename="$(find clr_connector_mating_demo)/urdf/peg_macro.xacro"/>
 
   <link name="world" />
 
@@ -42,6 +43,14 @@
   <xacro:receptacle prefix="" parent="world">
       <origin xyz="0.28 1.12 1.1" rpy="1.57 0 0"/>
   </xacro:receptacle>
+
+  <!-- The peg is held between the gripper fingers: its base sits 125 mm above the gripper
+       base, where the finger pads clear its 22 mm radius, so the outer ~48 mm of the fingers
+       wrap around it. It is rigidly attached to the gripper base; the demo tree closes the
+       fingers onto it for looks only. -->
+  <xacro:peg prefix="" parent="${tf_prefix}gripper_base_link">
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+  </xacro:peg>
 
   <!-- special inputs for mujoco processing-->
   <xacro:include filename="$(find clr_mujoco_config)/urdf/clr_mujoco_raw_inputs.xacro"/>
