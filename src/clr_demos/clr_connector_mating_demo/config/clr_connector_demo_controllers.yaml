@@ -46,3 +46,17 @@
           id: $(var tf_prefix)peg_tip
       admittance:
         selected_axes: [true, true, true, true, true, true]
+
+  # Contact keeps the arm away from the commanded trajectory, which is expected under admittance control.
+  # If this controller aborts, it snaps its command to the measured position all at once, which throws the arm,
+  # so keep the tolerances wide enough to not abort on contact. The default goal time would also wait forever.
+  admittance_joint_trajectory_controller:
+    ros__parameters:
+      constraints:
+        goal_time: 5.0
+        $(var tf_prefix)shoulder_pan_joint: { trajectory: 1.0, goal: 1.0 }
+        $(var tf_prefix)shoulder_lift_joint: { trajectory: 1.0, goal: 1.0 }
+        $(var tf_prefix)elbow_joint: { trajectory: 1.0, goal: 1.0 }
+        $(var tf_prefix)wrist_1_joint: { trajectory: 1.0, goal: 1.0 }
+        $(var tf_prefix)wrist_2_joint: { trajectory: 1.0, goal: 1.0 }
+        $(var tf_prefix)wrist_3_joint: { trajectory: 1.0, goal: 1.0 }

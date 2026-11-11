@@ -1,0 +1,114 @@
+<root main_tree_to_execute="MainTree">
+  <!--
+    Runs the connector mating tree once per trial of a test file, recording a rosbag for each.
+    After a failed insertion it pulls the peg back out, and if that fails then the test run ends.
+    The test files are in config/insertion_tests, and the results are saved in output_dir.
+
+    Requires the dormant rosbag recorder:
+      ros2 launch clr_connector_mating_demo clr_connector_mating_demo.launch.xml record_rosbags:=true
+  -->
+
+  <include file="connector_mate.xml" />
+
+  <BehaviorTree ID="MainTree"
+    test_file="insertion_smoke_test.yaml"
+    output_dir="test_results">
+    <Sequence name="Sequence">
+      <LoadInsertionTrials
+        name="load_trials"
+        test_file="{test_file}"
+        output_dir="{output_dir}"
+        trials="{trials}"
+      />
+      <ForEachItem name="for_each_trial" items="{trials}" item="{trial}">
+        <Sequence name="RunTrial">
+          <UnpackInsertionTrial
+            name="unpack_trial"
+            trial="{trial}"
+            translation_xyz="{translation_xyz}"
+            orientation_xyzw="{orientation_xyzw}"
+            insertion_speed="{insertion_speed}"
+            bag_path="{bag_path}"
+            insertion_depth="{insertion_depth}"
+          />
+          <!-- This always succeeds, so a failed trial is written out and does not end the test run. -->
+          <OutputChildSuccess name="check_trial" succeeded="{tree_completed}">
+            <RecordRosbag name="record_trial" output_path="{bag_path}">
+              <SubTree ID="ConnectorMate"
+                name="ConnectorMate"
+                translation_xyz="{translation_xyz}"
+                orientation_xyzw="{orientation_xyzw}"
+                insertion_speed="{insertion_speed}"
+                aligned_standoff_pose="{aligned_standoff_pose}"
+                insertion_depth="{insertion_depth}"
+              />
+            </RecordRosbag>
+          </OutputChildSuccess>
+          <!-- The bore is 109.5 mm deep, so this requires the peg to get within 5 mm of the floor. -->
+          <WriteInsertionTrialResult
+            name="write_trial_result"
+            trial="{trial}"
+            tree_completed="{tree_completed}"
+            insertion_depth="{insertion_depth}"
+            required_depth="0.1045"
+          />
+          <!-- If this fails, the arm is stuck and later trials would not mean anything, so the test run ends.
+               This also ends the test run for a trial that failed before the insertion started. -->
+          <SuccessIfVariableIsTrue name="check_if_recovery_needed" variable="{tree_completed}">
+            <SubTree ID="RecoverPeg"
+              name="RecoverPeg"
+              retract_pose="{aligned_standoff_pose}"
+              insertion_speed="{insertion_speed}"
+            />
+          </SuccessIfVariableIsTrue>
+        </Sequence>
+      </ForEachItem>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Pulls the peg back out after a failed insertion, while the admittance controllers are still active.
+       Unlike the normal retract, this plans from the measured pose, which can be far from the commanded one,
+       and it goes to the pose without the target offset. A tilted target would rotate a peg that is in the bore. -->
+  <BehaviorTree ID="RecoverPeg">
+    <Sequence name="Sequence">
+      <!-- Resets the admittance controllers to the measured pose and lets the arm settle before planning.
+           An abort makes the arm move suddenly, so a plan from that moment would start from a stale pose. -->
+      <SwitchRosControllers
+        name="hold_with_clr_joint_trajectory_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="clr_joint_trajectory_controller"
+        deactivate_controllers="admittance_joint_trajectory_controller, admittance_controller"
+      />
+      <WaitForDuration name="wait_for_arm_to_settle" duration_sec="1.0" />
+      <SwitchRosControllers
+        name="enable_admittance_controllers"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="admittance_controller, admittance_joint_trajectory_controller"
+        deactivate_controllers="clr_joint_trajectory_controller"
+      />
+      <WaitForDuration name="wait_for_controller_to_settle" duration_sec="0.5" />
+      <SubTree ID="MoveToPoseWithAdmittance"
+        name="RetractPeg"
+        target_poses="{retract_pose}"
+        max_linear_speed="{insertion_speed}"
+      />
+      <SetAllowedCollisions
+        name="restore_peg_contact_checking"
+        service_name="/roboplan_planning_server/set_collisions"
+        body1="peg_link;peg_link"
+        body2="receptacle;door"
+        allowed="false"
+      />
+      <SwitchRosControllers
+        name="restore_clr_joint_trajectory_controller"
+        service_name="/controller_manager/switch_controller"
+        service_timeout="3.0"
+        activate_controllers="clr_joint_trajectory_controller"
+        deactivate_controllers="admittance_joint_trajectory_controller, admittance_controller"
+      />
+    </Sequence>
+  </BehaviorTree>
+
+</root>

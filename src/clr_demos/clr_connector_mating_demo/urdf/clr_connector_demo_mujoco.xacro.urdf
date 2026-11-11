@@ -11,6 +11,8 @@
   <xacro:arg name="include_scene_objects" default="false"/>
   <xacro:arg name="sim_speed" default="1.0"/>
   <xacro:arg name="headless" default="false" />
+  <!-- Sliding friction coefficient of the peg, which overrides what it contacts in simulation. -->
+  <xacro:arg name="peg_friction" default="1.0" />
 
   <xacro:property name="model_env" value="$(arg model_env)"/>
   <xacro:property name="tf_prefix" value="$(arg tf_prefix)"/>
@@ -70,6 +72,7 @@
         model_env="true"
       />
       <decompose_mesh mesh_name="receptacle" threshold="0.01"/>
+      <modify_element type="geom" mesh="chamfered_peg" class="collision" priority="1" friction="$(arg peg_friction) 0.005 0.0001"/>
     </processed_inputs>
     <xacro:clr_mujoco_scene/>
   </mujoco_inputs>

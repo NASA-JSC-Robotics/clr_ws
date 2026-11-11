@@ -5,6 +5,7 @@
 build/*
 install/*
 log/*
+test_results/*
 .ccache/*
 
 # bash history
